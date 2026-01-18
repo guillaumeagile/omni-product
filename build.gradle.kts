@@ -1,17 +1,20 @@
 plugins {
     id("java")
+    id("org.springframework.boot") version "3.4.1"
+    id("io.spring.dependency-management") version "1.1.7"
 }
 
-group = "org.example"
+group = "com.example"
 version = "1.0-SNAPSHOT"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.compilerArgs.addAll(listOf("-source", "25", "-target", "25", "--enable-preview"))
+    options.compilerArgs.add("-parameters")
 }
 
 repositories {
@@ -19,12 +22,14 @@ repositories {
 }
 
 dependencies {
+    // Spring Boot
+    implementation("org.springframework.boot:spring-boot-starter-web")
+
     // Vavr
     implementation("io.vavr:vavr:0.10.4")
 
     // Testing - JUnit 5
-    testImplementation(platform("org.junit:junit-bom:5.10.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // AssertJ - Best assertion library
@@ -34,5 +39,4 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    jvmArgs = listOf("--enable-preview")
 }

@@ -1,0 +1,16 @@
+Product
+- id
+- name
+- slug
+- price
+    - base
+    - tax
+    - tax_rate
+- discounts
+- images
+- weight 
+- dimensions
+- quantity
+- stock
+- warehouse
+    - location

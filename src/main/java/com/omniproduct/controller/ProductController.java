@@ -47,6 +47,7 @@ public class ProductController {
                 product.getPrice(),
                 product.getDiscounts(),
                 product.getImages(),
+                product.getSuppliersRegions(),
                 product.getWeight(),
                 product.getDimensions(),
                 product.getQuantity(),

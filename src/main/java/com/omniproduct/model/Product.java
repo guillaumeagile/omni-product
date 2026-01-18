@@ -31,6 +31,12 @@ public class Product {
     @Column(name = "image_detail")
     private Map<String, String> images; // Simplified to Map<String, String> for JPA
     
+    @ElementCollection
+    @CollectionTable(name = "product_suppliers", joinColumns = @JoinColumn(name = "product_id"))
+    @MapKeyColumn(name = "region")
+    private Map<String, Supplier> suppliersRegions;
+    
+    
     private Double weight;
     private String dimensions;
     private Integer quantity;
@@ -39,12 +45,36 @@ public class Product {
     @Embedded
     private Warehouse warehouse;
     
+    @Embeddable
+    public static class Supplier {
+        private String name;
+        private String siren;
+        private String tvaId;
+        
+        public Supplier() {}
+        
+        public Supplier(String name, String siren, String tvaId) {
+            this.name = name;
+            this.siren = siren;
+            this.tvaId = tvaId;
+        }
+        
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+
+        public String getSiren() { return siren; }
+        public void setSiren(String siren) { this.siren = siren; }
+
+        public String getTvaId() { return tvaId; }
+        public void setTvaId(String tvaId) { this.tvaId = tvaId; }
+    }
+    
     // Default constructor for JPA
     public Product() {}
     
     // Constructor for testing
     public Product(String id, String name, String slug, Price price, List<String> discounts, 
-                   Map<String, String> images, Double weight, String dimensions, 
+                   Map<String, String> images, Map<String, Supplier> suppliersRegions, Double weight, String dimensions, 
                    Integer quantity, Integer stock, Warehouse warehouse) {
         this.id = id;
         this.name = name;
@@ -52,6 +82,7 @@ public class Product {
         this.price = price;
         this.discounts = discounts;
         this.images = images;
+        this.suppliersRegions = suppliersRegions;
         this.weight = weight;
         this.dimensions = dimensions;
         this.quantity = quantity;
@@ -77,6 +108,9 @@ public class Product {
     
     public Map<String, String> getImages() { return images; }
     public void setImages(Map<String, String> images) { this.images = images; }
+    
+    public Map<String, Supplier> getSuppliersRegions() { return suppliersRegions; }
+    public void setSuppliersRegions(Map<String, Supplier> suppliersRegions) { this.suppliersRegions = suppliersRegions; }
     
     public Double getWeight() { return weight; }
     public void setWeight(Double weight) { this.weight = weight; }

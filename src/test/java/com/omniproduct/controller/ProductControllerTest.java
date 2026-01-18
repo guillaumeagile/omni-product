@@ -29,9 +29,11 @@ public class ProductControllerTest {
     public void testCrudOperations() throws Exception {
         Product.Price price = new Product.Price(100.0, 20.0, 0.2);
         Product.Warehouse warehouse = new Product.Warehouse("Main Warehouse");
+        Product.Supplier supplier1 = new Product.Supplier("Supplier1", "SIREN123", "TVA456");
         Product product = new Product(
                 "p1", "Test Product", "test-product",
                 price, List.of("Image 1"), Map.of("main", "image-url"),
+                Map.of("Europe", supplier1),
                 1.5, "10x10x10", 100, 50, warehouse
         );
 
@@ -42,7 +44,10 @@ public class ProductControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("p1"))
                 .andExpect(jsonPath("$.name").value("Test Product"))
-                .andExpect(jsonPath("$.images.main").value("image-url"));
+                .andExpect(jsonPath("$.images.main").value("image-url"))
+                .andExpect(jsonPath("$.suppliersRegions.Europe.name").value("Supplier1"))
+                .andExpect(jsonPath("$.suppliersRegions.Europe.siren").value("SIREN123"))
+                .andExpect(jsonPath("$.suppliersRegions.Europe.tvaId").value("TVA456"));
 
         // Get All
         mockMvc.perform(get("/api/products"))
@@ -55,9 +60,11 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.name").value("Test Product"));
 
         // Update
+        Product.Supplier supplier2 = new Product.Supplier("Supplier2", "SIREN789", "TVA012");
         Product updatedProduct = new Product(
                 "p1", "Updated Product", "updated-product",
                 price, List.of("D1"), Map.of("main", "image-url"),
+                Map.of("Asia", supplier2),
                 1.5, "10x10x10", 100, 50, warehouse
         );
         mockMvc.perform(put("/api/products/p1")

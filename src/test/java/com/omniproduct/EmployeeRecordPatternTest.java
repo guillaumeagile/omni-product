@@ -1,8 +1,8 @@
-package com.example;
+package com.omniproduct;
 
-import com.example.model.Department;
-import com.example.model.Employee;
-import com.example.service.EmployeeService;
+import com.omniproduct.model.Department;
+import com.omniproduct.model.Employee;
+import com.omniproduct.service.EmployeeService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,6 @@
-package com.example.service;
+package com.omniproduct.service;
 
-import com.example.model.Employee;
+import com.omniproduct.model.Employee;
 
 public class EmployeeService {
 

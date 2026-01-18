@@ -42,16 +42,16 @@ public class ProductController {
         // In this simple implementation, we just use the id from the path
         Product updatedProduct = new Product(
                 id,
-                product.name(),
-                product.slug(),
-                product.price(),
-                product.discounts(),
-                product.images(),
-                product.weight(),
-                product.dimensions(),
-                product.quantity(),
-                product.stock(),
-                product.warehouse()
+                product.getName(),
+                product.getSlug(),
+                product.getPrice(),
+                product.getDiscounts(),
+                product.getImages(),
+                product.getWeight(),
+                product.getDimensions(),
+                product.getQuantity(),
+                product.getStock(),
+                product.getWarehouse()
         );
         return ResponseEntity.ok(productService.save(updatedProduct));
     }

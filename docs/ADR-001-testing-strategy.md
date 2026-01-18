@@ -73,6 +73,12 @@ Unit Tests (50%)
 ❌ **Harder debugging** - More layers to investigate
 ❌ **Resource intensive** - Full Spring context
 
+### What is problematic
+
+ - Integration vs. Unit Tests: The test is a @SpringBootTest, which loads the full application context. This is good for integration testing but slow. Consider adding @WebMvcTest for faster, isolated controller unit tests using mocks for the service.
+ - Test Data Isolation: The test performs CRUD operations in sequence. While effective for a quick check, it makes tests interdependent. Individual tests should ideally be isolated (e.g., one test for Create, another for Find).
+
+
 ### Current Test Structure
 ```java
 @SpringBootTest

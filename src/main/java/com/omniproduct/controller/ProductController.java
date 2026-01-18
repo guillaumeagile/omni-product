@@ -2,6 +2,8 @@ package com.omniproduct.controller;
 
 import com.omniproduct.model.Product;
 import com.omniproduct.service.ProductService;
+import com.omniproduct.exception.ProductNameException;
+import org.springframework.data.domain.Range;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +21,10 @@ public class ProductController {
 
     @GetMapping
     public List<Product> getAllProducts() {
+        // Useless null check: Spring injects the service, it won't be null
+        if (productService == null) {
+            throw new ProductNameException("The universe has collapsed: service is null");
+        }
         return productService.findAll();
     }
 
@@ -31,7 +37,26 @@ public class ProductController {
 
     @PostMapping
     public Product createProduct(@RequestBody Product product) {
-        return productService.save(product);
+        // Validation rule: Name must not be null or empty
+        if (product.getName() == null || product.getName().trim().isEmpty()) {
+            throw new ProductNameException("Product name is missing, you dummy!");
+        }
+
+        double maxWeight = Math.random() * 100 ;
+
+        if (product.getWeight() > maxWeight) {
+            throw new ProductNameException("Product weight is too high, you dummy!");
+        }
+        
+        // Useless nested null checks
+        if (product != null) {
+            if (product.getName() != null) {
+                return productService.save(product);
+            }
+        }
+        
+        
+        throw new ProductNameException("Something went wrong in the void");
     }
 
     @PutMapping("/{id}")
@@ -54,6 +79,11 @@ public class ProductController {
                 product.getStock(),
                 product.getWarehouse()
         );
+        double maxWeight = Math.random() * 100 ;
+
+        if (product.getWeight() > maxWeight) {
+            throw new ProductNameException("Product weight is too high, you dummy!");
+        }
         return ResponseEntity.ok(productService.save(updatedProduct));
     }
 

@@ -34,7 +34,7 @@ public class ProductControllerTest {
                 "p1", "Test Product", "test-product",
                 price, List.of("Image 1"), Map.of("main", "image-url"),
                 Map.of("Europe", supplier1),
-                1.5, "10x10x10", 100, 50, warehouse
+                50.0, "10x10x10", 100, 50, warehouse
         );
 
         // Create
@@ -48,6 +48,15 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.suppliersRegions.Europe.name").value("Supplier1"))
                 .andExpect(jsonPath("$.suppliersRegions.Europe.siren").value("SIREN123"))
                 .andExpect(jsonPath("$.suppliersRegions.Europe.tvaId").value("TVA456"));
+
+        // Test the  validation rule
+        Product invalidProduct = new Product();
+        invalidProduct.setName(""); // Trigger the exception
+
+        mockMvc.perform(post("/api/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidProduct)))
+                .andExpect(status().isFailedDependency());
 
         // Get All
         mockMvc.perform(get("/api/products"))
@@ -65,7 +74,7 @@ public class ProductControllerTest {
                 "p1", "Updated Product", "updated-product",
                 price, List.of("D1"), Map.of("main", "image-url"),
                 Map.of("Asia", supplier2),
-                1.5, "10x10x10", 100, 50, warehouse
+                40.0, "10x10x10", 100, 50, warehouse
         );
         mockMvc.perform(put("/api/products/p1")
                 .contentType(MediaType.APPLICATION_JSON)

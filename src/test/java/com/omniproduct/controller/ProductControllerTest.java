@@ -34,7 +34,7 @@ public class ProductControllerTest {
                 "p1", "Test Product", "test-product",
                 price, List.of("Image 1"), Map.of("main", "image-url"),
                 Map.of("Europe", supplier1),
-                50.0, "10x10x10", 100, 50, warehouse
+                23.0, "10x10x10", 100, 50, warehouse
         );
 
         // Create
@@ -74,7 +74,7 @@ public class ProductControllerTest {
                 "p1", "Updated Product", "updated-product",
                 price, List.of("D1"), Map.of("main", "image-url"),
                 Map.of("Asia", supplier2),
-                40.0, "10x10x10", 100, 50, warehouse
+                3.0, "10x10x10", 100, 50, warehouse
         );
         mockMvc.perform(put("/api/products/p1")
                 .contentType(MediaType.APPLICATION_JSON)

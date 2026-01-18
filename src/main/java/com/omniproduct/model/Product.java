@@ -37,8 +37,8 @@ public class Product {
     private Map<String, Supplier> suppliersRegions;
     
     
-    private Double weight;
-    private String dimensions;
+    private Double kilos;
+    private String volume;
     private Integer quantity;
     private Integer stock;
     
@@ -83,8 +83,8 @@ public class Product {
         this.discounts = discounts;
         this.images = images;
         this.suppliersRegions = suppliersRegions;
-        this.weight = weight;
-        this.dimensions = dimensions;
+        this.kilos = weight;
+        this.volume = dimensions;
         this.quantity = quantity;
         this.stock = stock;
         this.warehouse = warehouse;
@@ -112,11 +112,11 @@ public class Product {
     public Map<String, Supplier> getSuppliersRegions() { return suppliersRegions; }
     public void setSuppliersRegions(Map<String, Supplier> suppliersRegions) { this.suppliersRegions = suppliersRegions; }
     
-    public Double getWeight() { return weight; }
-    public void setWeight(Double weight) { this.weight = weight; }
+    public Double getKilos() { return kilos; }
+    public void setKilos(Double weight) { this.kilos = weight; }
     
-    public String getDimensions() { return dimensions; }
-    public void setDimensions(String dimensions) { this.dimensions = dimensions; }
+    public String getVolume() { return volume; }
+    public void setVolume(String dimensions) { this.volume = dimensions; }
     
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }

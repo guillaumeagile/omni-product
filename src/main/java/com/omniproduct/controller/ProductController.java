@@ -3,7 +3,6 @@ package com.omniproduct.controller;
 import com.omniproduct.model.Product;
 import com.omniproduct.service.ProductService;
 import com.omniproduct.exception.ProductNameException;
-import org.springframework.data.domain.Range;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,7 +43,7 @@ public class ProductController {
 
         double maxWeight = Math.random() * 100 ;
 
-        if (product.getWeight() > maxWeight) {
+        if (product.getKilos() > maxWeight) {
             throw new ProductNameException("Product weight is too high, you dummy!");
         }
         
@@ -73,16 +72,16 @@ public class ProductController {
                 product.getDiscounts(),
                 product.getImages(),
                 product.getSuppliersRegions(),
-                product.getWeight(),
-                product.getDimensions(),
+                product.getKilos(),
+                product.getVolume(),
                 product.getQuantity(),
                 product.getStock(),
                 product.getWarehouse()
         );
-        double maxWeight = Math.random() * 100 ;
 
-        if (product.getWeight() > maxWeight) {
-            throw new ProductNameException("Product weight is too high, you dummy!");
+        double maxWeight = Math.random() * 100 ;
+        if (product.getKilos() > 43) {
+          throw new ProductNameException("Product weight is too high, you dummy!");
         }
         return ResponseEntity.ok(productService.save(updatedProduct));
     }

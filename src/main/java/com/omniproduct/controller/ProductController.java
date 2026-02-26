@@ -41,11 +41,6 @@ public class ProductController {
             throw new ProductNameException("Product name is missing, you dummy!");
         }
 
-        double maxWeight = Math.random() * 100 ;
-
-        if (product.getKilos() > maxWeight) {
-            throw new ProductNameException("Product weight is too high, you dummy!");
-        }
         
         // Useless nested null checks
         if (product != null) {
@@ -79,10 +74,6 @@ public class ProductController {
                 product.getWarehouse()
         );
 
-        double maxWeight = Math.random() * 100 ;
-        if (product.getKilos() > 43) {
-          throw new ProductNameException("Product weight is too high, you dummy!");
-        }
         return ResponseEntity.ok(productService.save(updatedProduct));
     }
 

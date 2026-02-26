@@ -38,7 +38,7 @@ public class ProductController {
     public Product createProduct(@RequestBody Product product) {
         // Validation rule: Name must not be null or empty
         if (product.getName() == null || product.getName().trim().isEmpty()) {
-            throw new ProductNameException("Product name is missing, you dummy!");
+            throw new ProductNameException("Product name is missing, you fucking idiot!");
         }
 
         

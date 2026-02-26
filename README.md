@@ -1,5 +1,11 @@
 # Workshop CUPID-AI
 
+## voir toute la documentation dans ./docs
+
+[docs/Workshop.md]
+
+
+
 on part d'une base de code Java / sprintBoot , un debut de clean archi mais de découpage en Bounded Context -> big ball of mud
 
 

@@ -36,6 +36,9 @@ public class Product {
     @MapKeyColumn(name = "region")
     private Map<String, Supplier> suppliersRegions;
     
+    @ManyToOne
+    @JoinColumn(name = "supplier_id")
+    private com.omniproduct.model.Supplier supplier;
     
     private Double kilos;
     private String volume;
@@ -126,6 +129,9 @@ public class Product {
     
     public Warehouse getWarehouse() { return warehouse; }
     public void setWarehouse(Warehouse warehouse) { this.warehouse = warehouse; }
+    
+    public com.omniproduct.model.Supplier getSupplier() { return supplier; }
+    public void setSupplier(com.omniproduct.model.Supplier supplier) { this.supplier = supplier; }
     
     @Embeddable
     public static class Price {

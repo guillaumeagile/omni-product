@@ -54,6 +54,17 @@ We want to add new features
     - Self-documenting through structure
 
 
+## Legacy OO code 
+
+- several controlers and models, all mixed up 
+  - product (all concerns embedded: transport, stock, catalog front end, suppliers)
+  - suppliers management
+  - stock management
+  - catalog front end
+  - transport management
+- several services as well
+- and all models depedencies
+
 
 ## CUTE DDD : tactical changes 
 

@@ -2,7 +2,7 @@
 
 ## voir toute la documentation dans ./docs
 
-[docs/Workshop.md]
+[docs/Workshop.md](docs)
 
 
 

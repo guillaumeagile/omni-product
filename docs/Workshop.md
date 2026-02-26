@@ -34,6 +34,31 @@ We want to add new features
 
 ### Tackle complexity : Event Storming -> Find Bounded Contexts
 
+
+
+## Analyze legacy OO code (Spring Boot + JPA)
+
+- several controlers and models, all mixed up
+    - product (all concerns embedded: transport, stock, catalog front end, suppliers)
+    - suppliers management
+    - stock management
+    - catalog front end
+    - transport management
+- several services as well
+- and all models with inter-depedencies (relationships in DB)
+
+## 🖋️ Domain StoryTelling + Context Mapping 
+
+write stories about Products, Suppliers and Stocks
+
+examples:
+
+    - supplier add product to catalog, then ship later into the stock
+    - product is in stock, then sold: the supplier must be advised, the stock must be updated
+    - a product is in stock, but deprecated: the supplier must be advised, the stock must be updated, the customer must be advised (product label must change)
+
+goal: split domain in bounded contexts , let events emerge 
+
 ## 🚀 Applying Stragegic changes
 
 1. **Contextual Design**
@@ -52,18 +77,6 @@ We want to add new features
 4. **Expressive Code**
     - Intent-revealing names
     - Self-documenting through structure
-
-
-## Legacy OO code 
-
-- several controlers and models, all mixed up 
-  - product (all concerns embedded: transport, stock, catalog front end, suppliers)
-  - suppliers management
-  - stock management
-  - catalog front end
-  - transport management
-- several services as well
-- and all models depedencies
 
 
 ## CUTE DDD : tactical changes 

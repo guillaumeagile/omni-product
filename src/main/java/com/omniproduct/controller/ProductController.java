@@ -23,6 +23,8 @@ public class ProductController {
         // Useless null check: Spring injects the service, it won't be null
         if (productService == null) {
             throw new ProductNameException("The universe has collapsed: service is null");
+            //TODO: never throw exceptions in controllers
+            // or Use a global @ControllerAdvice to map these to HTTP responses
         }
         return productService.findAll();
     }

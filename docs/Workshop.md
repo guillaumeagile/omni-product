@@ -20,6 +20,18 @@ Easy to test at all levels (unit, integration, acceptance)
 #### **E** - **Expressive**
 Clearly communicates business intent
 
+## The five CUPID properties are:
+
+C - Composable: plays well with others
+
+U - Unix philosophy: does one thing well
+
+P - Predictable: does what you expect
+
+I - Idiomatic: feels natural
+
+D - Domain-based: the solution domain models the problem domain in language and structure
+
 ## CUTE DDD : Stragegic changes
 
 We want to add new features

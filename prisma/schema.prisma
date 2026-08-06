@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Intentionally a God model: catalog presentation, stock, supplier/pricing,
+// and warehouse info are all bolted onto one entity. This is the workshop's
+// anti-pattern seed — attendees split this into an aggregate + value objects.
+model Product {
+  id       String @id @default(uuid())
+  name     String
+  slug     String @unique
+
+  // Price value object, flattened onto the entity instead of extracted.
+  priceBase    Float
+  priceTax     Float
+  priceTaxRate Float
+
+  discounts        String[]
+  images           Json // Record<imageKey, imageDetail>
+  suppliersRegions Json // Record<region, { name, siren, tvaId }>
+
+  kilos    Float?
+  volume   String?
+  quantity Int
+  stock    Int
+
+  // Warehouse value object, flattened onto the entity instead of extracted.
+  warehouseLocation String?
+
+  supplierId String?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Supplier {
+  id           String  @id @default(uuid())
+  name         String
+  contactEmail String
+  contactPhone String
+  country      String
+  region       String
+
+  products Product[]
+}

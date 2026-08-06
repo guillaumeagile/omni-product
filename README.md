@@ -36,31 +36,36 @@ Use these as your refactoring targets during the workshop.
 
 ## Why e2e tests run against a real Postgres, not an in-memory DB
 
-It's possible to run e2e tests against an in-memory or ephemeral substitute
-instead of a real, shared Postgres instance, but each option trades away
-something relevant to this workshop:
+An in-memory or ephemeral substitute is possible, but each has a real cost:
 
-- **`pg-mem`** — an in-memory JS reimplementation of Postgres. Fast, no
-  Docker needed, but it doesn't support the full SQL surface. This schema
-  uses `Json` columns (`images`, `suppliersRegions`), and Prisma's generated
-  queries against JSON operators frequently hit unsupported features or
-  subtly different behavior than real Postgres.
-- **Testcontainers** — spins up a real, throwaway Postgres in Docker per
-  test run. Full compatibility, but not actually in-memory: startup takes
-  ~1-2s per container and it still depends on Docker, the exact dependency
-  an in-memory swap is usually trying to avoid.
-- **SQLite** (via Prisma's SQLite provider) — fast and in-memory-capable,
-  but a different datasource engine than production. `Json` columns,
-  migrations, and connection strings all diverge from what the schema
-  declares (`provider = "postgresql"`), so you'd be testing against a
-  different engine than the one this workshop is teaching.
+- **`pg-mem`** — fast, no Docker, but doesn't fully support `Json` column
+  queries, which this schema relies on (`images`, `suppliersRegions`).
+- **Testcontainers** — full Postgres compatibility, but not actually
+  in-memory: still needs Docker, plus ~1-2s startup per run.
+- **SQLite** — fast and in-memory-capable, but a different engine than
+  production (`provider = "postgresql"`), so behavior can diverge.
 
-More generally, swapping in a fake or lighter-weight engine for e2e tests
-risks masking real Postgres-specific bugs (JSON query behavior, unique
-constraint quirks, case sensitivity) that only show up against the real
-thing — and it papers over the exact pain point this seed's e2e setup is
-meant to surface: coupling tests to a live, unmanaged, shared database is
-slow and stateful, which is part of why teams eventually pull business logic
-out into a domain layer that can be tested in isolation, without a database
-at all. Keeping e2e tests on real Postgres lets attendees feel that friction
-firsthand rather than have it hidden from them.
+This seed keeps e2e tests on a real, shared Postgres instance instead, with
+no reset between runs (see `test/products.e2e-spec.ts`).
+
+It's slower and
+more state-dependent than the unit tests under `pnpm test`, which mock
+Prisma entirely — worth keeping in mind as you decide what a given test
+actually needs to cover.
+
+## What good tests look like
+
+Regardless of the layer, a test worth keeping is usually:
+
+- **Isolated** — doesn't depend on state left behind by another test, and
+  doesn't leave state behind for the next one.
+- **Repeatable** — gives the same result every run, on any machine, in any
+  order.
+- **Fast** — a slow test gets skipped or run less often, which defeats its
+  purpose.
+- **Self-checking** — passes or fails on its own; no one should have to read
+  logs or query a database to know the outcome.
+- **Focused on one behavior** — a failing test should point at what broke,
+  not require debugging to find out.
+- **Automated and autonomous** — runnable with a single command, without a
+  human setting up state by hand first.

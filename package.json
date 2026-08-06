@@ -13,7 +13,7 @@
     "test": "vitest run --config ./vitest.config.mts",
     "test:watch": "vitest --config ./vitest.config.mts",
     "test:cov": "vitest run --config ./vitest.config.mts --coverage",
-    "test:e2e": "vitest run --config ./test/vitest-e2e.config.mts",
+    "test:e2e": "vitest run --config ./test-e2e/vitest.config.mts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",

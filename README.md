@@ -45,6 +45,26 @@ Use these as your refactoring targets during the workshop.
   represented at all. Same library, opposite outcome — see
   `TODO(refactor)` in `create-product.schema.ts`.
 
+## Running the tests
+
+```bash
+pnpm test          # unit tests — mocked Prisma, no DB needed
+pnpm test:watch    # unit tests in watch mode
+pnpm test:e2e      # e2e tests — needs a running, migrated Postgres (see below)
+```
+
+`pnpm test:e2e` boots the real `AppModule` against whatever Postgres is reachable at `DATABASE_URL` in `.env`. Before
+running it the first time:
+
+```bash
+pnpm db:up            # starts local Postgres via docker-compose
+pnpm prisma:migrate   # creates the Product/Supplier tables
+pnpm test:e2e
+```
+
+See [DEV-SETUP-AND-GUIDE.md](./DEV-SETUP-AND-GUIDE.md) for full first-time setup and troubleshooting (e.g. port `5432`
+already in use).
+
 ## Why e2e tests run against a real Postgres, not an in-memory DB
 
 An in-memory or ephemeral substitute is possible, but each has a real cost:

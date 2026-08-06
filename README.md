@@ -31,8 +31,19 @@ See [DEV-SETUP-AND-GUIDE.md](./DEV-SETUP-AND-GUIDE.md) to get running.
 - **E2E tests hit a real, unmanaged, shared Postgres** with no reset between
   runs (see `test/products.e2e-spec.ts`) — meant to be felt as slow/flaky
   compared to isolated unit tests around an extracted domain.
+- **Zod at the controller boundary only** (`src/products/create-product.schema.ts`)
+  validates shape and primitive ranges, not domain rules — see the `SMELL`
+  comment on `CreateProductSchema`.
 
 Use these as your refactoring targets during the workshop.
+
+## Roadmap
+
+- Move Zod from boundary shape-validation to domain modeling: value-object
+  factories (Zod-backed or hand-rolled) that return a `Result`, with
+  invariants enforced in aggregate constructors so illegal states can't be
+  represented at all. Same library, opposite outcome — see
+  `TODO(refactor)` in `create-product.schema.ts`.
 
 ## Why e2e tests run against a real Postgres, not an in-memory DB
 

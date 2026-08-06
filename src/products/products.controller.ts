@@ -1,14 +1,27 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { ZodError } from 'zod';
 import { ProductService } from './product.service';
-import { CreateProductInput } from './create-product-input';
+import { CreateProductSchema } from './create-product.schema';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
-  async create(@Body() body: CreateProductInput) {
-    return this.productService.create(body);
+  async create(@Body() body: unknown) {
+    // Naive boundary validation: parse, and turn a failed parse into a 400
+    // the default way. Shape is checked here; nothing downstream knows or
+    // cares whether the numbers inside make business sense.
+    let input;
+    try {
+      input = CreateProductSchema.parse(body);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        throw new BadRequestException(err.issues);
+      }
+      throw err;
+    }
+    return this.productService.create(input);
   }
 
   @Get()

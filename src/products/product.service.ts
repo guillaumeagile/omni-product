@@ -1,7 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, Product } from '@prisma/client';
-import { PrismaService } from '../prisma.service';
-import { CreateProductInput } from './create-product-input';
+import {BadRequestException, Injectable, NotFoundException} from '@nestjs/common';
+import {Prisma, Product} from '@prisma/client';
+import {PrismaService} from '../prisma.service';
+import {CreateProductInput} from './create-product-input';
+import {ProductCreator} from './product-creator';
+import {ProductReader} from './product-reader';
+import {ResellerPriceCalculator} from './reseller-price-calculator';
+import {StockReserver} from './stock-reserver';
 
 // Regional margin applied on top of the supplier's base price before VAT.
 // Pulled straight out of the legacy Spring Boot pricing job.
@@ -15,7 +19,7 @@ const REGIONAL_MARGIN: Record<string, number> = {
 const DEFAULT_MARGIN = 0.2;
 
 @Injectable()
-export class ProductService {
+export class ProductService implements ProductCreator, ProductReader, StockReserver, ResellerPriceCalculator {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(input: CreateProductInput): Promise<Product> {

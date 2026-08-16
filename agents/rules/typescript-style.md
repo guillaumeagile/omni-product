@@ -2,8 +2,14 @@
 
 ## Purpose
 
-Teach the agent to write modern, elegant TypeScript that is explicit, predictable, domain-readable, and pleasant to
-evolve.
+Teach the agent to use the TypeScript type system and FP-style constructs well: strong typing, algebraic data modeling,
+`Result`-based error handling. This file is mechanics — for *why* (DDD/CUPID posture, bounded contexts, testability) see
+`agents/rules/CUTE and CUPID Code Rules.md`.
+
+**References** (read for full rationale — this file only distills them):
+
+- `docs/4.the FP idiomatic way.md` — full FP patterns, Result design, library ladder
+- Project `CLAUDE.md` — one type/interface/record per file convention, applies to every pattern below
 
 ## Core posture
 
@@ -58,6 +64,44 @@ evolve.
 - Prefer **small local generic helpers** over early abstraction into reusable frameworks.
 - Prefer exhaustive `switch` handling so new cases fail loudly at compile time.
 - Prefer named derived types over repeating opaque inline type expressions.
+
+## Patterns (worked shapes, not templates to copy verbatim)
+
+State as a union, not booleans:
+
+```ts
+type ProductStatus =
+        | { kind: 'Draft' }
+        | { kind: 'Active'; activatedAt: Date }
+        | { kind: 'Archived'; archivedAt: Date; reason: string };
+```
+
+Expected failure as a tagged union, not an exception hierarchy:
+
+```ts
+type ReserveStockError =
+        | { kind: 'ProductNotFound'; productId: ProductId }
+        | { kind: 'InsufficientStock'; available: number; requested: number };
+```
+
+`Result` as a small local protocol, not an imported philosophy:
+
+```ts
+type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
+```
+
+Use cases return `Result<T, DomainError>`; unexpected/infrastructure failures still throw.
+
+Derive, don't repeat (one source of truth):
+
+```ts
+type New<T> = Omit<T, 'id' | 'createdAt' | 'updatedAt'>;
+type Persisted<T> = T & Readonly<{ id: string; createdAt: Date; updatedAt: Date }>;
+```
+
+Boundary vs domain: decode/validate shape at the edge (controller/pipe, e.g. Zod `safeParse`), enforce invariants via
+smart constructors in the domain type. Type-level enforcement only — see `CUTE and CUPID Code Rules.md` for the
+architectural placement of that boundary.
 
 ## Done when
 

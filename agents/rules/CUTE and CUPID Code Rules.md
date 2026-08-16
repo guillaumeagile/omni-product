@@ -1,8 +1,12 @@
-# Code Rules
+# CUTE and CUPID Code Rules
 
 ## Purpose
 
-Teach the agent to write modern, elegant TypeScript with clean code tactics borrowed from the workshop principles.
+Teach the agent the DDD/CUPID posture: bounded contexts, ubiquitous language, testability, and architectural boundaries.
+This file is *why* and *where* — for TypeScript type-system and FP mechanics (unions, `Result`, mapped types) see
+`agents/rules/typescript-style.md`.
+
+**References**: `docs/Workshop long format.md` (CUTE DDD + CUPID source), `docs/4.the FP idiomatic way.md`.
 
 ## Core posture
 
@@ -76,9 +80,9 @@ Teach the agent to write modern, elegant TypeScript with clean code tactics borr
 
 ### Be idiomatic
 
-- Use **TypeScript-native** tools first: unions, readonly data, mapped types, conditional types, utility types.
 - Use NestJS for delivery and wiring, not as the domain model.
 - Use Prisma as infrastructure, not as the source of business truth.
+- For TypeScript-native type-system tools (unions, mapped types, `Result`), see `typescript-style.md`.
 
 ### Be domain-based
 

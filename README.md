@@ -28,8 +28,8 @@ See [DEV-SETUP-AND-GUIDE.md](./DEV-SETUP-AND-GUIDE.md) to get running.
   objects** — the controller calls the service directly, and the service
   calls Prisma directly. These are exactly what attendees will introduce.
 - **No CQRS, no command/query bus, no mediator** — intentionally flat.
-- **E2E tests hit a real, unmanaged, shared Postgres** with no reset between
-  runs (see `test/products.e2e-spec.ts`) — meant to be felt as slow/flaky
+- **E2E tests hit a real, unmanaged, shared Postgres** with no reset between runs (see
+  `test-e2e/products.e2e-spec.ts`) — meant to be felt as slow/flaky
   compared to isolated unit tests around an extracted domain.
 - **Zod at the controller boundary only** (`src/products/create-product.schema.ts`)
   validates shape and primitive ranges, not domain rules — see the `SMELL`
@@ -76,8 +76,8 @@ An in-memory or ephemeral substitute is possible, but each has a real cost:
 - **SQLite** — fast and in-memory-capable, but a different engine than
   production (`provider = "postgresql"`), so behavior can diverge.
 
-This seed keeps e2e tests on a real, shared Postgres instance instead, with
-no reset between runs (see `test/products.e2e-spec.ts`).
+This seed keeps e2e tests on a real, shared Postgres instance instead, with no reset between runs (see
+`test-e2e/products.e2e-spec.ts`).
 
 It's slower and
 more state-dependent than the unit tests under `pnpm test`, which mock

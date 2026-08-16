@@ -14,7 +14,9 @@ This workshop provides a **holistic approach** to domain-driven design by integr
 | **CUPID** | Code properties for joyful development | Dan North |
 | **Model Exploration Whirlpool** | Collaborative model discovery process | Eric Evans / Kenny Baas-Schwegler |
 
-**Goal**: Transform a legacy Spring Boot + JPA codebase into a well-structured, domain-aligned, testable, and maintainable system through collaborative modelling and incremental refactoring.
+**Goal**: Transform a legacy monolithic codebase (originally ported from Spring Boot + JPA to NestJS + Prisma) into a
+well-structured, domain-aligned, testable, and maintainable system through collaborative modelling and incremental
+refactoring.
 
 ---
 
@@ -31,13 +33,13 @@ This workshop provides a **holistic approach** to domain-driven design by integr
 
 ### CUPID — Tactical Code Properties (Joyful Code)
 
-| Letter | Property | Description | DDD Connection |
-|--------|----------|-------------|----------------|
-| **C** | **Composable** | Plays well with others; small, focused components that combine easily | Aggregates, Domain Events, Value Objects compose naturally |
-| **U** | **Unix Philosophy** | Does one thing well; single-purpose modules with clear boundaries | Bounded Contexts, Single Responsibility per aggregate |
-| **P** | **Predictable** | Does what you expect; no surprising side effects | Invariants, Always-Valid Entities, Domain Events |
-| **I** | **Idiomatic** | Feels natural in the language/framework; leverages platform strengths | Spring Boot idioms, Java records for VOs, Pattern Matching |
-| **D** | **Domain-Based** | Code models the problem domain in language and structure | Ubiquitous Language, Tactical DDD patterns |
+| Letter | Property            | Description                                                           | DDD Connection                                                                             |
+|--------|---------------------|-----------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| **C**  | **Composable**      | Plays well with others; small, focused components that combine easily | Aggregates, Domain Events, Value Objects compose naturally                                 |
+| **U**  | **Unix Philosophy** | Does one thing well; single-purpose modules with clear boundaries     | Bounded Contexts, Single Responsibility per aggregate                                      |
+| **P**  | **Predictable**     | Does what you expect; no surprising side effects                      | Invariants, Always-Valid Entities, Domain Events                                           |
+| **I**  | **Idiomatic**       | Feels natural in the language/framework; leverages platform strengths | NestJS modular architecture, TypeScript types/classes for VOs & Entities, pattern matching |
+| **D**  | **Domain-Based**    | Code models the problem domain in language and structure              | Ubiquitous Language, Tactical DDD patterns                                                 |
 
 > **Key Insight**: CUPID properties are *centred sets* (direction of travel) not *bounded sets* (pass/fail). CUTE principles guide *what* to build; CUPID properties guide *how* to build it.
 
@@ -129,7 +131,7 @@ This workshop provides a **holistic approach** to domain-driven design by integr
 
 ### Business Context (From Legacy Analysis)
 
-Legacy Spring Boot + JPA codebase with mixed concerns:
+Legacy codebase (originally ported from Spring Boot + JPA to NestJS + Prisma) with mixed concerns:
 - **Product** (transport, stock, catalog frontend, suppliers all embedded)
 - **Suppliers Management**
 - **Stock Management**
@@ -202,13 +204,13 @@ regionalSupplier.quoteResellerPrice(regionalMarginPolicy, vatRate);
 
 ### Code Quality Lens: CUPID Properties as Refactoring Guide
 
-| CUPID Property | Legacy Smell | Target Pattern | Example |
-|----------------|--------------|----------------|---------|
-| **Composable** | God `Product` entity | Small Aggregates + Domain Events | `StockItem`, `CatalogItem`, `ProcurementItem` |
-| **Unix Philosophy** | Services doing everything | Single-purpose Domain Services | `PricingService`, `TaxCalculation`, `SlugGenerator` |
-| **Predictable** | Nulls, exceptions, invalid states | Always-Valid Entities, Result/Either | `Result<Price>`, `Option<StockLevel>` |
-| **Idiomatic** | Manual DTO mapping, heavy ORM | Java Records, Pattern Matching, Spring Data projections | `record Price(...)`, `interface StockRepository` |
-| **Domain-Based** | Technical names (`ProductDTO`) | Domain names (`ResellerQuote`, `StockReservation`) | Ubiquitous language in code |
+| CUPID Property      | Legacy Smell                             | Target Pattern                                                            | Example                                             |
+|---------------------|------------------------------------------|---------------------------------------------------------------------------|-----------------------------------------------------|
+| **Composable**      | God `Product` entity                     | Small Aggregates + Domain Events                                          | `StockItem`, `CatalogItem`, `ProcurementItem`       |
+| **Unix Philosophy** | Services doing everything                | Single-purpose Domain Services                                            | `PricingService`, `TaxCalculation`, `SlugGenerator` |
+| **Predictable**     | Nulls, exceptions, invalid states        | Always-Valid Entities, Result/Either                                      | `Result<Price>`, `Option<StockLevel>`               |
+| **Idiomatic**       | Anemic Prisma models, heavy ORM coupling | TypeScript Value Objects, pure domain entities, Prisma select projections | `class Price(...)`, `interface StockRepository`     |
+| **Domain-Based**    | Technical names (`ProductDTO`)           | Domain names (`ResellerQuote`, `StockReservation`)                        | Ubiquitous language in code                         |
 
 ### Tactical Refactoring Roadmap
 
@@ -231,7 +233,7 @@ regionalSupplier.quoteResellerPrice(regionalMarginPolicy, vatRate);
 - [ ] **Ports & Adapters**: Repository interfaces in domain, implementations in infrastructure
 - [ ] **DTO Mapping**: Explicit mappers per use case (no auto-mapping)
 - [ ] **Slug Generation**: Strategy pattern (IoC) — `SlugGenerator` interface
-- [ ] **ORM → Projections**: Spring Data JPA projections for read models
+- [ ] **ORM → Projections**: Prisma query projections / tailored read models
 
 #### Phase D: Validation vs Invariants (Predictable + Domain-Based)
 - [ ] **Input Validation**: At application boundary (request DTOs)
@@ -300,13 +302,14 @@ regionalSupplier.quoteResellerPrice(regionalMarginPolicy, vatRate);
 | `StockService` | Direct DB access | Inventory aggregate + repository |
 | `CatalogService` | Frontend coupling | Catalog read model projector |
 
-### Domain Model (JPA Entities)
-| Entity | Problems | Target |
-|--------|----------|--------|
-| `Product` | Anemic, all concerns, DB-coupled | Split: `StockItem`, `CatalogItem`, `ProcurementItem` |
-| `Supplier` | Mixed regions, no invariants | `RegionalSupplier` aggregate |
-| `Stock` | No encapsulation | `StockItem` with reservations |
-| `Transport` | Embedded in Product | Separate BC or value object |
+### Domain Model (Prisma Models vs Pure Domain Entities)
+
+| Model / Entity | Problems                                               | Target                                                                      |
+|----------------|--------------------------------------------------------|-----------------------------------------------------------------------------|
+| `Product`      | Anemic Prisma schema, all concerns bundled, DB-coupled | Split: `StockItem`, `CatalogItem`, `ProcurementItem` (Pure Domain Entities) |
+| `Supplier`     | Mixed regions, no invariants                           | `RegionalSupplier` aggregate                                                |
+| `Stock`        | No encapsulation                                       | `StockItem` with reservations                                               |
+| `Transport`    | Embedded in Product                                    | Separate BC or value object                                                 |
 
 ---
 
@@ -347,4 +350,5 @@ regionalSupplier.quoteResellerPrice(regionalMarginPolicy, vatRate);
 
 ---
 
-> **Workshop Mantra**: *"Harvest the implicit, make it explicit. Model multiple ways, probe with code. Keep whirling toward deeper insight."}]</parameter=explanation=
+> **Workshop Mantra**: *"Harvest the implicit, make it explicit. Model multiple ways, probe with code. Keep whirling
+toward deeper insight."*

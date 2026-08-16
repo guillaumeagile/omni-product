@@ -25,6 +25,8 @@ generated/prisma
 
 # Test coverage
 coverage
+reports
+.stryker-tmp
 
 # Editor directories and files
 .vscode/*

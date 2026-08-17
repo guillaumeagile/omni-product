@@ -1,23 +1,24 @@
 import {describe, expect, it, vi} from 'vitest';
 import {
-  andTee,
-  andThen,
-  andThrough,
-  asyncAndThen,
-  asyncAndThrough,
-  asyncMap,
-  fromNullable,
-  isNone,
-  isSome,
-  map,
-  match,
-  none,
-  type Option,
-  OPTION_KIND,
-  orElse,
-  orTee,
-  some,
-  unwrapOr,
+    andTee,
+    andThen,
+    asyncAndThen,
+    asyncFilterAndThen,
+    asyncMap,
+    filterAndThen,
+    fromNullable,
+    isNone,
+    isSome,
+    map,
+    match,
+    none,
+    type Option,
+    OPTION_KIND,
+    orElse,
+    orTee,
+    some,
+    unwrapOr,
+    unwrapOrElse,
 } from './option';
 
 describe('Option', () => {
@@ -181,37 +182,53 @@ describe('Option', () => {
         expect(option).toEqual({kind: OPTION_KIND.Some, value: 'catalog'});
     });
 
-    it('keeps the original Some when andThrough succeeds', () => {
-        const option = andThrough(some(18), value => (value > 0 ? some('validated') : none()));
+    it('keeps the original Some when filterAndThen passes', () => {
+        const option = filterAndThen(some(18), value => (value > 0 ? some('validated') : none()));
 
         expect(option).toEqual({kind: OPTION_KIND.Some, value: 18});
     });
 
-    it('turns Some into None when andThrough fails', () => {
-        const option = andThrough(some(0), value => (value > 0 ? some('validated') : none()));
+    it('turns Some into None when filterAndThen fails', () => {
+        const option = filterAndThen(some(0), value => (value > 0 ? some('validated') : none()));
 
         expect(option).toEqual({kind: OPTION_KIND.None});
     });
 
-    it('keeps None when andThrough runs on None', () => {
-        const option = andThrough(none<number>(), value => some(value));
+    it('keeps None when filterAndThen runs on None', () => {
+        const option = filterAndThen(none<number>(), value => some(value));
 
         expect(option).toEqual({kind: OPTION_KIND.None});
     });
 
-    it('keeps the original Some when asyncAndThrough succeeds', async () => {
-        const option = await asyncAndThrough(some(18), async value => (value > 0 ? some('validated') : none()));
+    it('keeps the original Some when asyncFilterAndThen passes', async () => {
+        const option = await asyncFilterAndThen(some(18), async value => (value > 0 ? some('validated') : none()));
 
         expect(option).toEqual({kind: OPTION_KIND.Some, value: 18});
     });
 
-    it('turns Some into None when asyncAndThrough fails', async () => {
-        const option = await asyncAndThrough(some(0), async value => (value > 0 ? some('validated') : none()));
+    it('turns Some into None when asyncFilterAndThen fails', async () => {
+        const option = await asyncFilterAndThen(some(0), async value => (value > 0 ? some('validated') : none()));
 
         expect(option).toEqual({kind: OPTION_KIND.None});
     });
 
-    it('supports domain-readable flows with Option values', () => {
+    it('returns the inner value when unwrapOrElse runs on Some', () => {
+        const fallback = vi.fn(() => 'fallback');
+
+        expect(unwrapOrElse(some('stock'), fallback)).toBe('stock');
+        expect(fallback).not.toHaveBeenCalled();
+    });
+
+    it('computes the fallback lazily when unwrapOrElse runs on None', () => {
+        const fallback = vi.fn(() => 'fallback');
+
+        expect(unwrapOrElse(none<string>(), fallback)).toBe('fallback');
+        expect(fallback).toHaveBeenCalledOnce();
+    });
+});
+
+describe('Option composition', () => {
+    it('chains map and match into a domain-readable message', () => {
         const maybeMargin: Option<number> = some(18);
         const message = match(map(maybeMargin, margin => `${margin}%`), margin => `Margin is ${margin}`, () => 'Margin is missing');
 

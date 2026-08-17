@@ -46,6 +46,9 @@ export const match = <T, TResult>(
 export const unwrapOr = <T>(option: Option<T>, defaultValue: T): T =>
     (isSome(option) ? option.value : defaultValue);
 
+export const unwrapOrElse = <T>(option: Option<T>, callback: () => T): T =>
+    (isSome(option) ? option.value : callback());
+
 export const andTee = <T>(option: Option<T>, callback: (value: T) => void): Option<T> => {
     if (isSome(option)) {
         callback(option.value);
@@ -62,7 +65,7 @@ export const orTee = <T>(option: Option<T>, callback: () => void): Option<T> => 
     return option;
 };
 
-export const andThrough = <T>(option: Option<T>, callback: (value: T) => Option<unknown>): Option<T> => {
+export const filterAndThen = <T>(option: Option<T>, callback: (value: T) => Option<unknown>): Option<T> => {
     if (isNone(option)) {
         return option;
     }
@@ -70,7 +73,7 @@ export const andThrough = <T>(option: Option<T>, callback: (value: T) => Option<
     return isSome(callback(option.value)) ? option : none();
 };
 
-export const asyncAndThrough = async <T>(
+export const asyncFilterAndThen = async <T>(
     option: Option<T>,
     callback: (value: T) => Promise<Option<unknown>>,
 ): Promise<Option<T>> => {

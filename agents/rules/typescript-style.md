@@ -30,6 +30,10 @@ Teach the agent to use the TypeScript type system and FP-style constructs well: 
 - **Distinguish trusted domain data from untrusted external data.**
   Parsed, validated, and constructed domain values must not have the same status as raw input.
 
+- **Use branded or opaque types when a primitive carries stable domain meaning.**
+  A `string` that means `ProductId`, `Sku`, or `EmailAddress` should not be interchangeable with any other `string` once
+  trusted.
+
 - **Use generics to preserve meaning, not to generalize prematurely.**
   A generic is justified when it keeps a real relationship explicit across inputs and outputs.
 
@@ -55,8 +59,13 @@ Teach the agent to use the TypeScript type system and FP-style constructs well: 
 
 - Prefer **discriminated unions** over booleans that smuggle state.
 - Prefer **readonly** data and immutable updates.
+- Prefer **branded or opaque types** for identifiers and validated scalar concepts when confusion between same-shaped
+  values would create real domain bugs.
 - Prefer **typed IDs, value objects, and narrow scalar types** over raw strings and numbers when values carry domain
   meaning.
+- Prefer **`neverthrow` `Result` / `ResultAsync`** for expected business failures.
+- Prefer a **small local `Option<T>`** for meaningful absence instead of adding a second FP dependency just for
+  `Option`.
 - Prefer **constructors or factory functions** that create trusted values only after validation.
 - Prefer **tagged error unions** over broad exception hierarchies for expected business failures.
 - Prefer type inference inside implementations, but annotate **public APIs, exported functions, and boundaries**.
@@ -76,6 +85,13 @@ type ProductStatus =
         | { kind: 'Archived'; archivedAt: Date; reason: string };
 ```
 
+Branded primitive for a stable domain identifier:
+
+```ts
+type Brand<T, TBrand extends string> = T & { readonly __brand: TBrand };
+type ProductId = Brand<string, 'ProductId'>;
+```
+
 Expected failure as a tagged union, not an exception hierarchy:
 
 ```ts
@@ -84,13 +100,22 @@ type ReserveStockError =
         | { kind: 'InsufficientStock'; available: number; requested: number };
 ```
 
-`Result` as a small local protocol, not an imported philosophy:
+`neverthrow` as the chosen `Result` protocol:
 
 ```ts
-type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
+import {err, ok, type Result, type ResultAsync} from 'neverthrow';
 ```
 
-Use cases return `Result<T, DomainError>`; unexpected/infrastructure failures still throw.
+Use cases return `Result<T, DomainError>` or `ResultAsync<T, DomainError>`; unexpected or infrastructure failures still
+throw.
+
+Local `Option<T>` for absence without adding another library:
+
+```ts
+type Option<T> =
+        | { kind: 'Some'; value: T }
+        | { kind: 'None' };
+```
 
 Derive, don't repeat (one source of truth):
 

@@ -8,13 +8,14 @@
 
 ## Goal
 
-Model expected failure explicitly with `Result<T, E>` and `Option<T>`.
+Model expected failure explicitly with `neverthrow` `Result<T, E>` / `ResultAsync<T, E>` and a small local `Option<T>`.
 
 ## Do
 
-- use `Option<T>` for absence
-- use `Result<T, DomainError>` for expected business failure
+- use a small local `Option<T>` for absence
+- use `neverthrow` `Result<T, DomainError>` or `ResultAsync<T, DomainError>` for expected business failure
 - use tagged union errors with a stable `kind`
+- use `map`, `andThen`, and `match` when they make failure flow clearer
 - keep error payloads serializable and specific
 - map domain errors to HTTP responses only at the boundary
 - let unexpected technical failures throw
@@ -28,7 +29,8 @@ Model expected failure explicitly with `Result<T, E>` and `Option<T>`.
 
 ## Deliverables
 
-- a small local `Result` protocol
+- `neverthrow`-based result flow
+- a small local `Option<T>` shape if meaningful absence appears
 - domain-specific tagged error unions
 - explicit boundary mapping rules
 - signatures that expose expected failure modes

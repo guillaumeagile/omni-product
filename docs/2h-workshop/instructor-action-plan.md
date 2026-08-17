@@ -39,8 +39,8 @@ See `agents/AGENTS.md` for the entry point and routing order.
 - [x] **Task 0**: Agree on Agent Skills, Decisions, and Architecture.
 - [x] **Task 4 (Priority)**: Draft the complete 2-Hour Tactical Hands-On Guide in `2h-tactical-hands-on.md`.
 - [x] **Task 1**: Install `fast-check` and configure test dependencies.
-- [ ] **Task 2**: Implement `src/shared/option.ts` (`Option<T>` plus small helpers such as `some`, `none`, `mapOption`,
-  and `matchOption`, fully tested).
+- [x] **Task 2**: Implement `src/shared/option.ts` (`Option<T>` plus Result-shaped helpers such as `some`, `none`,
+  `map`, `andThen`, `match`, and `unwrapOr`, fully tested).
 - [ ] **Task 3**: Build the reference tutorial in `src/pricing/`:
     - `Margin` Value Object (immutable, branded where useful, factory returning `neverthrow`
       `Result<Margin, DomainError>`).

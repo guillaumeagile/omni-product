@@ -40,6 +40,10 @@ Teach the agent to use the TypeScript type system and FP-style constructs well: 
 - **Derive types from one source of truth.**
   Use mapped and conditional types to avoid repeating structural knowledge in many places.
 
+- **Expose stable literals once, then reuse them.**
+  Repeated discriminants, status names, event names, and error codes are a refactoring smell. Export one source of truth
+  and derive the type-level usage from it instead of scattering raw strings.
+
 - **Prefer explicit state models over optional-property bags.**
   When variants differ by meaning, use unions and explicit cases.
 
@@ -58,6 +62,8 @@ Teach the agent to use the TypeScript type system and FP-style constructs well: 
 ## Practical TypeScript Defaults
 
 - Prefer **discriminated unions** over booleans that smuggle state.
+- Prefer **one exported source of truth** for repeated discriminants and other stable literals rather than repeating raw
+  strings across constructors, guards, matches, and tests.
 - Prefer **readonly** data and immutable updates.
 - Prefer **branded or opaque types** for identifiers and validated scalar concepts when confusion between same-shaped
   values would create real domain bugs.
@@ -112,9 +118,14 @@ throw.
 Local `Option<T>` for absence without adding another library:
 
 ```ts
+const OPTION_KIND = {
+  Some: 'Some',
+  None: 'None',
+} as const;
+
 type Option<T> =
-        | { kind: 'Some'; value: T }
-        | { kind: 'None' };
+        | { kind: typeof OPTION_KIND.Some; value: T }
+        | { kind: typeof OPTION_KIND.None };
 ```
 
 Derive, don't repeat (one source of truth):

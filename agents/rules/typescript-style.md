@@ -9,6 +9,7 @@ Teach the agent to use the TypeScript type system and FP-style constructs well: 
 **References** (read for full rationale — this file only distills them):
 
 - `docs/4.the FP idiomatic way.md` — full FP patterns, Result design, library ladder
+- `docs/5.the FP fellowship.md` — the FP habits (immutability, ADTs, smart constructors, …) mapped to tactical DDD
 - Project `CLAUDE.md` — one type/interface/record per file convention, applies to every pattern below
 
 ## Core posture

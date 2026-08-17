@@ -17,6 +17,9 @@ Prove behavior with fast unit tests first, then widen confidence with property-b
 - write example-based tests for named business scenarios
 - add property-based tests for invariants, symmetry, bounds, and idempotence
 - generate meaningful arbitrary data near boundaries
+- write assertions so humans can read them in domain language
+- treat tests as living documentation of business rules
+- use a small test DSL or builders when they improve readability and reuse
 - prefer precise assertions over broad snapshots
 
 ## Avoid
@@ -31,10 +34,11 @@ Prove behavior with fast unit tests first, then widen confidence with property-b
 - fast unit tests for core rules
 - property-based tests for invariants
 - readable generators and helper fixtures
-- tests that explain business intent
+- tests that explain business intent in domain language
 
 ## Done when
 
 - core domain behavior is covered by isolated tests
 - invariants hold across arbitrary inputs
+- test names and assertions read like business rules
 - failures point to a business rule, not test setup noise

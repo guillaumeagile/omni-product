@@ -1,4 +1,4 @@
-# Agent Skill Stack Routing
+# Agent Stack Routing
 
 ## Purpose
 
@@ -7,13 +7,13 @@ Use this stack to keep agent behavior precise, composable, and low-overhead.
 ## Global rules
 
 - Read `agents/rules/CUTE and CUPID Code Rules.md` first for DDD/architecture posture (bounded contexts, testability,
-  invariants), then `agents/rules/typescript-style.md` for TypeScript type-system and FP mechanics (unions, Result,
+  invariants), then `rules/typescript-style.md` for TypeScript type-system and FP mechanics (unions, Result,
   mapped types). Apply both as shared posture for all tasks.
 - Pick **one primary skill** per task.
 - Add a secondary skill only when the task clearly crosses concerns.
-- Prefer **TypeScript-native** design before introducing libraries.
+- Prefer **TypeScript-native** design before introducing libraries (except `neverthrow` for `Result<T, E>`).
 - Keep **NestJS, Prisma, and HTTP** at the edges.
-- Follow `CLAUDE.md`: **one object/interface/record-like type per file**.
+- Follow `../CLAUDE.md`: **one object/interface/record-like type per file**.
 
 ## Skill boundaries
 

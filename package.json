@@ -38,6 +38,7 @@
     "@types/node": "^22.10.0",
     "@types/supertest": "^6.0.2",
     "dotenv": "^17.4.2",
+    "fast-check": "^4.9.0",
     "prisma": "^6.2.0",
     "supertest": "^7.0.0",
     "typescript": "^5.7.2",

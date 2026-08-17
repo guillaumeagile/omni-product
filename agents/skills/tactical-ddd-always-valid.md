@@ -14,6 +14,8 @@ Make illegal states unrepresentable, or at least explicit and impossible to igno
 
 - model domain concepts with small named types
 - prefer immutable value objects and readonly data
+- use branded or opaque types for stable identifiers and validated scalar concepts
+- promote a branded primitive to a value object when behavior or richer invariants appear
 - use discriminated unions for legal variants and lifecycle states
 - expose factory functions or named constructors for validation
 - keep domain logic free of NestJS, Prisma, and transport concerns
@@ -30,6 +32,7 @@ Make illegal states unrepresentable, or at least explicit and impossible to igno
 ## Deliverables
 
 - explicit domain types
+- branded or opaque scalar types where primitive confusion would create domain bugs
 - constructor/factory entry points
 - aggregate methods that protect invariants
 - narrow domain language in names and signatures
@@ -37,5 +40,6 @@ Make illegal states unrepresentable, or at least explicit and impossible to igno
 ## Done when
 
 - invalid combinations cannot be created accidentally
+- same-shaped values with different domain meaning cannot be mixed accidentally
 - domain rules live with the model, not scattered across services
 - the model can be tested in memory with no framework bootstrapping

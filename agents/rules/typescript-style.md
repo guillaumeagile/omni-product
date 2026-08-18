@@ -12,6 +12,13 @@ Teach the agent to use the TypeScript type system and FP-style constructs well: 
 - `docs/5.the FP fellowship.md` — the FP habits (immutability, ADTs, smart constructors, …) mapped to tactical DDD
 - Project `CLAUDE.md` — one type/interface/record per file convention, applies to every pattern below
 
+## Objects for models, functions for actions
+
+Domain models (value objects, entities) are classes with a private constructor and invariant-preserving methods — see
+`agents/skills/tactical-ddd-always-valid.md`. Everything below in this file — `Result`/`Option` pipelines, `map`,
+`andThen`, `match` — is about actions and orchestration (services, use cases), not about how a domain model's own
+methods are written.
+
 ## Core posture
 
 - Start from **domain meaning**, not from data shape alone.

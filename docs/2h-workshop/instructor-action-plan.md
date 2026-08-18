@@ -41,9 +41,12 @@ See `agents/AGENTS.md` for the entry point and routing order.
 - [x] **Task 1**: Install `fast-check` and configure test dependencies.
 - [x] **Task 2**: Implement `src/shared/option.ts` (`Option<T>` plus Result-shaped helpers such as `some`, `none`,
   `map`, `andThen`, `match`, and `unwrapOr`, fully tested).
-- [ ] **Task 3**: Build the reference tutorial in `src/pricing/`:
+- [ ] **Task 3**: Build the reference tutorial in `src/shared/pricing/`:
     - `Margin` Value Object (immutable, branded where useful, factory returning `neverthrow`
       `Result<Margin, DomainError>`).
+    - refer to Part 1: Phase A — Primitive Obsession → Value Objects (Pricing Shared Kernel) in
+      `2h-tactical-hands-on.md`
     - Domain-readable Unit Tests + Property-Based Tests + Stryker Mutation verification (100% killed).
 - [ ] **Task 5**: Prepare candidate exercises and starter templates for participants (Pricing, Inventory, Catalog,
   Procurement tracks).
+    

@@ -10,16 +10,32 @@
 
 Make illegal states unrepresentable, or at least explicit and impossible to ignore.
 
+## Objects for models, functions for actions
+
+Domain models — value objects and entities — are **classes**: a private constructor, a static factory returning
+`Result<T, DomainError>`, and instance methods that are the only way to operate on the value while preserving its
+invariants. The private constructor is what makes a model *unforgeable* — nothing outside the class can produce an
+instance that skipped validation.
+
+Actions, commands, and orchestration — services, use cases, anything that acts *on* domain models rather than *being*
+one — stay function-first: pure functions and `Result`/`Option` pipelines (`map`, `andThen`, `match`), per
+`agents/rules/typescript-style.md`.
+
+Algebraic infrastructure that isn't itself a domain concept (`Option<T>`, `Result<T, E>` and their combinators) is its
+own category: function/ADT style, one cohesive module, per the exception in the project `CLAUDE.md`. It is vocabulary
+the domain models are built with, not a domain model itself.
+
 ## Do
 
 - model domain concepts with small named types
-- prefer immutable value objects and readonly data
+- implement value objects and entities as classes: private constructor, static factory returning `Result`,
+  invariant-preserving instance methods
 - use branded or opaque types for stable identifiers and validated scalar concepts
 - promote a branded primitive to a value object when behavior or richer invariants appear
 - use discriminated unions for legal variants and lifecycle states
-- expose factory functions or named constructors for validation
 - keep domain logic free of NestJS, Prisma, and transport concerns
 - make state transitions explicit and intention-revealing
+- write services, use cases, and other orchestration as pure functions operating on domain model instances
 
 ## Avoid
 

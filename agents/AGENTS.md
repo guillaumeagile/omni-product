@@ -7,7 +7,7 @@ Use this stack to keep agent behavior precise, composable, and low-overhead.
 ## Global rules
 
 - Read `agents/rules/CUTE and CUPID Code Rules.md` first for DDD/architecture posture (bounded contexts, testability,
-  invariants), then `rules/typescript-style.md` for TypeScript type-system and FP mechanics (unions, Result,
+  invariants), then `agents/rules/typescript-style.md` for TypeScript type-system and FP mechanics (unions, Result,
   mapped types). Apply both as shared posture for all tasks.
 - follow `docs/5.the FP fellowship.md` for writing clean code.
 - Pick **one primary skill** per task.

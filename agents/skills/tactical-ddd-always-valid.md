@@ -33,6 +33,9 @@ the domain models are built with, not a domain model itself.
 - use branded or opaque types for stable identifiers and validated scalar concepts
 - promote a branded primitive to a value object when behavior or richer invariants appear
 - use discriminated unions for legal variants and lifecycle states
+- apply illegal-states-unrepresentable to every parameter a domain factory or method accepts, not only to the value
+  it returns — an optional or bare-primitive parameter (`region?: string`) is as much a primitive-obsession risk as
+  an unvalidated field, and often means two or more domain cases are sharing one type
 - keep domain logic free of NestJS, Prisma, and transport concerns
 - make state transitions explicit and intention-revealing
 - write services, use cases, and other orchestration as pure functions operating on domain model instances

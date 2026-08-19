@@ -3,11 +3,13 @@
 > A field note from setting up Stryker for `src/shared/pricing/margins/margin.ts` (Task 3). Worth reading before
 > anyone chases a mutation score to 100% for the first time.
 >
-> **Read the correction at the bottom first if you're short on time.** The mutant described below as "unkillable" was
+> **TLdR;** The mutant described below as "unkillable" was
 > not unkillable — it was a modeling bug wearing a testing-tool costume, and it took someone asking "why can `region`
 > be `undefined` at all" to see it. The four rewrite attempts and the 95%-threshold conclusion that follows are kept
 > here because being wrong about this in a specific, traceable way is more useful to read than a version of this
 > document that got it right the first time.
+> 
+> *Read the correction at the bottom first if you're short on time.*
 
 ## What mutation testing actually gives you
 

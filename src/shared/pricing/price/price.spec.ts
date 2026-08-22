@@ -28,4 +28,10 @@ describe('Price.create', () => {
         expect(result.isErr()).toBe(true);
         expect(result._unsafeUnwrapErr()).toEqual({kind: 'PriceAmountTooManyDecimals', amount: 19.999});
     });
+
+    it('returns Ok for an integer amount with no decimal places', () => {
+        const result = Price.create(20);
+
+        expect(result.isOk()).toBe(true);
+    });
 });

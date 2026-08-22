@@ -176,7 +176,7 @@ modeling a domain concept that *wraps* a simpler VO rather than reinventing its 
 - **Operations**: `add(other: Price)`, `multiply(factor: number)`, `equals(other: Price)`.
 - **Factory**: `Price.create(amount: number, currency?: string): Result<Price, InvalidPriceError>`.
 
-#### Exercise A2: `VatRate` Value Object (`src/pricing/domain/vat-rate.ts`)
+#### Exercise A1c: `VatRate` Value Object (`src/pricing/domain/vat-rate.ts`)
 
 A VAT rate is not a single flat number: it depends on the **country** and, within a country, on the **category of
 goods/services**. France alone has four standard rates (20% standard, 10% and 5.5% reduced, 2.1% super-reduced), each
@@ -188,7 +188,7 @@ applying to different product categories.
 - **Factory**:
   `VatRate.create(rate: number, country: CountryCode, category?: VatCategory): Result<VatRate, InvalidVatRateError>`.
 
-#### Exercise A3 (Integration -- Optional): `ResellerPriceCalculator`
+#### Exercise A2 (Integration -- Optional): `ResellerPriceCalculator`
 
 - Combine `Price`, `Margin`, and `VatRate` into a pure domain function:
   $$\text{ResellerPrice} = \text{BasePrice} + \text{MarginAmount} + \text{BaseVAT} + \text{VATOnMargin}$$

@@ -52,6 +52,11 @@ methods are written.
   Repeated discriminants, status names, event names, and error codes are a refactoring smell. Export one source of truth
   and derive the type-level usage from it instead of scattering raw strings.
 
+- **Never use magic numbers or strings in production code.**
+  Any literal number or string with domain meaning (thresholds, currency codes, error kinds, rounding factors, …) must
+  be a named constant. Reserve a bare literal for values with no meaning beyond themselves (e.g. `0`/`1` as arithmetic
+  identities). This rule does not apply to test code, where literal inputs and expected values are the point.
+
 - **Prefer explicit state models over optional-property bags.**
   When variants differ by meaning, use unions and explicit cases.
 

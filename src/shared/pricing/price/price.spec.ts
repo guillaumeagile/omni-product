@@ -40,4 +40,17 @@ describe('Price.create', () => {
 
         expect(result._unsafeUnwrap().currency).toBe('EUR');
     });
+
+    it('returns Err for an amount over 100000', () => {
+        const result = Price.create(100001);
+
+        expect(result.isErr()).toBe(true);
+        expect(result._unsafeUnwrapErr()).toEqual({kind: 'PriceAmountTooHigh', amount: 100001});
+    });
+
+    it('returns Ok for an amount of exactly 100000', () => {
+        const result = Price.create(100000);
+
+        expect(result.isOk()).toBe(true);
+    });
 });

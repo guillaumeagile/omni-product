@@ -22,11 +22,11 @@ describe('Price.create', () => {
         expect(result._unsafeUnwrapErr()).toEqual({kind: 'PriceAmountNotPositive', amount: 0});
     });
 
-    it('returns Err for an amount with more than 2 decimal places', () => {
+    it('rounds an amount with more than 2 decimal places instead of rejecting it', () => {
         const result = Price.create(19.999);
 
-        expect(result.isErr()).toBe(true);
-        expect(result._unsafeUnwrapErr()).toEqual({kind: 'PriceAmountTooManyDecimals', amount: 19.999});
+        expect(result.isOk()).toBe(true);
+        expect(result._unsafeUnwrap().amount).toBe(20);
     });
 
     it('returns Ok for an integer amount with no decimal places', () => {

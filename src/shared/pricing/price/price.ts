@@ -8,21 +8,19 @@ const ROUNDING_FACTOR = 100;
 export class Price {
     readonly currency = CURRENCY;
 
-    private constructor() {}
+    private constructor(readonly amount: number) {}
 
     static create(amount: number): Result<Price, PriceError> {
         if (amount <= 0) {
             return err({kind: PRICE_ERROR_KIND.AmountNotPositive, amount});
         }
 
-        if (Math.round(amount * ROUNDING_FACTOR) / ROUNDING_FACTOR !== amount) {
-            return err({kind: PRICE_ERROR_KIND.AmountTooManyDecimals, amount});
+        const rounded = Math.round(amount * ROUNDING_FACTOR) / ROUNDING_FACTOR;
+
+        if (rounded > MAX_AMOUNT) {
+            return err({kind: PRICE_ERROR_KIND.AmountTooHigh, amount: rounded});
         }
 
-        if (amount > MAX_AMOUNT) {
-            return err({kind: PRICE_ERROR_KIND.AmountTooHigh, amount});
-        }
-
-        return ok(new Price());
+        return ok(new Price(rounded));
     }
 }

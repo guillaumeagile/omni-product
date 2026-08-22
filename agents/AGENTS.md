@@ -96,6 +96,20 @@ Does not own:
 - error algebra design
 - test quality gates
 
+### `tdd-by-the-book`
+
+Owns:
+
+- the red/green/refactor loop itself when a task is explicitly done "using TDD"
+- sequencing: one failing test, confirmed red, before any implementation
+- keeping implementation steps minimal and test-driven
+
+Does not own:
+
+- domain modeling decisions (defer to `tactical-ddd-always-valid`)
+- error algebra shape (defer to `result-type-functional-errors`)
+- test technique/PBT design (defer to `domain-unit-testing-and-pbt`)
+
 ## Recommended order
 
 1. `nest-cupid-architecture`
@@ -104,6 +118,10 @@ Does not own:
 4. `domain-unit-testing-and-pbt`
 5. `mutation-testing-verification`
 
+When a task is explicitly TDD-driven, `tdd-by-the-book` governs the *process*
+(loop discipline) while the others still govern the *content* of each test and
+each implementation step.
+
 ## Escalation rules
 
 - If the task is about **shape of the model**, use `tactical-ddd-always-valid`.
@@ -111,3 +129,4 @@ Does not own:
 - If the task is about **confidence in behavior**, use `domain-unit-testing-and-pbt`.
 - If the task is about **test rigor**, use `mutation-testing-verification`.
 - If the task is about **layering, boundaries, or Nest wiring**, use `nest-cupid-architecture`.
+- If the task explicitly says **"using TDD"**, apply `tdd-by-the-book` as the process on top of whichever content skill fits.

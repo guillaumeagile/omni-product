@@ -28,6 +28,12 @@ coverage
 reports
 .stryker-tmp
 
+# Java build artifacts (legacy reference code)
+.gradle
+build
+bin
+*.class
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

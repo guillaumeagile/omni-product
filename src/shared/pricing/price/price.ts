@@ -9,6 +9,10 @@ export class Price {
             return err({kind: 'PriceAmountNotPositive', amount});
         }
 
+        if (Math.round(amount * 100) / 100 !== amount) {
+            return err({kind: 'PriceAmountTooManyDecimals', amount});
+        }
+
         return ok(new Price());
     }
 }

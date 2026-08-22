@@ -25,8 +25,10 @@ code exists because a failing test demanded it — never ahead of it.
    change.
 4. **Verify** — run mutation testing (`pnpm test:mutation`) scoped to the file(s)
    just touched. A surviving mutant means the code contains a branch, condition,
-   or literal no test pins down — either kill it with another test or remove the
-   untested code. Do not proceed to the next test while mutants survive.
+   or literal no test pins down. Report the surviving mutant(s) and **stop** —
+   do not add a test to kill it without discussing the fix first (it may call
+   for a test, or for removing untested code instead). Do not proceed to the
+   next test while mutants survive.
 5. Repeat: pick the next smallest untested behavior and go back to step 1.
 
 ## Do
@@ -40,6 +42,8 @@ code exists because a failing test demanded it — never ahead of it.
 - keep steps small enough that the diff for "green" is obvious and minimal
 - narrate the cycle explicitly: which step (red/green/refactor/verify) is happening now
 - run mutation testing after each green step to prove no untested code was written
+- when a mutant survives, report it and propose a fix, then wait for confirmation
+  before writing the killing test or removing the untested code
 
 ## Avoid
 
@@ -49,6 +53,7 @@ code exists because a failing test demanded it — never ahead of it.
 - treating a design document's list of invariants as a checklist to implement
   upfront instead of as a backlog of future failing tests
 - skipping the "confirm it fails" step
+- adding a test to kill a surviving mutant without first discussing it with the user
 
 ## Deliverables
 

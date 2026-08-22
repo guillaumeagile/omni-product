@@ -2,7 +2,7 @@ import {describe, expect, it} from 'vitest';
 import {Price} from './price';
 
 describe('Price.create', () => {
-    it('returns Ok for a non-negative amount', () => {
+    it('returns Ok for a positive amount', () => {
         const result = Price.create(19.99);
 
         expect(result.isOk()).toBe(true);
@@ -12,5 +12,13 @@ describe('Price.create', () => {
         const result = Price.create(-1);
 
         expect(result.isErr()).toBe(true);
+        expect(result._unsafeUnwrapErr()).toEqual({kind: 'PriceAmountNotPositive', amount: -1});
+    });
+
+    it('returns Err for a zero amount', () => {
+        const result = Price.create(0);
+
+        expect(result.isErr()).toBe(true);
+        expect(result._unsafeUnwrapErr()).toEqual({kind: 'PriceAmountNotPositive', amount: 0});
     });
 });

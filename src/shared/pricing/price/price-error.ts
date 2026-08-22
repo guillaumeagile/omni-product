@@ -1,1 +1,1 @@
-export type PriceError = { readonly kind: 'PriceAmountNegative'; readonly amount: number };
+export type PriceError = { readonly kind: 'PriceAmountNotPositive'; readonly amount: number };

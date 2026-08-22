@@ -5,8 +5,8 @@ export class Price {
     private constructor() {}
 
     static create(amount: number, currency?: string): Result<Price, PriceError> {
-        if (amount < 0) {
-            return err({kind: 'PriceAmountNegative', amount});
+        if (amount <= 0) {
+            return err({kind: 'PriceAmountNotPositive', amount});
         }
 
         return ok(new Price());

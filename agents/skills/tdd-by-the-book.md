@@ -13,32 +13,38 @@ code exists because a failing test demanded it — never ahead of it.
 
 ## The loop
 
-1. **Red** — write **one** small test for a behavior that does not exist yet.
-   Run only that test file, e.g. `pnpm test -- <path/to>.spec.ts`. Confirm it
-   fails, and confirm *why*: a missing module/class/method, not a typo or a
-   broken test harness.
-2. **Green** — write the **minimum** production code to make that one test pass.
+1. **Name the rule** — before writing any TypeScript, state the single behavior
+   being tested next as one plain-English sentence in the domain's `*.spec.md`
+   (or equivalent doc). If the rule already exists there, point to it instead of
+   restating it. This sentence is what the next test's name/assertions must match.
+2. **Red** — write **one** small test for that plain-English rule. Run only that
+   test file, e.g. `pnpm test -- <path/to>.spec.ts`. Confirm it fails, and
+   confirm *why*: a missing module/class/method, not a typo or a broken test
+   harness.
+3. **Green** — write the **minimum** production code to make that one test pass.
    Do not implement invariants, branches, or parameters no test has asked for
    yet, even if the spec/doc mentions them. "Fake it" (e.g. return a constant,
    skip validation) is an acceptable and often correct green step. Run only the
    targeted test file to confirm.
-3. **Refactor** — with the test green, clean up duplication or naming in either
+4. **Refactor** — with the test green, clean up duplication or naming in either
    the test or the production code. Re-run the targeted test file to confirm
    still green. No behavior change.
-4. **Verify** — run mutation testing scoped to only the source file just
+5. **Verify** — run mutation testing scoped to only the source file just
    touched, e.g. `pnpm exec stryker run --mutate '<path/to/source>.ts'`. A
    surviving mutant means the code contains a branch, condition, or literal no
    test pins down. Report the surviving mutant(s) and **stop** — do not add a
    test to kill it without discussing the fix first (it may call for a test, or
    for removing untested code instead). Do not proceed to the
    next test while mutants survive.
-5. **Commit** — once the cycle is green with zero surviving mutants, commit
+6. **Commit** — once the cycle is green with zero surviving mutants, commit
    that one behavior on its own before starting the next test. Small commits
    that each correspond to one passing test, not a batch of several.
-6. Repeat: pick the next smallest untested behavior and go back to step 1.
+7. Repeat: pick the next smallest untested behavior and go back to step 1.
 
 ## Do
 
+- write the plain-English rule in the spec markdown before writing the
+  corresponding TypeScript test — never the reverse
 - write only one failing test before writing any implementation
 - run the test and observe the actual failure before writing a line of production code
 - treat "it compiles/passes on the first try" as a signal something is wrong —

@@ -7,4 +7,10 @@ describe('Price.create', () => {
 
         expect(result.isOk()).toBe(true);
     });
+
+    it('returns Err for a negative amount', () => {
+        const result = Price.create(-1);
+
+        expect(result.isErr()).toBe(true);
+    });
 });

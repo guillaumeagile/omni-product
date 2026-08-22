@@ -14,22 +14,28 @@ code exists because a failing test demanded it — never ahead of it.
 ## The loop
 
 1. **Red** — write **one** small test for a behavior that does not exist yet.
-   Run it. Confirm it fails, and confirm *why*: a missing module/class/method,
-   not a typo or a broken test harness.
+   Run only that test file, e.g. `pnpm test -- <path/to>.spec.ts`. Confirm it
+   fails, and confirm *why*: a missing module/class/method, not a typo or a
+   broken test harness.
 2. **Green** — write the **minimum** production code to make that one test pass.
    Do not implement invariants, branches, or parameters no test has asked for
    yet, even if the spec/doc mentions them. "Fake it" (e.g. return a constant,
-   skip validation) is an acceptable and often correct green step.
+   skip validation) is an acceptable and often correct green step. Run only the
+   targeted test file to confirm.
 3. **Refactor** — with the test green, clean up duplication or naming in either
-   the test or the production code. Re-run to confirm still green. No behavior
-   change.
-4. **Verify** — run mutation testing (`pnpm test:mutation`) scoped to the file(s)
-   just touched. A surviving mutant means the code contains a branch, condition,
-   or literal no test pins down. Report the surviving mutant(s) and **stop** —
-   do not add a test to kill it without discussing the fix first (it may call
-   for a test, or for removing untested code instead). Do not proceed to the
+   the test or the production code. Re-run the targeted test file to confirm
+   still green. No behavior change.
+4. **Verify** — run mutation testing scoped to only the source file just
+   touched, e.g. `pnpm exec stryker run --mutate '<path/to/source>.ts'`. A
+   surviving mutant means the code contains a branch, condition, or literal no
+   test pins down. Report the surviving mutant(s) and **stop** — do not add a
+   test to kill it without discussing the fix first (it may call for a test, or
+   for removing untested code instead). Do not proceed to the
    next test while mutants survive.
-5. Repeat: pick the next smallest untested behavior and go back to step 1.
+5. **Commit** — once the cycle is green with zero surviving mutants, commit
+   that one behavior on its own before starting the next test. Small commits
+   that each correspond to one passing test, not a batch of several.
+6. Repeat: pick the next smallest untested behavior and go back to step 1.
 
 ## Do
 
@@ -41,7 +47,12 @@ code exists because a failing test demanded it — never ahead of it.
   (e.g. reject negative amount, reject bad currency, rounding) — not all at once
 - keep steps small enough that the diff for "green" is obvious and minimal
 - narrate the cycle explicitly: which step (red/green/refactor/verify) is happening now
+- run tests and mutation testing scoped to only the targeted test/source file for
+  each cycle, not the whole suite — a full-suite run is for a final sanity check,
+  not for driving the loop
 - run mutation testing after each green step to prove no untested code was written
+- commit as soon as a test goes green with zero surviving mutants, before moving
+  to the next test
 - when a mutant survives, report it and propose a fix, then wait for confirmation
   before writing the killing test or removing the untested code
 

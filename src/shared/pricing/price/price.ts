@@ -1,5 +1,6 @@
 import {err, ok, type Result} from 'neverthrow';
 import {PRICE_ERROR_KIND, type PriceError} from './price-error';
+import {PriceWithTax} from './price-with-tax';
 
 const CURRENCY = 'EUR';
 const MAX_AMOUNT = 100000;
@@ -22,5 +23,9 @@ export class Price {
         }
 
         return ok(new Price(rounded));
+    }
+
+    withTax(rate: number): PriceWithTax {
+        return new PriceWithTax(this.amount * (1 + rate));
     }
 }

@@ -54,3 +54,13 @@ describe('Price.create', () => {
         expect(result.isOk()).toBe(true);
     });
 });
+
+describe('Price#withTax', () => {
+    it('produces a tax-inclusive price from a tax rate', () => {
+        const price = Price.create(100)._unsafeUnwrap();
+
+        const withTax = price.withTax(0.2);
+
+        expect(withTax.amount).toBe(120);
+    });
+});

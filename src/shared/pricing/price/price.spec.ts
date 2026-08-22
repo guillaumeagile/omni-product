@@ -34,4 +34,10 @@ describe('Price.create', () => {
 
         expect(result.isOk()).toBe(true);
     });
+
+    it('exposes EUR as its currency', () => {
+        const result = Price.create(20);
+
+        expect(result._unsafeUnwrap().currency).toBe('EUR');
+    });
 });

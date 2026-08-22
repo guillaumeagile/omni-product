@@ -1,10 +1,14 @@
 import {err, ok, type Result} from 'neverthrow';
 import type {PriceError} from './price-error';
 
+const CURRENCY = 'EUR';
+
 export class Price {
+    readonly currency = CURRENCY;
+
     private constructor() {}
 
-    static create(amount: number, currency?: string): Result<Price, PriceError> {
+    static create(amount: number): Result<Price, PriceError> {
         if (amount <= 0) {
             return err({kind: 'PriceAmountNotPositive', amount});
         }

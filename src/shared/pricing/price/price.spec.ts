@@ -59,8 +59,43 @@ describe('Price#withTax', () => {
     it('produces a tax-inclusive price from a tax rate', () => {
         const price = Price.create(100)._unsafeUnwrap();
 
-        const withTax = price.withTax(0.2);
+        const result = price.withTax(0.2);
 
-        expect(withTax.amount).toBe(120);
+        expect(result.isOk()).toBe(true);
+        expect(result._unsafeUnwrap().amount).toBe(120);
+    });
+
+    it('returns Err for a tax rate above 100%', () => {
+        const price = Price.create(100)._unsafeUnwrap();
+
+        const result = price.withTax(1.5);
+
+        expect(result.isErr()).toBe(true);
+        expect(result._unsafeUnwrapErr()).toEqual({kind: 'PriceWithTaxRateOutOfRange', rate: 1.5});
+    });
+
+    it('returns Ok for a tax rate of exactly 0%', () => {
+        const price = Price.create(100)._unsafeUnwrap();
+
+        const result = price.withTax(0);
+
+        expect(result.isOk()).toBe(true);
+    });
+
+    it('returns Err for a negative tax rate', () => {
+        const price = Price.create(100)._unsafeUnwrap();
+
+        const result = price.withTax(-0.1);
+
+        expect(result.isErr()).toBe(true);
+        expect(result._unsafeUnwrapErr()).toEqual({kind: 'PriceWithTaxRateOutOfRange', rate: -0.1});
+    });
+
+    it('returns Ok for a tax rate of exactly 100%', () => {
+        const price = Price.create(100)._unsafeUnwrap();
+
+        const result = price.withTax(1);
+
+        expect(result.isOk()).toBe(true);
     });
 });

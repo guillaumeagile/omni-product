@@ -5,3 +5,4 @@ A price is always in EURO
 A currency change is not handled by the pricing domain
 A price over 100000 is not allowed
 A price always has a taxable amount - the tax is a percentage. The price can be represented without tax, or with tax, and the distiction is alway clear.
+The tax rate must be between 0% and 100% inclusive.

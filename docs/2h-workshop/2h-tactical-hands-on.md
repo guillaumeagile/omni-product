@@ -34,7 +34,7 @@ All code written during this lab must adhere to three foundational rules:
 
 ---
 
-## 🔍 Part 0: As-Is Tour & Mutation Baseline (15 min)
+## 🔍 Phase 0: As-Is Tour & Mutation Baseline (15 min)
 
 ### The Legacy Smells
 
@@ -58,7 +58,7 @@ pnpm test:mutation
 
 ---
 
-## 💎 Part 1: Phase A — Value Objects in Shared Kernel (`src/pricing/`) (35 min)
+## 💎 Phase A — Value Objects in Shared Kernel (`src/pricing/`) (35 min)
 
 ### 1. Instructor Live Demo: `Margin` Value Object (10 min)
 
@@ -144,34 +144,64 @@ describe('Margin Value Object', () => {
 
 ### 2. Participant Hands-On: Complete the Pricing Kernel (25 min)
 
-Participants implement one or both of the following Value Objects:
+Participants implement one or more of the following Value Objects:
 
-#### Exercise A1: `Price` (or `Money`) Value Object (`src/pricing/domain/price.ts`)
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        CHOOSE YOUR VALUE OBJECT                        │
+├───────────────────────┬───────────────────────┬────────────────────────┤
+│ VO 1: Money           │ VO 2: Price           │ VO 3: VatRate          │
+│ amount + currency,    │ wraps Money, adds     │ per country, per goods/│
+│ no business rule      │ pricing invariants    │ services category      │
+│ add / multiply /      │ (e.g. strictly        │ (e.g. FR: 20% / 10% /  │
+│ equals                │ positive)             │ 5.5% / 2.1%)           │
+└───────────────────────┴───────────────────────┴────────────────────────┘
+```
+
+#### Exercise A1a: `Money` Value Object (`src/pricing/domain/money.ts`)
+
+The simpler VO: amount + currency, no pricing-specific business rule.
 
 - **Invariants**: Amount must be non-negative, currency code (ISO 3-letter, default `EUR`), rounded to 2 decimal places.
+- **Operations**: `add(other: Money)`, `multiply(factor: number)`, `equals(other: Money)`.
+- **Factory**: `Money.create(amount: number, currency?: string): Result<Money, InvalidMoneyError>`.
+
+#### Exercise A1b: `Price` Value Object (`src/pricing/domain/price.ts`)
+
+A richer VO built on top of `Money`, carrying pricing-specific invariants. Pick this one if you want to practice
+modeling a domain concept that *wraps* a simpler VO rather than reinventing its arithmetic.
+
+- **Invariants**: Wraps a `Money`; must be strictly positive (a price of zero or negative is invalid), tied to a catalog
+  context.
 - **Operations**: `add(other: Price)`, `multiply(factor: number)`, `equals(other: Price)`.
 - **Factory**: `Price.create(amount: number, currency?: string): Result<Price, InvalidPriceError>`.
 
 #### Exercise A2: `VatRate` Value Object (`src/pricing/domain/vat-rate.ts`)
 
-- **Invariants**: Rate between `0.0` (0%) and `0.30` (30%).
-- **Operations**: `calculateTax(taxableAmount: number): number`.
-- **Factory**: `VatRate.create(rate: number): Result<VatRate, InvalidVatRateError>`.
+A VAT rate is not a single flat number: it depends on the **country** and, within a country, on the **category of
+goods/services**. France alone has four standard rates (20% standard, 10% and 5.5% reduced, 2.1% super-reduced), each
+applying to different product categories.
 
-#### Exercise A3 (Integration): `ResellerPriceCalculator`
+- **Invariants**: Rate between `0.0` (0%) and `0.30` (30%); tied to a `country` code and a `category` (or "standard"
+  default) so the same `VatRate` type can't silently mix France's 5.5% (food) with Germany's 19% (standard).
+- **Operations**: `calculateTax(taxableAmount: number): number`.
+- **Factory**:
+  `VatRate.create(rate: number, country: CountryCode, category?: VatCategory): Result<VatRate, InvalidVatRateError>`.
+
+#### Exercise A3 (Integration -- Optional): `ResellerPriceCalculator`
 
 - Combine `Price`, `Margin`, and `VatRate` into a pure domain function:
   $$\text{ResellerPrice} = \text{BasePrice} + \text{MarginAmount} + \text{BaseVAT} + \text{VATOnMargin}$$
 
 ---
 
-## 🛡️ Part 2: Phase B — Rich Aggregates & Invariants (50 min)
+## 🛡️ Phase B — Rich Aggregates & Invariants (50 min)
 
 Participants select **one track** according to their interest:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   CHOOSE YOUR BOUNDED CONTEXT TRACK                     │
+│                   CHOOSE YOUR BOUNDED CONTEXT TRACK                    │
 ├────────────────────┬────────────────────┬──────────────────────────────┤
 │ Track 1: Inventory │ Track 2: Catalog   │ Track 3: Procurement         │
 │ `StockItem`        │ `CatalogItem`      │ `RegionalSupplier`           │
@@ -231,7 +261,11 @@ Participants select **one track** according to their interest:
 
 ---
 
-## 🔬 Part 3: Phase C — The Verification Gate (15 min)
+## 🔬 Phase C — The Verification Gate (15 min, optional)
+
+Are we happy with our harness ?
+
+What do you prefer ? PBT ? Mutation testing ? Agentic review ? Human review ?
 
 Run the automated verification suite against your new domain models:
 
@@ -255,7 +289,7 @@ pnpm test:mutation
 
 ---
 
-## 🏆 Part 4: Retrospective & CUPID Checklist (5 min)
+## 🏆 Phase D: Retrospective & CUPID Checklist (5 min)
 
 Review the resulting domain code against the **CUPID properties**:
 

@@ -28,12 +28,41 @@ rates, percentages) — especially one involving rounding — write PBT properti
 *before* declaring the type done, the same way this project already does for `Margin` (see `margin.spec.ts`). Skipping
 that step is what let this bug through two rounds of by-the-book verification.
 
-## Secondary note: a green mutation score is not a green property
+## Secondary note: a failing property can itself have a bug — investigate before loosening it
 
-Once the PBT properties existed, the monotonicity property itself turned out to be too strict (it doesn't account for
-rounding-boundary effects with adjacent floats — see `margin.spec.ts`'s own workaround using coarse integer steps
-instead of adjacent floats for the same kind of property). That's a separate, smaller lesson: writing a PBT property is
-not automatically correct just because it looks reasonable — it still needs the same rounding- aware care as the
-production code it's testing. But the larger point stands:
-the process gap that mattered was not having PBT in the loop at all, not the exact shape of the first property once
-added.
+The monotonicity property (`withTax is monotonic in the rate for a fixed price`) failed for a real reason, but not the
+one first assumed. The counterexample was `[amount ≈ 0.01, lowerRate ≈ 0.9900000095367432]`. Two things were wrong, and
+only one was about production rounding:
+
+1. Rounding to 2 decimals can genuinely make two close rates round in a way the raw `>=` comparison doesn't expect —
+   fixed with a small `ROUNDING_TOLERANCE`, mirroring `margin.spec.ts`'s own workaround.
+2. The actual trigger of *this specific* counterexample: `lowerRate + 0.01 = 1.0000000095367432`, which is **outside the
+   valid `[0, 1]` tax range** the property assumed both rates would stay within. `withTax` correctly returned
+   `Err` for the "higher" rate; the property's `higher.isOk() && …` then short-circuited to `false`. This wasn't a
+   rounding-tolerance problem at all — the generator needed to stop below `0.99` so `lowerRate + 0.01` can never exceed
+   `1.0`.
+
+Both fixes landed in the test only; `price.ts` was untouched. The lesson: when a PBT property fails, get the actual
+counterexample and compute what happens by hand before picking a fix. A rounding-tolerance patch would have looked
+plausible and *seemed* to work, but the real bug (an out-of-range rate feeding a comparison that assumed both sides were
+`Ok`) needed a different fix (bounding the generator), and only showed up because a fresh run with fresh random seeds
+continued to intermittently fail even after adding the tolerance.
+
+## The real finding: the plain-English spec was incomplete, not just the tests
+
+The deeper issue PBT exposed is that `price.spec.md` never said anything about rounding-boundary behavior for
+`withTax`. Rules 1-8 cover positivity, the 2-decimal/rounding rule for `Price.create`, the 100000 ceiling, and the
+`[0, 1]` tax-rate range — but nothing about what guarantee (if any) holds when two *different but close* tax rates are
+applied to the same price. The monotonicity property was testing a guarantee no one had actually specified in plain
+English; it turned out the real guarantee is weaker ("ordered rates that differ enough to matter at the cent level
+produce ordered amounts", not "any two distinct rates, however close, always order strictly"). `price.spec.md`
+has been updated with a new rule 9 to state this explicitly, so the executable property and the plain-English spec now
+agree.
+
+**This is the general lesson, not a one-off:** when a property-based test fails and the fix is to loosen or narrow what
+the test checks, that is a change to what the code's behavior is specified to guarantee — the same kind of change as
+adding or narrowing an example-based test. It must be reflected back in `*.spec.md`, not just in the
+`*.ts` test file. Fixing the test alone (as was initially done in this session, before this note) leaves the plain-
+English spec silently out of sync with what's actually being verified — the exact drift `tdd-by-the-book` exists to
+prevent for example-based tests, that had not been extended to property-based ones. `agents/skills/tdd-by-the-book.md`
+has been updated to require this explicitly.

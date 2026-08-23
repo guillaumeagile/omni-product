@@ -41,6 +41,13 @@ code exists because a failing test demanded it — never ahead of it.
    that each correspond to one passing test, not a batch of several.
 7. Repeat: pick the next smallest untested behavior and go back to step 1.
 
+## Property-based tests
+
+Add property-based tests (`fast-check`) alongside the example-based ones for behaviors defined over a range of inputs
+rather than discrete cases. If fixing a failing property means loosening, narrowing, or bounding what it checks, update
+`*.spec.md` with a matching rule in the same change — a property's assertion is part of the spec, same as an example
+test's.
+
 ## Do
 
 - write the plain-English rule in the spec markdown before writing the
@@ -61,6 +68,8 @@ code exists because a failing test demanded it — never ahead of it.
   to the next test
 - when a mutant survives, report it and propose a fix, then wait for confirmation
   before writing the killing test or removing the untested code
+- when a property-based test's assertion needs to be loosened, narrowed, or bounded to pass, update `*.spec.md` with a
+  matching rule in the same change
 
 ## Avoid
 
@@ -71,6 +80,7 @@ code exists because a failing test demanded it — never ahead of it.
   upfront instead of as a backlog of future failing tests
 - skipping the "confirm it fails" step
 - adding a test to kill a surviving mutant without first discussing it with the user
+- fixing a failing property-based test by only editing the `*.ts` test file without updating `*.spec.md`
 
 ## Deliverables
 

@@ -1,38 +1,33 @@
-import {err, ok, type Result} from 'neverthrow';
-import {PRICE_ERROR_KIND, type PriceError} from './price-error';
-import {PRICE_WITH_TAX_ERROR_KIND, type PriceWithTaxError} from './price-with-tax-error';
 import {PriceWithTax} from './price-with-tax';
 
-const CURRENCY = 'EUR';
 const MAX_AMOUNT = 100000;
-const ROUNDING_FACTOR = 100;
-const MIN_TAX_RATE = 0;
-const MAX_TAX_RATE = 1;
+const DECIMAL_PLACES = 2;
 
 export class Price {
-    readonly currency = CURRENCY;
+    readonly currency = 'EUR';
 
     private constructor(readonly amount: number) {}
 
-    static create(amount: number): Result<Price, PriceError> {
+    static create(amount: number): Price {
         if (amount <= 0) {
-            return err({kind: PRICE_ERROR_KIND.AmountNotPositive, amount});
+            throw new Error(`Price amount must be positive, got ${amount}`);
+        }
+        if (amount > MAX_AMOUNT) {
+            throw new Error(`Price amount must not exceed ${MAX_AMOUNT}, got ${amount}`);
         }
 
-        const rounded = Math.round(amount * ROUNDING_FACTOR) / ROUNDING_FACTOR;
+        const roundedAmount = Number(amount.toFixed(DECIMAL_PLACES));
 
-        if (rounded > MAX_AMOUNT) {
-            return err({kind: PRICE_ERROR_KIND.AmountTooHigh, amount: rounded});
-        }
-
-        return ok(new Price(rounded));
+        return new Price(roundedAmount);
     }
 
-    withTax(rate: number): Result<PriceWithTax, PriceWithTaxError> {
-        if (rate < MIN_TAX_RATE || rate > MAX_TAX_RATE) {
-            return err({kind: PRICE_WITH_TAX_ERROR_KIND.RateOutOfRange, rate});
+    withTax(rate: number): PriceWithTax {
+        if (rate < 0 || rate > 1) {
+            throw new Error(`Tax rate must be between 0 and 1, got ${rate}`);
         }
 
-        return ok(new PriceWithTax(this.amount * (1 + rate)));
+        const amountWithTax = Number((this.amount * (1 + rate)).toFixed(DECIMAL_PLACES));
+
+        return new PriceWithTax(amountWithTax, this.currency);
     }
 }

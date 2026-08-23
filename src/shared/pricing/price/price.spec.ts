@@ -2,100 +2,91 @@ import {describe, expect, it} from 'vitest';
 import {Price} from './price';
 
 describe('Price.create', () => {
-    it('returns Ok for a positive amount', () => {
-        const result = Price.create(19.99);
+    it('creates a price for a positive amount', () => {
+        const price = Price.create(19.99);
 
-        expect(result.isOk()).toBe(true);
+        expect(price.amount).toBe(19.99);
     });
 
-    it('returns Err for a negative amount', () => {
-        const result = Price.create(-1);
-
-        expect(result.isErr()).toBe(true);
-        expect(result._unsafeUnwrapErr()).toEqual({kind: 'PriceAmountNotPositive', amount: -1});
+    it('throws for a negative amount', () => {
+        expect(() => Price.create(-1)).toThrow('Price amount must be positive, got -1');
     });
 
-    it('returns Err for a zero amount', () => {
-        const result = Price.create(0);
-
-        expect(result.isErr()).toBe(true);
-        expect(result._unsafeUnwrapErr()).toEqual({kind: 'PriceAmountNotPositive', amount: 0});
+    it('throws for a zero amount', () => {
+        expect(() => Price.create(0)).toThrow('Price amount must be positive, got 0');
     });
 
     it('rounds an amount with more than 2 decimal places instead of rejecting it', () => {
-        const result = Price.create(19.999);
+        const price = Price.create(19.999);
 
-        expect(result.isOk()).toBe(true);
-        expect(result._unsafeUnwrap().amount).toBe(20);
+        expect(price.amount).toBe(20);
     });
 
-    it('returns Ok for an integer amount with no decimal places', () => {
-        const result = Price.create(20);
+    it('creates a price for an integer amount with no decimal places', () => {
+        const price = Price.create(20);
 
-        expect(result.isOk()).toBe(true);
+        expect(price.amount).toBe(20);
     });
 
     it('exposes EUR as its currency', () => {
-        const result = Price.create(20);
+        const price = Price.create(20);
 
-        expect(result._unsafeUnwrap().currency).toBe('EUR');
+        expect(price.currency).toBe('EUR');
     });
 
-    it('returns Err for an amount over 100000', () => {
-        const result = Price.create(100001);
-
-        expect(result.isErr()).toBe(true);
-        expect(result._unsafeUnwrapErr()).toEqual({kind: 'PriceAmountTooHigh', amount: 100001});
+    it('throws for an amount over 100000', () => {
+        expect(() => Price.create(100001)).toThrow('Price amount must not exceed 100000, got 100001');
     });
 
-    it('returns Ok for an amount of exactly 100000', () => {
-        const result = Price.create(100000);
+    it('creates a price for an amount of exactly 100000', () => {
+        const price = Price.create(100000);
 
-        expect(result.isOk()).toBe(true);
+        expect(price.amount).toBe(100000);
     });
 });
 
 describe('Price#withTax', () => {
     it('produces a tax-inclusive price from a tax rate', () => {
-        const price = Price.create(100)._unsafeUnwrap();
+        const price = Price.create(100);
 
-        const result = price.withTax(0.2);
+        const priceWithTax = price.withTax(0.2);
 
-        expect(result.isOk()).toBe(true);
-        expect(result._unsafeUnwrap().amount).toBe(120);
+        expect(priceWithTax.amount).toBe(120);
     });
 
-    it('returns Err for a tax rate above 100%', () => {
-        const price = Price.create(100)._unsafeUnwrap();
+    it('throws for a tax rate above 100%', () => {
+        const price = Price.create(100);
 
-        const result = price.withTax(1.5);
-
-        expect(result.isErr()).toBe(true);
-        expect(result._unsafeUnwrapErr()).toEqual({kind: 'PriceWithTaxRateOutOfRange', rate: 1.5});
+        expect(() => price.withTax(1.5)).toThrow('Tax rate must be between 0 and 1, got 1.5');
     });
 
-    it('returns Ok for a tax rate of exactly 0%', () => {
-        const price = Price.create(100)._unsafeUnwrap();
+    it('accepts a tax rate of exactly 0%', () => {
+        const price = Price.create(100);
 
-        const result = price.withTax(0);
+        const priceWithTax = price.withTax(0);
 
-        expect(result.isOk()).toBe(true);
+        expect(priceWithTax.amount).toBe(100);
     });
 
-    it('returns Err for a negative tax rate', () => {
-        const price = Price.create(100)._unsafeUnwrap();
+    it('throws for a negative tax rate', () => {
+        const price = Price.create(100);
 
-        const result = price.withTax(-0.1);
-
-        expect(result.isErr()).toBe(true);
-        expect(result._unsafeUnwrapErr()).toEqual({kind: 'PriceWithTaxRateOutOfRange', rate: -0.1});
+        expect(() => price.withTax(-0.1)).toThrow('Tax rate must be between 0 and 1, got -0.1');
     });
 
-    it('returns Ok for a tax rate of exactly 100%', () => {
-        const price = Price.create(100)._unsafeUnwrap();
+    it('accepts a tax rate of exactly 100%', () => {
+        const price = Price.create(100);
 
-        const result = price.withTax(1);
+        const priceWithTax = price.withTax(1);
 
-        expect(result.isOk()).toBe(true);
+        expect(priceWithTax.amount).toBe(200);
+    });
+
+    it('exposes EUR as its currency', () => {
+        const price = Price.create(100);
+
+        const priceWithTax = price.withTax(0.2);
+
+        expect(priceWithTax.currency).toBe('EUR');
     });
 });

@@ -32,9 +32,9 @@ code exists because a failing test demanded it — never ahead of it.
 5. **Verify** — run mutation testing scoped to only the source file just
    touched, e.g. `pnpm exec stryker run --mutate '<path/to/source>.ts'`. A
    surviving mutant means the code contains a branch, condition, or literal no
-   test pins down. Report the surviving mutant(s) and **stop** — do not add a
-   test to kill it without discussing the fix first (it may call for a test, or
-   for removing untested code instead). Do not proceed to the
+   test pins down. Report the surviving mutant(s) and **stop** — do not add a test to kill it without discussing the fix
+   first : it may call for removing untested code, or for adding a new test, but that may also need to discuss a plain
+   english specification in `*.spec.md` or require adding a new one. Do not proceed to the
    next test while mutants survive.
 6. **Commit** — once the cycle is green with zero surviving mutants, commit
    that one behavior on its own before starting the next test. Small commits

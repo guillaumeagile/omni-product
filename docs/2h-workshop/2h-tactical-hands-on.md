@@ -1,4 +1,4 @@
-# 2-Hour Tactical Hands-On Lab: CUPID DDD & Code Quality
+# 2-Hour Tactical Hands-On Lab  < to be reworked >
 
 > **Goal**: Refactor an anemic NestJS/Prisma God-model codebase into clean, expressive, always-valid Tactical DDD models
 > and verify behavioral resilience using **Unit Testing**, **Property-Based Testing (PBT)**, and **Mutation Testing (
@@ -10,10 +10,9 @@ Stryker)**.
 
 ```
 00:00 - 00:15 (15 min) | Part 0: As-Is Tour — Legacy Smells & The Mutation Baseline
-00:15 - 00:50 (35 min) | Part 1: Phase A — Primitive Obsession → Value Objects (Pricing Shared Kernel)
-00:50 - 01:40 (50 min) | Part 2: Phase B — Anemic CRUD → Rich Aggregates & Invariants (Choose a Track)
-01:40 - 01:55 (15 min) | Part 3: Phase C — Verification Gate (Unit + PBT + Mutation Testing)
-01:55 - 02:00 (05 min) | Part 4: Retrospective & CUPID Properties Checklist
+00:15 - 00:50 (35 min) | Part 1: Primitive Obsession → Value Objects (Pricing Shared Kernel)
+00:50 - 01:40 (50 min) | Part 2:  event storming and event propagation between 2 BC (Choose a Track)
+01:55 - 02:00 (05 min) | Part 3: Retrospective & CUPID Properties Checklist
 ```
 
 ---
@@ -29,12 +28,10 @@ All code written during this lab must adhere to three foundational rules:
 2. **Zero Framework Pollution in Domain**:
     - Domain files under `src/<context>/domain/` must have **zero imports** from `@nestjs/*`, `@prisma/client`, or HTTP
       libraries.
-3. **One Object Per File (`../../CLAUDE.md`)**:
-    - Each Value Object, Entity, Interface, or Error type lives in its own file named after the type.
 
 ---
 
-## 🔍 Part 0: As-Is Tour & Mutation Baseline (15 min)
+## 🔍 Part 0: As-Is Tour (15 min)
 
 ### The Legacy Smells
 
@@ -44,21 +41,11 @@ Inspect `../../src/products/product.service.ts` and `../../prisma/schema.prisma`
 - **Primitive Obsession**: Raw numbers for prices, stock, margins, and taxes with no invariant validation.
 - **Anemic Logic**: Margin tables and VAT calculations buried in service methods.
 
-### The False Sense of Security
 
-Run the tests and mutation test runner:
-
-```bash
-pnpm test
-pnpm test:mutation
-```
-
-- **Observation**: Unit tests pass (100% green), yet **Stryker reports >50% survived mutants** (arithmetic changes,
-  swapped `>=` / `>`, and missed validation boundaries).
 
 ---
 
-## 💎 Part 1: Phase A — Value Objects in Shared Kernel (`src/pricing/`) (35 min)
+## 💎 Part 1: — Value Objects in Shared Kernel (`src/pricing/`) (35 min)
 
 ### 1. Instructor Live Demo: `Margin` Value Object (10 min)
 
@@ -105,6 +92,8 @@ export class Margin {
 ```
 
 #### Unit & Property-Based Tests (`src/pricing/domain/margin.spec.ts`)
+
+TBC: talk about the agentic TDD approach....
 
 ```ts
 import {describe, expect, it} from 'vitest';
@@ -165,7 +154,7 @@ Participants implement one or both of the following Value Objects:
 
 ---
 
-## 🛡️ Part 2: Phase B — Rich Aggregates & Invariants (50 min)
+## 🛡️ Part 2:  events flowing (50 min)
 
 Participants select **one track** according to their interest:
 

@@ -1,6 +1,7 @@
 # Agent vs. mutants
 
-> A field note from setting up Stryker for `src/shared/pricing/margins/margin.ts` (Task 3). Worth reading before
+> A field note from setting up Stryker for `../../../src/shared/pricing/margins/margin.ts` (Task 3). Worth reading
+> before
 > anyone chases a mutation score to 100% for the first time.
 >
 > **TLdR;** The mutant described below as "unkillable" was
@@ -53,7 +54,8 @@ place of the `Record`, an `as string` cast, a magic-string sentinel default para
 - traded honest types for a lie (`as string`) or a made-up domain concept (`UNKNOWN_REGION` sentinel) that has no
   reason to exist except to please a mutation tool.
 
-The eventual call: revert to the original, keep the mutant, move on. The threshold in `stryker.config.json` reflects
+The eventual call: revert to the original, keep the mutant, move on. The threshold in `../../../stryker.config.json`
+reflects
 this — `break: 95`, not `100`, with the survivor documented here rather than papered over.
 
 ## The chase, blow by blow
@@ -88,8 +90,8 @@ parameterized `it.each` test could enumerate its keys directly, but awkward to w
 literal without another layer of indirection. Fixing one survivor by construction quietly reopened three others.
 
 **What actually closed the gap**: not another rewrite of `forRegion`, but two changes orthogonal to the stuck
-mutant — adding `it.each` coverage for `UK`, `US`, and `APAC` (the real gap the first Stryker run surfaced) and
-setting `stryker.config.json`'s `thresholds.break` to `95` instead of `100`, with this document as the record of
+mutant — adding `it.each` coverage for `UK`, `US`, and `APAC` (the real gap the first Stryker run surfaced) and setting
+`../../../stryker.config.json`'s `thresholds.break` to `95` instead of `100`, with this document as the record of
 why the remaining 2.94% is not a debt.
 
 ## Problem raised: what "100% mutation score" quietly assumes
@@ -170,7 +172,7 @@ static default(): Margin {
 ```
 
 No ternary, no `undefined` branch, nothing to mutate into an equivalent form. Mutation score on `margin.ts`:
-**100.00%, zero survivors.** `stryker.config.json`'s `thresholds.break` is back to `100`.
+**100.00%, zero survivors.** `../../../stryker.config.json`'s `thresholds.break` is back to `100`.
 
 ### Why four rewrite attempts missed this
 
@@ -298,7 +300,8 @@ A concrete, checkable habit, not a vague intention:
    second failed attempt at the same line, still inside the same frame, is the trigger to stop and ask the second
    question explicitly, out loud, rather than attempt a third rewrite.
 
-3. **Re-read the rules file's own principle as applying recursively.** `agents/skills/tactical-ddd-always-valid.md`
+3. **Re-read the rules file's own principle as applying recursively.**
+   `../../../agents/skills/tactical-ddd-always-valid.md`
    says "avoid primitive obsession" and "make illegal states unrepresentable" as if they were checked once, at the
    top level, for the type being designed. They actually need applying at every level a type appears: the value
    itself, each of its constructor's parameters, and each of its methods' parameters. Nothing in the rules file

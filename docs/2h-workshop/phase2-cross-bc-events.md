@@ -342,3 +342,117 @@ cycle of *dependencies* is deadly; a conversation of *events* is just how busine
 - [ ] Mode decided (A: full track / B: handlers only) and the corresponding pieces removed from the branch
 - [ ] Policy sticky fragment printed / drawn for Part 1
 - [ ] Broken-handler snippet ready to paste for the Part 5 demo
+
+---
+
+## 📎 Appendix: Advanced Use Case — Who Calculates the Displayed Price? (Procurement → Catalog)
+
+> **Scenario**: a new supplier is declared. It operates in a **different country with different tax rules**. The
+> catalog must display a full price, tax details included. **Who is responsible for calculating it?**
+
+Use this as a discussion appendix (or a follow-up session seed). It's a trap question, and that's the point: it *sounds*
+like it has a one-BC answer. It doesn't — asked as "who calculates?", every single-BC answer is wrong in an instructive
+way.
+
+### The three wrong one-BC answers
+
+| Tempting answer                                                       | Why it's wrong                                                                                                                                                                                                                                               |
+|-----------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Procurement calculates it** and puts the display price in its event | Procurement would need to know margin policies and storefront tax presentation — a responsibility leak. This is the **fat event smell at BC scale**: the producer doing the consumer's thinking. Worse: every pricing-rule change now redeploys Procurement. |
+| **Catalog calculates it** from scratch                                | Catalog is a *presentation* context. If VAT regimes and margin math live in Catalog's domain, Sales/eCommerce will need the same math for the cart — copy-paste divergence guaranteed.                                                                       |
+| **Catalog asks Procurement** for the price at render time             | Synchronous cross-BC query — temporal coupling, exactly the wiring Part 1 rejected. Procurement down ⇒ storefront down.                                                                                                                                      |
+
+### The decomposition: three responsibilities, three places
+
+The question dissolves once you split "calculate the full price" into **cost facts**, **calculation rules**, and
+**display decision**:
+
+```
+┌────────────────────┐                                  ┌─────────────────────────┐
+│    Procurement      │  SupplierDeclared                │        Catalog          │
+│                     │  SupplierPriceChanged            │                         │
+│  owns: cost price,  │ ───────────────────────────────▶ │  policy handler reacts, │
+│  supplier country,  │        (facts only —             │  stores a DisplayPrice  │
+│  purchase terms     │     no display price!)           │  read model (breakdown) │
+└────────────────────┘                                  └───────────┬────────────┘
+                                                                     │ calls (pure, in-process)
+                                                                     ▼
+                                                        ┌─────────────────────────┐
+                                                        │  Pricing Shared Kernel   │
+                                                        │  Price, Margin,          │
+                                                        │  TaxPolicy.forCountry()  │
+                                                        │  owns: HOW to compute    │
+                                                        └─────────────────────────┘
+```
+
+1. **Procurement states cost facts.** `SupplierPriceChanged { productId, supplierId, costPrice, currency,
+   supplierCountry }`. Past tense, thin, no display price. The supplier's country is a *fact about the supplier* — it
+   belongs in the event. What that country *implies* for tax does not.
+2. **The Pricing shared kernel owns the math.** This codebase already encodes the domain rule *reseller price = supplier
+   cost + margin, VAT on the margin only* (`Price`, `Margin`, `PriceWithTax`). A supplier in a new country doesn't
+   change *who* calculates — it changes **which rule the kernel selects**: VAT-on-margin regime vs. VAT-on-full-price
+   vs. reverse charge for cross-border acquisition. That's a strategy keyed by country
+   (`TaxPolicy.forCountry(supplierCountry, storefrontCountry)`), pure and property-testable like everything else in the
+   kernel — note it needs **both** countries, which is exactly why neither BC alone could own it.
+3. **Catalog decides when and for whom.** Its policy handler reacts to Procurement's fact, invokes the kernel, and
+   stores a denormalized `DisplayPrice` read model carrying the full breakdown (base, margin, tax detail, applied
+   regime). Presentation context owns presentation — including "we show tax details", which is a storefront choice, not
+   a procurement or tax-law concern.
+
+**One-line answer for the room**: *Procurement states what it cost. Pricing knows how to compute. Catalog decides what
+to show. The calculation is **triggered in** Catalog's application layer but **owned by** the kernel.*
+
+### The subtle domain insight worth surfacing
+
+Displayed tax depends on the **buyer's context** (storefront country, customer location) at least as much as on the
+supplier's. "New supplier country" changes the *cost side inputs* (import duties, acquisition VAT treatment); the
+*sales-side* tax is a different axis entirely. Participants who notice that the tax rule is a function of **two**
+countries have found the real reason this can't live in either BC — hand them a sticker.
+
+### Where do the tax rates live?
+
+Follow-up question with a trap of its own. The key distinction: **rules are behavior, rates are reference data.**
+
+- The **rule** — "VAT on the margin only", "reverse charge cross-border" — is domain logic: it changes rarely and
+  changes the *shape* of the calculation. It lives in the kernel as code (`TaxPolicy`, a *pure* domain service:
+  regime selection given the two countries, rates passed in as values).
+- The **rate** — 20% FR, 21% NL — is data with **temporal validity**: it changes by legislation on a date, and
+  re-quoting an old order must reproduce the rate in force *at the time of sale*. No code change should ship because
+  Spain adjusts its VAT.
+
+So rates sit behind a **port + adapter**, same recipe as the bus:
+
+```ts
+// kernel (src/shared/pricing/tax/) — owns the shape of the question, not the data
+interface TaxRateProvider {
+    rateFor(country: Country, on: Date): Result<VatRate, UnknownTaxJurisdictionError>;
+}
+```
+
+| Piece                    | Where                   | Workshop version                                                                                   | Production version                                                                       |
+|--------------------------|-------------------------|----------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
+| `TaxRateProvider` (port) | kernel                  | same                                                                                               | same — that's the point                                                                  |
+| Adapter                  | infrastructure          | `InMemoryTaxRateProvider`, hardcoded table (what `Margin` does today, but behind the interface)    | DB reference table (`country, rate, valid_from`) or external tax API; caching lives here |
+| Resolution               | **application** service | Catalog's policy handler resolves the rate, passes the `VatRate` *value* into the pure kernel math | same                                                                                     |
+
+**The anti-pattern to name out loud**: a domain-level "TaxService" that *fetches*. The moment a domain service does I/O,
+the kernel stops being pure and property-testable. The application service is the bridge — exactly the role it already
+plays with the `EventBus` and the repository. One policy handler, two ports in, pure math in the middle, repository out:
+participants have seen this shape once already; here it is again.
+
+**Staleness corollary**: `SupplierPriceChanged` arrives at time T; the `DisplayPrice` read model is read at T+n. If a
+rate changes in between, the stored price is stale — so a rate change must itself trigger recalculation. That's the
+argument for the rate table having a real owner able to raise its own fact (`TaxRateChanged`) rather than being a config
+file nobody watches. (And once something *owns* rates and *publishes* facts about them, you're most of the way to the
+Pricing BC of the evolution path below.)
+
+### Evolution path (discussion only)
+
+- **Today's size**: shared kernel as a library + Catalog-side policy. Right-sized for this system; the kernel is
+  versioned with both consumers, which is the shared-kernel trade-off (tight coupling, accepted knowingly).
+- **When pricing grows** (promotions, per-customer quotes, currency conversion, price history): promote Pricing to a
+  full BC that subscribes to `SupplierPriceChanged` and publishes its own fact — `ResellerPriceQuoted` — which Catalog
+  and Sales both consume. Same recipe as today's exercise, applied one more time: the graph grows by an edge, no
+  existing BC changes its contract.
+- **Deliberately out of scope**: currency conversion (a new supplier country likely means a new currency — that's a
+  whole session), and per-customer tax display (B2B net vs. B2C gross).

@@ -3,6 +3,7 @@ import type {DomainEvent} from '../../shared/events/domain-event';
 import type {InsufficientStockError} from './insufficient-stock-error';
 
 export class StockItem {
+
     private constructor(readonly productId: string, readonly availableQuantity: number) {
     }
 
@@ -10,7 +11,7 @@ export class StockItem {
         return ok(new StockItem(props.productId, props.availableQuantity));
     }
 
-    reserve(_qty: number): Result<void, InsufficientStockError> {
+    reserve(_qty: number): Result<StockItem, InsufficientStockError> {
         throw new Error('StockItem#reserve not implemented');
     }
 

@@ -401,6 +401,15 @@ if (reservation.isOk()) {
 }
 ```
 
+No-`if` version, same four responsibilities, using the `neverthrow` combinators `Price`/`PriceWithTax` already use:
+
+```ts
+await reservation.asyncAndThen(() =>
+    ResultAsync.fromSafePromise(this.stockItemRepository.save(stockItem)) // ② the repository
+        .map(() => this.eventBus.publish(stockItem.pullDomainEvents())),   // ③ the event bag, ④ the transport
+);
+```
+
 | # | Who                                | Responsibility                                                                                                                   | Fails how, distributed                                                                                                                       |
 |---|------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
 | ① | `stockItem` (aggregate)            | Compute the next valid state and the resulting facts, in memory. Never persists itself — no `save()` method, no DB import.       | Not durable by itself — a crash before ② loses the whole call, cleanly (nothing committed).                                                  |

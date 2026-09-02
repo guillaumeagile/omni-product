@@ -21,6 +21,11 @@ run in Part 2 of the lab:
 - Past tense? Domain language? (`StockDepleted`, not `StockUpdateNotification`.)
 - Thin? `productId` + `occurredAt`. Argue about `remainingQuantity` for thirty seconds, then drop it.
 - Decide the event-name string convention now: `inventory.stock-depleted` — context-prefixed, kebab-case.
+- Name the edge on a context map, out loud: Inventory is **upstream**, Catalog **downstream**; the boundary pattern is
+  **Published Language** (the event) delivered through an **Open-host Service** (the bus), read by Catalog behind an
+  **Anticorruption Layer** (the policy handler translating "stock" language into "availability" language). If you can't
+  say that sentence smoothly, that's the rehearsal gap — see the Context Mapping appendix in
+  `phase2-cross-bc-events.md` for all nine patterns and where each already lives in this codebase.
 
 This step is the actual dress rehearsal for the lab's contract-design segment.
 

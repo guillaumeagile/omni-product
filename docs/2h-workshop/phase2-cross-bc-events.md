@@ -4,18 +4,6 @@
 > **Catalog** (`CatalogItem`) — each internally CUPID, always-valid, framework-free. They are autonomous islands.
 > **Goal**: Make them collaborate *without re-coupling them*. The lesson: **the event is the contract, not the model.**
 
----
-
-## ⏱️ Schedule (50 Minutes)
-
-```
-00:00 - 00:08 (08 min) | Part 1: The Policy Sticky — "How would you wire this?"
-00:08 - 00:15 (07 min) | Part 2: Design the Contract on Paper
-00:15 - 00:18 (03 min) | Part 3: The Bus Reveal — a CUPID "I" Tension (discussion)
-00:18 - 00:40 (22 min) | Part 4: Code Probe (two run modes, see below)
-00:40 - 00:48 (08 min) | Part 5: Verification Gate + Failure-Isolation Demo
-00:48 - 00:50 (02 min) | Part 6: CUPID Retro + Stretch Pointer
-```
 
 ---
 
@@ -47,7 +35,7 @@ The session is built to trigger three realisations, in order:
 
 ---
 
-## 🗣️ Part 1: The Policy Sticky (8 min)
+## 🗣️ Part 1: The Policy Sticky + Context Map (10 min)
 
 ### The wider landscape, first
 
@@ -56,13 +44,13 @@ Before narrowing to today's exercise, put the whole picture on the wall for a mi
 
 ```
 ┌───────────────────┐                  ┌──────────────┐                  ┌──────────────┐
-│    Procurement     │  StockReceived   │   Inventory   │  StockDepleted   │   Catalog    │
-│ RegionalSupplier   │ ───────────────▶ │   StockItem   │ ───────────────▶ │ CatalogItem  │
-└───────────────────┘                  └───────┬───────┘                  └───────┬──────┘
-                                                │                                  │
-                                                │ StockReserved                    │ ItemPublished
-                                                ▼                                  ▼
-                                  ┌───────────────────────────────────────────────────────┐
+│    Procurement    │  StockReceived   │   Inventory  │  StockDepleted   │   Catalog    │
+│ RegionalSupplier  │ ───────────────▶ │   StockItem  │ ───────────────▶ │ CatalogItem  │
+└───────────────────┘                  └───────┬──────┘                  └───────┬──────┘
+                                               │                                 │
+                                               │ StockReserved                   │ ItemPublished
+                                               ▼                                 ▼
+                                  ┌─────────────────────────────────────────────────────────┐
                                   │                    Sales / eCommerce                    │
                                   │            Order, Cart — reacts to both sides           │
                                   └─────────────────────────────────────────────────────────┘
@@ -82,6 +70,36 @@ from others — the same mechanism, four times over. **Today we code one edge of
 pattern is fully in your hands; the other edges are the same recipe, applied again.**
 If your own domain has a fifth or sixth BC, the question is never "does this scale?" — it's "what's the next fact, and
 who reacts to it?"
+
+### This wall is a Context Map — name the relationships (2 min)
+
+What we just drew has a name: a **context map**
+([ddd-crew/context-mapping](https://github.com/ddd-crew/context-mapping)). The insight to hand the room: **every arrow
+between two BCs carries two decisions, not one** —
+
+1. **The team relationship** — who is *upstream* (their changes hit you) and who is *downstream* (your changes don't hit
+   them). ddd-crew names three kinds: **upstream/downstream**, **mutually dependent**, and **free** (no dependency at
+   all — also a valid answer).
+2. **The integration pattern at the boundary** — *how* the models touch. That's a catalogue of nine named patterns (see
+   the Context Mapping appendix); today's lab uses four of them without ceremony.
+
+Annotate the arrows already on the wall:
+
+| Edge on the map                         | Team relationship               | Pattern at the boundary                                                                         |
+|-----------------------------------------|---------------------------------|-------------------------------------------------------------------------------------------------|
+| Inventory `──StockDepleted──▶` Catalog  | Inventory **U** / Catalog **D** | **Published Language** (the event) + **Anticorruption Layer** (the translating handler, Part 4) |
+| Every BC → `src/shared/pricing`         | **mutually dependent**          | **Shared Kernel** — shared code, coordinated change (see the pricing appendix)                  |
+| Legacy `product.service.ts` + God table | —                               | **Big Ball of Mud** — draw the boundary *around* it; don't let its model leak in                |
+
+Two sentences of ddd-crew advice worth repeating verbatim: keep a context map **small and focused on one question**
+("how does stock availability reach the storefront?"), not a wall-sized everything-diagram — draw several small maps for
+several questions. And **write the pattern names on the arrows**: "Catalog is downstream of Inventory behind an ACL" is
+a design decision a stakeholder can read, challenge, and hold you to.
+
+Note the alignment that makes event edges pleasant: on this map, data flow (facts move producer → consumer) and model
+dependency (the consumer imports the producer's *event type only* — the Boundary Rule) point the **same way**. A
+synchronous call from Inventory into Catalog would split them — data flowing one way, a code dependency pointing the
+other — which is exactly the re-coupling the next exercise makes the room feel.
 
 ### The pair we're coding: Inventory → Catalog
 
@@ -322,6 +340,11 @@ Then one honest slide, discussion only (do **not** code it):
 | **I — Idiomatic**       | Deliberately traded away today (Part 3) — and we can say *why*.                                            |
 | **D — Domain-Based**    | `StockDepleted`, `markUnavailable` — the lilac sticky became a line of code you can read aloud.            |
 
+Close the loop with Part 1's map: the arrow the room wired today now has its full label — *Catalog is downstream of
+Inventory, integrating through a Published Language behind an Anticorruption Layer.* One sentence, four strategic-DDD
+decisions, all of them now sitting in code they wrote (names and the other six patterns: see the Context Mapping
+appendix).
+
 ### 🚀 Stretch goal (documented, for fast groups)
 
 Reverse flow: `CatalogItem.archive()` raises `ItemArchived` → Inventory policy releases outstanding reservations and
@@ -341,6 +364,8 @@ cycle of *dependencies* is deadly; a conversation of *events* is just how busine
 - [ ] `reserve-stock` application service wired to persist-then-publish
 - [ ] Mode decided (A: full track / B: handlers only) and the corresponding pieces removed from the branch
 - [ ] Policy sticky fragment printed / drawn for Part 1
+- [ ] [ddd-crew context-map cheat sheet](https://github.com/ddd-crew/context-mapping) printed for the Part 1 naming
+  moment (and to hand out with the appendix)
 - [ ] Broken-handler snippet ready to paste for the Part 5 demo
 
 ---
@@ -456,3 +481,59 @@ Pricing BC of the evolution path below.)
   existing BC changes its contract.
 - **Deliberately out of scope**: currency conversion (a new supplier country likely means a new currency — that's a
   whole session), and per-customer tax display (B2B net vs. B2C gross).
+
+---
+
+## 🗺️ Appendix: Context Mapping — Naming the Relationships We Just Built
+
+> Companion to Part 1's two-minute naming moment. Source and cheat sheet:
+> [ddd-crew/context-mapping](https://github.com/ddd-crew/context-mapping) (pattern definitions below paraphrased from
+> it, CC BY-SA 4.0; the patterns originate in Evans' *DDD* and Vernon's *IDDD*). Print their cheat sheet for the room.
+
+Strategic DDD has two halves. The workshop's first hours are about drawing boundaries (bounded contexts, ubiquitous
+language *inside* a boundary). A context map is the tool for the second half: **what happens *between* the boundaries**
+— and, crucially, between the *teams* that own them. A context map is as much an organizational diagram as a technical
+one: an arrow says "when they change, we feel it", which is a statement about planning meetings before it is one about
+imports.
+
+### Axis 1 — the three team relationships
+
+| Relationship            | Meaning                                                                                | In this system                                                                |
+|:------------------------|:---------------------------------------------------------------------------------------|:------------------------------------------------------------------------------|
+| **Upstream/Downstream** | Upstream's actions affect downstream; the reverse is not (significantly) true          | Inventory (U) → Catalog (D); Procurement (U) → Inventory (D)                  |
+| **Mutually dependent**  | Neither can deliver without coordinating with the other; expect frequent communication | Every consumer of the pricing **Shared Kernel** — a kernel change touches all |
+| **Free**                | No organizational or technical dependency; evolve independently                        | Procurement ↔ Catalog *before* the pricing use case above added an edge       |
+
+The relationship type is chosen *before* the integration pattern — asking "are we willing to be downstream of that
+team?" is often more clarifying than any technical debate.
+
+### Axis 2 — the nine patterns, located in this codebase
+
+| Pattern                  | One-liner (ddd-crew)                                                                             | Where it lives today                                                                                                                                                      |
+|:-------------------------|:-------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Published Language**   | A well-documented shared language as the common medium of communication                          | `StockDepleted` and every event under `domain/events/` — "the event is the contract" *is* this pattern. Part 2's schema argument is a published-language negotiation      |
+| **Open-host Service**    | Upstream exposes its capabilities as a protocol/service set any consumer can use                 | Inventory's event stream on the bus: one publishing surface, N unknown subscribers, adding one costs the producer nothing (Part 6, "C")                                   |
+| **Anticorruption Layer** | Downstream translates the upstream model into its own, isolating itself                          | `WhenStockDepleted` — receives *stock* language, speaks *availability* language. Aha moment #3, now with its official name                                                |
+| **Conformist**           | Downstream adopts the upstream model as-is: zero translation, zero autonomy                      | The tempting shortcut: Catalog storing `stockQuantity` on `CatalogItem`. Cheap on day one; Inventory's schema now steers Catalog's model forever                          |
+| **Shared Kernel**        | A deliberately shared subset of the model; changes require coordination                          | `src/shared/pricing` (`Price`, `Margin`, `PriceWithTax`) — the trade-off is named honestly in the pricing appendix: tight coupling, accepted knowingly                    |
+| **Customer/Supplier**    | Upstream/downstream where downstream's needs factor into upstream's planning, like a negotiation | The *team* process behind Part 2: if Catalog genuinely needs a field in `StockDepleted`, it asks; Inventory plans it. Contrast Conformist: take it or leave it            |
+| **Partnership**          | Two contexts that succeed or fail *together*; joint planning, coordinated releases               | Not on today's map — and that's a feature. It's what Inventory+Catalog would become if one storefront release required both to ship in lockstep                           |
+| **Separate Ways**        | No connection at all; each finds its own small, specialized solution                             | The edges we *didn't* draw. Procurement and Catalog shared nothing until the pricing scenario justified an edge — an empty cell in the map is a decision, not an omission |
+| **Big Ball of Mud**      | Mark the boundary of a messy, mixed-model system — and keep it from spreading                    | The legacy God table + `product.service.ts` from Part 0. The whole workshop is the act of drawing this demarcation line and migrating out of it                           |
+
+### How to run the exercise with your own domain (post-workshop)
+
+ddd-crew's advice, condensed:
+
+1. **One question per map.** "Which teams block our checkout redesign?" beats "the architecture". Draw several small
+   maps rather than one mural.
+2. **Label every arrow twice** — team relationship (U/D, mutually dependent, free) *and* boundary pattern. An unlabeled
+   arrow is an undecided dependency.
+3. **Write the pattern names down where stakeholders read them.** "We are Conformist to the ERP" is a risk statement a
+   product owner can act on; an unnamed import is not.
+4. **Revisit when teams change**, not just when code does — a context map goes stale by reorg faster than by refactor.
+
+The connective tissue back to today's lab: the room didn't *learn about* these patterns, they **built four of them in 50
+minutes** — a Published Language (the event), behind an Open-host Service (the bus surface), consumed through an
+Anticorruption Layer (the policy handler), next to a Shared Kernel (pricing) whose cost they can now name. The map is
+just the vocabulary sheet for what their hands already know.

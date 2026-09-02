@@ -20,7 +20,8 @@ run in Part 2 of the lab:
 
 - Past tense? Domain language? (`StockDepleted`, not `StockUpdateNotification`.)
 - Thin? `productId` + `occurredAt`. Argue about `remainingQuantity` for thirty seconds, then drop it.
-- Decide the event-name string convention now: `inventory.stock-depleted` — context-prefixed, kebab-case.
+- Name it against the grammar, not by feel: `<bc>.<event-fact>`, `<event-fact>` past-tense kebab-case —
+  `inventory.stock-depleted`. Full BNF and worked examples in `phase2-cross-bc-events.md`, Part 2.
 - Name the edge on a context map, out loud: Inventory is **upstream**, Catalog **downstream**; the boundary pattern is
   **Published Language** (the event) delivered through an **Open-host Service** (the bus), read by Catalog behind an
   **Anticorruption Layer** (the policy handler translating "stock" language into "availability" language). If you can't

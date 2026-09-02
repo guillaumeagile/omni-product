@@ -44,16 +44,18 @@ Before narrowing to today's exercise, put the whole picture on the wall for a mi
 
 ```
 ┌───────────────────┐                  ┌──────────────┐                  ┌──────────────┐
-│    Procurement    │  StockReceived   │   Inventory  │  StockDepleted   │   Catalog    │
-│ RegionalSupplier  │ ───────────────▶ │   StockItem  │ ───────────────▶ │ CatalogItem  │
-└───────────────────┘                  └───────┬──────┘                  └───────┬──────┘
-                                               │                                 │
-                                               │ StockReserved                   │ ItemPublished
-                                               ▼                                 ▼
-                                  ┌─────────────────────────────────────────────────────────┐
-                                  │                    Sales / eCommerce                    │
-                                  │            Order, Cart — reacts to both sides           │
-                                  └─────────────────────────────────────────────────────────┘
+│    Procurement    │  StockReceived   │   Inventory   │  StockDepleted   │   Catalog    │
+│ RegionalSupplier  │ ───────────────▶ │   StockItem   │ ───────────────▶ │ CatalogItem  │
+└─────────┬─────────┘                  └───────┬───────┘                  └───────┬──────┘
+          │                                    │                                  │
+          │ ProductDiscontinued                │ StockReserved                    │ ItemPublished
+          │ ProductRecalled                    ▼                                  ▼
+          │                      ┌───────────────────────────────────────────────────────┐
+          │                      │                    Sales / eCommerce                    │
+          │                      │            Order, Cart — reacts to both sides           │
+          │                      └─────────────────────────────────────────────────────────┘
+          │
+          └──────────────────────────────────▶ both Inventory and Catalog (fan-out, see below)
 ```
 
 (event names shown here are all 🟠 orange-sticky domain events — the colour convention from Part 2 of the long-format
@@ -64,12 +66,24 @@ workshop guide)
 - **Inventory** also raises `StockReserved` — Sales/eCommerce reacts by confirming an order line can ship.
 - **Catalog** raises `ItemPublished` / `ItemArchived` — Sales/eCommerce reacts by showing/hiding the item in the
   storefront, and (stretch, Part 6) Inventory reacts to `ItemArchived` by releasing reservations.
+- **Procurement** also raises `ProductDiscontinued` and `ProductRecalled` — a supplier-side fact ("we no longer
+  produce this" / "this batch is unsafe") that **two** downstream contexts each react to in their own vocabulary:
+  Inventory stops accepting restocks and (for a recall) quarantines existing stock; Catalog un-publishes the listing
+  outright, a stronger reaction than the temporary `markUnavailable()` triggered by `StockDepleted`. Same fact, two
+  independent policies — nobody orchestrates the pair.
 
 None of these BCs calls another's service directly. Each only ever *states a fact* about itself and *reacts* to facts
-from others — the same mechanism, four times over. **Today we code one edge of this graph (Inventory → Catalog) so the
-pattern is fully in your hands; the other edges are the same recipe, applied again.**
+from others — the same mechanism, five times over now. **Today we code one edge of this graph (Inventory → Catalog) so
+the pattern is fully in your hands; the other edges — including Procurement's fan-out — are the same recipe, applied
+again.**
 If your own domain has a fifth or sixth BC, the question is never "does this scale?" — it's "what's the next fact, and
 who reacts to it?"
+
+**Why this pair earns its place on the map, not just a bullet point**: `StockDepleted` is a single producer → single
+consumer edge — the shape the lab codes. `ProductDiscontinued`/`ProductRecalled` are a single producer → **multiple**
+consumer edges — the shape that shows the pattern actually scales past two BCs. Worth naming if a fast group asks
+"what if three contexts care about one fact?": nothing changes. Each subscribes independently; the producer still
+knows nothing about who's listening. That's `subscribe` called twice on the same event name, not a new mechanism.
 
 ### This wall is a Context Map — name the relationships (2 min)
 
@@ -88,6 +102,7 @@ Annotate the arrows already on the wall:
 | Edge on the map                         | Team relationship               | Pattern at the boundary                                                                         |
 |-----------------------------------------|---------------------------------|-------------------------------------------------------------------------------------------------|
 | Inventory `──StockDepleted──▶` Catalog  | Inventory **U** / Catalog **D** | **Published Language** (the event) + **Anticorruption Layer** (the translating handler, Part 4) |
+| Procurement `──ProductDiscontinued/Recalled──▶` {Inventory, Catalog} | Procurement **U** / both **D** | **Published Language**, fanned out — two independent Anticorruption Layers, one per consumer |
 | Every BC → `src/shared/pricing`         | **mutually dependent**          | **Shared Kernel** — shared code, coordinated change (see the pricing appendix)                  |
 | Legacy `product.service.ts` + God table | —                               | **Big Ball of Mud** — draw the boundary *around* it; don't let its model leak in                |
 
@@ -137,6 +152,47 @@ Debrief targets:
   a nice 30-second argument.)
 - **Producer owns the schema.** The event lives in `src/inventory/domain/events/stock-depleted.ts`. It is Inventory's
   *published language*; changing it is a breaking change to unknown consumers.
+
+### The naming grammar — stop bikeshedding, apply the rule
+
+Every event gets **two names** that must agree: the wire-level string (`event.name`, what `bus.subscribe` matches on)
+and the TypeScript class. Both are derived from the same BNF, so there's nothing left to argue once the sticky says
+`StockDepleted`:
+
+```bnf
+<event-name>      ::= <bc> "." <event-fact>
+<bc>               ::= <kebab-word>                 ; the owning bounded context, e.g. "inventory"
+<event-fact>       ::= <kebab-word> ("-" <kebab-word>)*   ; past-tense domain fact, e.g. "stock-depleted"
+<kebab-word>       ::= <lower-letter> (<lower-letter> | <digit>)*
+
+<event-class-name> ::= <pascal-case>(<event-fact>)   ; same fact, PascalCase, no BC prefix — the class already
+                                                       ; lives under src/<bc>/domain/events/, the folder is the prefix
+```
+
+Applied to today's events:
+
+| BC            | `<event-fact>` (past tense) | Wire name (`event.name`)         | Class name           |
+|----------------|------------------------------|-----------------------------------|-----------------------|
+| `inventory`    | `stock-depleted`             | `inventory.stock-depleted`        | `StockDepleted`       |
+| `inventory`    | `stock-received`             | `inventory.stock-received`        | `StockReceived`       |
+| `inventory`    | `stock-reserved`             | `inventory.stock-reserved`        | `StockReserved`       |
+| `catalog`      | `item-published`             | `catalog.item-published`          | `ItemPublished`       |
+| `catalog`      | `item-archived`              | `catalog.item-archived`           | `ItemArchived`        |
+| `procurement`  | `product-discontinued`       | `procurement.product-discontinued`| `ProductDiscontinued` |
+| `procurement`  | `product-recalled`           | `procurement.product-recalled`    | `ProductRecalled`     |
+
+Two things the grammar makes non-negotiable, worth pointing at explicitly:
+
+- **`<bc>` is always the producer's context, never the consumer's.** Reading the wire name alone tells you who owns
+  the schema — `procurement.product-recalled` is Procurement's fact even though Catalog and Inventory are the ones
+  reacting to it.
+- **`<event-fact>` must parse as past tense.** If the sticky reads `inventory.stock-update` or
+  `catalog.publish-item`, that's not a naming nitpick — it's a sign the event is being designed as a command
+  (something the receiver is told to do) instead of a fact (something that already happened). Reject the name and
+  redesign the event, not just rename it.
+
+Run every event proposed in Part 1's landscape or Part 2's contract through this grammar before it's "approved" —
+including the stretch-goal `ItemArchived` and the Procurement fan-out events above.
 
 ---
 

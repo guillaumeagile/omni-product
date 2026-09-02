@@ -2,7 +2,7 @@ import {describe, expect, it, vi} from 'vitest';
 import type {DomainEvent} from './domain-event';
 import {InMemoryEventBus} from './in-memory-event-bus';
 
-const eventNamed = (name: string): DomainEvent => ({name, occurredAt: new Date('2026-01-01T00:00:00.000Z')});
+const eventNamed = (name: string): DomainEvent => ({name});
 
 describe('InMemoryEventBus.publish', () => {
     it('returns Ok when there are no subscribers', () => {

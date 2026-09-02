@@ -19,7 +19,8 @@ Write the event as a sticky before any code: **name, payload, owner**. Force you
 run in Part 2 of the lab:
 
 - Past tense? Domain language? (`StockDepleted`, not `StockUpdateNotification`.)
-- Thin? `productId` + `occurredAt`. Argue about `remainingQuantity` for thirty seconds, then drop it.
+- Thin? `productId` only — no `occurredAt`, that's a transport-envelope concern, not a domain fact field. Argue about
+  `remainingQuantity` for thirty seconds, then drop it.
 - Name it against the grammar, not by feel: `<bc>.<event-fact>`, `<event-fact>` past-tense kebab-case —
   `inventory.stock-depleted`. Full BNF and worked examples in `phase2-cross-bc-events.md`, Part 2.
 - Name the edge on a context map, out loud: Inventory is **upstream**, Catalog **downstream**; the boundary pattern is

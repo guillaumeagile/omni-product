@@ -148,8 +148,10 @@ advocate ("surely the catalog needs the title to hide it?").
 Debrief targets:
 
 - **Past tense, domain language** — `StockDepleted`, not `StockUpdateNotification`.
-- **Thin payload** — `productId`, `occurredAt`. (`remainingQuantity` is debatable — by definition it's 0; keeping it is
-  a nice 30-second argument.)
+- **Thin payload** — `productId` only. (`remainingQuantity` is debatable — by definition it's 0; keeping it is a nice
+  30-second argument.) No `occurredAt` either: that's the *transport's* timestamp to carry, not the domain fact's —
+  `DomainEvent` only needs `name` (see the interface below). If a consumer needs business-time ordering, that's an
+  envelope concern for a production transport, not something every event class re-implements by hand.
 - **Producer owns the schema.** The event lives in `src/inventory/domain/events/stock-depleted.ts`. It is Inventory's
   *published language*; changing it is a breaking change to unknown consumers.
 
@@ -236,7 +238,6 @@ Everything below exists on the starting branch **except** the pieces the active 
 // src/shared/events/domain-event.ts
 export interface DomainEvent {
     readonly name: string;
-    readonly occurredAt: Date;
 }
 ```
 
@@ -277,7 +278,6 @@ import {DomainEvent} from '../../../shared/events/domain-event';
 
 export class StockDepleted implements DomainEvent {
     public readonly name = 'inventory.stock-depleted';
-    public readonly occurredAt = new Date();
 
     constructor(public readonly productId: string) {
     }

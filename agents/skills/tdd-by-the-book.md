@@ -11,6 +11,23 @@
 Follow the TDD loop exactly, one behavior at a time, so every line of production
 code exists because a failing test demanded it — never ahead of it.
 
+## Hard rules
+
+These are not style preferences — a cycle that violates one of them is not done:
+
+1. **Readable Failures.** A test must fail with a precise cause. The test output alone — name plus failure message —
+   must be explicit enough that nobody needs to open the source code to understand why it failed. That applies to every
+   layer of the failure:
+    - assertion messages compare the actual value against the expected one, not just `expected true, got false`;
+    - deliberate stubs each throw their own message naming what is missing (`StockItem#reserve not implemented`), never
+      a shared generic
+      `'not implemented'` — five red tests must not all point at the same anonymous throw;
+    - a test failing for the *wrong* reason (module resolution, harness error, typo) is not a valid red — fix the cause
+      until the failure states the missing behavior, then proceed.
+2. **One behavior per test.** Each test exercises exactly one plain-English rule from the spec. If a failure message
+   would have to mention two behaviors to be precise, that is two tests. This is what makes rule 1 achievable: a
+   single-behavior test has a single possible cause of failure to report.
+
 ## The loop
 
 1. **Name the rule** — before writing any TypeScript, state the single behavior
@@ -19,8 +36,10 @@ code exists because a failing test demanded it — never ahead of it.
    restating it. This sentence is what the next test's name/assertions must match.
 2. **Red** — write **one** small test for that plain-English rule. Run only that
    test file, e.g. `pnpm test -- <path/to>.spec.ts`. Confirm it fails, and
-   confirm *why*: a missing module/class/method, not a typo or a broken test
-   harness.
+   confirm *why*: a missing module/class/method, not a typo or a broken test harness. Then hold the failure output
+   against the Readable Failures rule:
+   would someone reading only this output know which behavior is missing? If not, sharpen the test name, the assertion,
+   or the stub's message before going green.
 3. **Green** — write the **minimum** production code to make that one test pass.
    Do not implement invariants, branches, or parameters no test has asked for
    yet, even if the spec/doc mentions them. "Fake it" (e.g. return a constant,
@@ -54,6 +73,10 @@ test's.
   corresponding TypeScript test — never the reverse
 - write only one failing test before writing any implementation
 - run the test and observe the actual failure before writing a line of production code
+- read the failure output as a stranger would: name + message must state the missing behavior without opening any source
+  file (Readable Failures)
+- give every deliberate stub its own specific error message naming the class and method (`Foo#bar not implemented`), so
+  each red test points at its own gap
 - treat "it compiles/passes on the first try" as a signal something is wrong —
   either the test isn't asserting the right thing, or code was written ahead of it
 - let each subsequent test drive one new invariant, branch, or edge case
@@ -79,6 +102,9 @@ test's.
 - treating a design document's list of invariants as a checklist to implement
   upfront instead of as a backlog of future failing tests
 - skipping the "confirm it fails" step
+- a generic shared failure message (`'not implemented'`, `expected true to be
+  false`) that forces the reader into the source to learn the cause
+- one test asserting two behaviors — split it until each failure has exactly one possible cause
 - adding a test to kill a surviving mutant without first discussing it with the user
 - fixing a failing property-based test by only editing the `*.ts` test file without updating `*.spec.md`
 
@@ -95,3 +121,4 @@ test's.
 - no untested invariant or branch exists in the code
 - mutation testing confirms zero surviving mutants on the code just written
 - the test suite reads as an incremental log of the behaviors built
+- any test in the suite, made to fail, reports a cause precise enough to act on without reading the production source

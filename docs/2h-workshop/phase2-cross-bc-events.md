@@ -322,7 +322,7 @@ The application service closes the loop after persisting:
 // src/inventory/application/reserve-stock.ts (already wired on the branch)
 const reservation = stockItem.reserve(qty);
 if (reservation.isOk()) {
-    await this.stockItems.save(stockItem);
+    await this.stockItemRepository.save(stockItem);
     this.eventBus.publish(stockItem.pullDomainEvents());
 }
 ```
@@ -379,10 +379,37 @@ another BC's failure — that is what "decoupled" *means*, mechanically.
 
 Then one honest slide, discussion only (do **not** code it):
 
-> In-process + try/catch means a crashed process loses events, and a swallowed error is silent. The production
-> answer is the **Outbox Pattern**: events saved in the same transaction as the aggregate, relayed to a broker,
-> retried, dead-lettered. Same contract, same handlers — only the transport hardens. Eventual consistency is the
+> In-process + try/catch means a crashed process loses events, and a swallowed error is silent.
+>
+> The production answer is the **Outbox Pattern**:
+> events saved in the same transaction as the aggregate, relayed to a broker,
+> retried, dead-lettered. Same contract, same handlers — only the transport hardens.
+>
+> **Eventual consistency** is the
 > price of autonomy, and the business usually already works that way.
+
+### Four responsibilities, three lines — don't let a name hide them
+
+The crash-and-multi-pod discussion above lives in these three lines from Step 2. Point at the second name explicitly —
+it's a *repository*, not a second aggregate, and naming it that way in code removes the ambiguity a bare plural invites:
+
+```ts
+const reservation = stockItem.reserve(qty);                 // ① the aggregate
+if (reservation.isOk()) {
+    await this.stockItemRepository.save(stockItem);          // ② the repository
+    this.eventBus.publish(stockItem.pullDomainEvents()); // ③ the event bag, ④ the transport
+}
+```
+
+| # | Who                                | Responsibility                                                                                                                   | Fails how, distributed                                                                                                                       |
+|---|------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| ① | `stockItem` (aggregate)            | Compute the next valid state and the resulting facts, in memory. Never persists itself — no `save()` method, no DB import.       | Not durable by itself — a crash before ② loses the whole call, cleanly (nothing committed).                                                  |
+| ② | `stockItemRepository` (repository) | Persist the aggregate's new state. The domain-level *interface* only; the adapter (Postgres, in-memory) lives in infrastructure. | Two pods loading the same aggregate and both saving is a **lost update** — needs optimistic concurrency (a version column) at this boundary. |
+| ③ | `pullDomainEvents()` (event bag)   | Hand off the facts recorded during ①, once, by draining.                                                                         | Memory-only, single-process — a crash between ② and ③ commits the state change but loses the events: Catalog never hears about it.           |
+| ④ | `eventBus.publish` (transport)     | Move the drained events to subscribers.                                                                                          | In-process `subscribe()` cannot reach another pod at all; a real deployment needs a broker behind the same `EventBus` port.                  |
+
+Two names, four jobs. The **Outbox Pattern** above is the fix for the ②/③ gap specifically: write the state and the
+pending events in the *same* transaction, so there is no instant where one is durable and the other isn't.
 
 ---
 

@@ -61,9 +61,9 @@ CUTE dit *quoi* construire ; CUPID dit *comment*.
 Transformer **1 God table** en **3 Bounded Contexts** :
 
 ```
-Procurement  ──StockReceived──▶  Inventory  ──StockDepleted──▶  Catalog
-                                     │
-                              Pricing (Shared Kernel)
+Procurement  ──(un événement)──▶  Inventory  ──(un événement)──▶  Catalog
+                                 │
+                          Pricing (Shared Kernel)
 ```
 
 Les BC collaborent en **énonçant des faits**, pas en s'appelant.

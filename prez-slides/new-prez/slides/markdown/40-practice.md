@@ -53,13 +53,13 @@ Chaque VO : immuable, `Result` en sortie, **100 % de mutants tués**.
 
 ## Part 2 — Inventory → Catalog
 
-**Le fait** : « quand le stock est épuisé, masquer l'article du catalogue »
+**Le fait métier à modéliser** : « quand le stock est épuisé, masquer l'article du catalogue »
 
-1. **EventStorming** — dessiner `StockDepleted` sur papier
+1. **EventStorming** — c'est *vous* qui nommez ce fait métier sur un sticky
    - nom au **passé**, langage métier
-   - payload **léger** : `productId` seulement
-2. **Coder le consommateur** — la policy `WhenStockDepleted` sur le bus in-memory
-   - traduit « stock » → « disponibilité » (ACL en miniature)
+   - payload **léger** : le strict nécessaire au consommateur
+2. **Coder le consommateur** — une policy sur le bus in-memory
+   - traduit le langage « stock » vers le langage « disponibilité » (ACL en miniature)
    - seul import cross-BC autorisé : le **type d'événement**
 
 ---
@@ -71,9 +71,9 @@ Chaque VO : immuable, `Result` en sortie, **100 % de mutants tués**.
 <event-fact>  ::= mot(s) kebab-case, au passé
 ```
 
-| BC | fait | nom sur le bus | classe |
-|----|------|----------------|--------|
-| `inventory` | `stock-depleted` | `inventory.stock-depleted` | `StockDepleted` |
+| BC          | fait           | nom sur le bus           | classe        |
+|-------------|----------------|--------------------------|---------------|
+| `inventory` | `<votre-fait>` | `inventory.<votre-fait>` | `<VotreFait>` |
 
 Si le nom n'est pas au passé → c'est une *commande* déguisée. On redessine.
 
@@ -83,7 +83,7 @@ Si le nom n'est pas au passé → c'est une *commande* déguisée. On redessine.
 
 ```bash
 pnpm test           # < 100 ms, sans Docker
-pnpm test:mutation  # 100 % sur les fichiers event / policy
+pnpm test:mutation  # 100 % sur les fichiers événement / policy
 ```
 
 **La démo qui vend l'archi** : on abonne un handler qui `throw`.

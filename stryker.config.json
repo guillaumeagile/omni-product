@@ -12,7 +12,9 @@
     "src/shared/events/**/*.ts",
     "!src/shared/events/**/*.spec.ts",
     "src/inventory/**/*.ts",
-    "!src/inventory/**/*.spec.ts"
+    "!src/inventory/**/*.spec.ts",
+    "src/catalog/**/*.ts",
+    "!src/catalog/**/*.spec.ts"
   ],
   "reporters": ["html", "clear-text", "progress"],
   "coverageAnalysis": "perTest",

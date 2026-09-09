@@ -16,10 +16,10 @@ export const isNone = <T>(option: Option<T>): option is { kind: typeof OPTION_KI
     option.kind === OPTION_KIND.None;
 
 export const fromNullable = <T>(value: T | null | undefined): Option<NonNullable<T>> =>
-    value == null ? none() : some(value as NonNullable<T>);
+    value == null ? none() : some(value);
 
 export const map = <T, TResult>(option: Option<T>, callback: (value: T) => TResult): Option<TResult> =>
-    (isSome(option) ? some(callback(option.value)) : none());
+    isSome(option) ? some(callback(option.value)) : none();
 
 export const asyncMap = async <T, TResult>(
     option: Option<T>,
@@ -27,7 +27,7 @@ export const asyncMap = async <T, TResult>(
 ): Promise<Option<TResult>> => (isSome(option) ? some(await callback(option.value)) : none());
 
 export const andThen = <T, TResult>(option: Option<T>, callback: (value: T) => Option<TResult>): Option<TResult> =>
-    (isSome(option) ? callback(option.value) : none());
+    isSome(option) ? callback(option.value) : none();
 
 export const asyncAndThen = async <T, TResult>(
     option: Option<T>,
@@ -35,19 +35,15 @@ export const asyncAndThen = async <T, TResult>(
 ): Promise<Option<TResult>> => (isSome(option) ? callback(option.value) : none());
 
 export const orElse = <T>(option: Option<T>, callback: () => Option<T>): Option<T> =>
-    (isSome(option) ? option : callback());
+    isSome(option) ? option : callback();
 
-export const match = <T, TResult>(
-    option: Option<T>,
-    onSome: (value: T) => TResult,
-    onNone: () => TResult,
-): TResult => (isSome(option) ? onSome(option.value) : onNone());
+export const match = <T, TResult>(option: Option<T>, onSome: (value: T) => TResult, onNone: () => TResult): TResult =>
+    isSome(option) ? onSome(option.value) : onNone();
 
-export const unwrapOr = <T>(option: Option<T>, defaultValue: T): T =>
-    (isSome(option) ? option.value : defaultValue);
+export const unwrapOr = <T>(option: Option<T>, defaultValue: T): T => (isSome(option) ? option.value : defaultValue);
 
 export const unwrapOrElse = <T>(option: Option<T>, callback: () => T): T =>
-    (isSome(option) ? option.value : callback());
+    isSome(option) ? option.value : callback();
 
 export const andTee = <T>(option: Option<T>, callback: (value: T) => void): Option<T> => {
     if (isSome(option)) {

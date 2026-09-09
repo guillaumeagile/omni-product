@@ -1,4 +1,4 @@
-import { SupplierRegionInfo } from './supplier-region-info';
+import type {SupplierRegionInfo} from './supplier-region-info';
 
 export interface CreateProductInput {
   name: string;

@@ -1,7 +1,7 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, Product } from '@prisma/client';
-import { PrismaService } from '../prisma.service';
-import { CreateProductInput } from './create-product-input';
+import {BadRequestException, Injectable, NotFoundException} from '@nestjs/common';
+import {Prisma, Product} from '@prisma/client';
+import {PrismaService} from '../prisma.service';
+import {CreateProductInput} from './create-product-input';
 
 // Regional margin applied on top of the supplier's base price before VAT.
 // Pulled straight out of the legacy Spring Boot pricing job.
@@ -16,7 +16,8 @@ const DEFAULT_MARGIN = 0.2;
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {
+  }
 
   async create(input: CreateProductInput): Promise<Product> {
     if (!input.name || input.name.trim().length === 0) {
@@ -40,7 +41,7 @@ export class ProductService {
         priceTax: input.priceTax,
         priceTaxRate: input.priceTaxRate,
         discounts: input.discounts ?? [],
-        images: (input.images ?? {}) as Prisma.InputJsonValue,
+        images: input.images ?? {},
         suppliersRegions: (input.suppliersRegions ?? {}) as unknown as Prisma.InputJsonValue,
         kilos: input.kilos,
         volume: input.volume,
@@ -54,14 +55,14 @@ export class ProductService {
 
   async findAll(region?: string): Promise<Product[]> {
     if (!region) {
-      return this.prisma.product.findMany({ orderBy: { createdAt: 'desc' } });
+      return this.prisma.product.findMany({orderBy: {createdAt: 'desc'}});
     }
-    const all = await this.prisma.product.findMany({ orderBy: { createdAt: 'desc' } });
-    return all.filter((p) => Object.keys(p.suppliersRegions as object).includes(region));
+    const all = await this.prisma.product.findMany({orderBy: {createdAt: 'desc'}});
+    return all.filter(p => Object.keys(p.suppliersRegions as object).includes(region));
   }
 
   async findOne(id: string): Promise<Product> {
-    const product = await this.prisma.product.findUnique({ where: { id } });
+    const product = await this.prisma.product.findUnique({where: {id}});
     if (!product) {
       throw new NotFoundException(`product ${id} not found`);
     }
@@ -80,8 +81,8 @@ export class ProductService {
     }
 
     return this.prisma.product.update({
-      where: { id },
-      data: { stock: product.stock - quantity },
+      where: {id},
+      data: {stock: product.stock - quantity},
     });
   }
 

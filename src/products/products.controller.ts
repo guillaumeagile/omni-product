@@ -1,11 +1,12 @@
-import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { ZodError } from 'zod';
-import { ProductService } from './product.service';
-import { CreateProductSchema } from './create-product.schema';
+import {BadRequestException, Body, Controller, Get, Param, Patch, Post, Query} from '@nestjs/common';
+import {ZodError} from 'zod';
+import {ProductService} from './product.service';
+import {CreateProductSchema} from './create-product.schema';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(private readonly productService: ProductService) {
+  }
 
   @Post()
   async create(@Body() body: unknown) {
@@ -36,7 +37,7 @@ export class ProductsController {
 
   @Get(':id/reseller-price')
   async resellerPrice(@Param('id') id: string, @Query('region') region: string) {
-    return { resellerPrice: await this.productService.calculateResellerPrice(id, region) };
+    return {resellerPrice: await this.productService.calculateResellerPrice(id, region)};
   }
 
   @Patch(':id/reserve')

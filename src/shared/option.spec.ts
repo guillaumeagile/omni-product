@@ -97,13 +97,21 @@ describe('Option', () => {
     });
 
     it('matches Some branches', () => {
-        const result = match(some('margin'), value => `Some:${value}`, () => 'None');
+        const result = match(
+            some('margin'),
+            value => `Some:${value}`,
+            () => 'None',
+        );
 
         expect(result).toBe('Some:margin');
     });
 
     it('matches None branches', () => {
-        const result = match(none<string>(), value => `Some:${value}`, () => 'None');
+        const result = match(
+            none<string>(),
+            value => `Some:${value}`,
+            () => 'None',
+        );
 
         expect(result).toBe('None');
     });
@@ -230,7 +238,12 @@ describe('Option', () => {
 describe('Option composition', () => {
     it('chains map and match into a domain-readable message', () => {
         const maybeMargin: Option<number> = some(18);
-        const message = match(map(maybeMargin, margin => `${margin}%`), margin => `Margin is ${margin}`, () => 'Margin is missing');
+        const formattedMargin = map(maybeMargin, margin => `${margin}%`);
+        const message = match(
+            formattedMargin,
+            margin => `Margin is ${margin}`,
+            () => 'Margin is missing',
+        );
 
         expect(message).toBe('Margin is 18%');
     });

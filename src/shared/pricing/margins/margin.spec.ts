@@ -50,7 +50,7 @@ describe('Margin.fromPercentage', () => {
         const result = Margin.fromPercentage(4);
 
         expect(result.isErr()).toBe(true);
-        expect(result._unsafeUnwrapErr()).toEqual({kind: 'MarginPercentageOutOfRange', percentage: 4    });
+        expect(result._unsafeUnwrapErr()).toEqual({kind: 'MarginPercentageOutOfRange', percentage: 4});
     });
 
     it('rejects NaN as not finite', () => {
@@ -85,7 +85,6 @@ describe('Margin.forRegion', () => {
 
         expect(margin.applyTo(100)).toBe(20);
     });
-
 });
 
 describe('Margin.default', () => {
@@ -147,7 +146,10 @@ describe('Margin properties', () => {
 
     it('property: the lower-bound margin never yields a markup above the base amount', () => {
         fc.assert(
-            fc.property(fc.float({min: 0, max: 1_000_000, noNaN: true}), amount => okMargin(5).applyTo(amount) <= amount),
+            fc.property(
+                fc.float({min: 0, max: 1_000_000, noNaN: true}),
+                amount => okMargin(5).applyTo(amount) <= amount,
+            ),
         );
     });
 

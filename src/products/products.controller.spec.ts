@@ -1,7 +1,7 @@
-import { Test } from '@nestjs/testing';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ProductsController } from './products.controller';
-import { ProductService } from './product.service';
+import {Test} from '@nestjs/testing';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {ProductsController} from './products.controller';
+import {ProductService} from './product.service';
 
 describe('ProductsController', () => {
   let controller: ProductsController;
@@ -24,14 +24,14 @@ describe('ProductsController', () => {
 
     const moduleRef = await Test.createTestingModule({
       controllers: [ProductsController],
-      providers: [{ provide: ProductService, useValue: productService }],
+      providers: [{provide: ProductService, useValue: productService}],
     }).compile();
 
     controller = moduleRef.get(ProductsController);
   });
 
   it('delegates product creation to the service', async () => {
-    productService.create.mockResolvedValue({ id: '1' });
+    productService.create.mockResolvedValue({id: '1'});
 
     const result = await controller.create({
       name: 'Blender',
@@ -44,16 +44,16 @@ describe('ProductsController', () => {
     });
 
     expect(productService.create).toHaveBeenCalled();
-    expect(result).toEqual({ id: '1' });
+    expect(result).toEqual({id: '1'});
   });
 
   it('delegates reservation to the service', async () => {
-    productService.reserveStock.mockResolvedValue({ id: '1', stock: 2 });
+    productService.reserveStock.mockResolvedValue({id: '1', stock: 2});
 
     const result = await controller.reserve('1', 4);
 
     expect(productService.reserveStock).toHaveBeenCalledWith('1', 4);
-    expect(result).toEqual({ id: '1', stock: 2 });
+    expect(result).toEqual({id: '1', stock: 2});
   });
 
   it('wraps the reseller price in a response object', async () => {
@@ -62,6 +62,6 @@ describe('ProductsController', () => {
     const result = await controller.resellerPrice('1', 'EU');
 
     expect(productService.calculateResellerPrice).toHaveBeenCalledWith('1', 'EU');
-    expect(result).toEqual({ resellerPrice: 131.6 });
+    expect(result).toEqual({resellerPrice: 131.6});
   });
 });

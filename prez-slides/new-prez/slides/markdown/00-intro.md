@@ -1,11 +1,3 @@
-![Sponsors 2025](./img/Slide%20Sponsors%20pour%20orateurs%202025.png)
-
----
-
-![Forum 2025](./img/Slide%20forum%202025.png)
-
----
-
 # CUTE DDD, les mains dans le code
 
 ## SOLID › CUPID › CUTE DDD — atelier 2 h

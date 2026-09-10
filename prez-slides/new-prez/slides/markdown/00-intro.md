@@ -1,6 +1,6 @@
-# CUTE DDD, les mains dans le code
+## CUTE DDD, les mains dans le code
 
-## SOLID › CUPID › CUTE DDD — atelier 2 h
+### SOLID › CUPID › CUTE DDD
 
 ![Guillaume & Sam](./img/portrait-sam+gui-land.jpg)
 
@@ -18,9 +18,9 @@ Version courte, 2 h, orientée pratique. On code un vrai refactoring DDD sur une
 
 ---
 
-# Le code à suivre
+### Le code à suivre
 
-![QR repo](./img/qrcode_repo_FizzBuzz2025.png)
+![QR repo](./img/qrcode_repo_omniproduct2026.png)
 
 ```bash
 pnpm install

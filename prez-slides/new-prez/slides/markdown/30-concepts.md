@@ -26,6 +26,46 @@ Sur ce code : **SRP / OCP / DIP violés**, LSP / ISP muets. SOLID dit *ce qui es
 - **I**diomatic — naturel dans le langage
 - **D**omain-based — le code parle le métier
 
+--
+
+**Composable** — en TypeScript
+
+- chaque unité est une fonction totale `A -> B` (elle renvoie toujours une valeur) ;
+- l'absence de résultat et l'échec sont des _valeurs_ : `Option<T>`, `Result<T, E>`
+- on enchaîne avec `map` / `andThen` / `pipe`, de gauche à droite — pas de `throw` caché, pas de court-circuit sur
+  `null`
+- _transparence référentielle_ : on peut remplacer un appel par son résultat sans changer le programme
+
+--
+
+**Unix philosophy** — fait une chose, et le fait bien
+
+- une fonction de décision reçoit des données déjà chargées et renvoie un `Result` ;
+- elle ne va rien chercher, ne journalise pas, ne persiste pas
+
+--
+
+**Predictable** — fait ce à quoi on s'attend
+
+- aucune fonction ne `throw` pour un cas _attendu_ ;
+- mêmes causes, mêmes effets : garder le cœur pur sans horloge, sans aléatoire, sans lecture en base
+
+--
+
+**Idiomatic** — naturel dans le langage
+
+- utiliser d'abord l'algèbre de TypeScript : unions discriminées, `readonly`, scalaires _branded_, `switch` exhaustif,
+  `Omit` / `Pick` / types mappés
+- se standardiser sur **`neverthrow`** : `ok` / `err` / `map` / `andThen` / `match` est le _seul_ dialecte fonctionnel
+  du repo
+
+--
+
+**Domain-based** — parle du problème, pas de la tuyauterie
+
+- `Money`, `ProductName`, `Quantity` sont des types, pas des primitives ; un cycle de vie est une machine à états, pas
+  des booléens
+- le code métier n'importe jamais `BadRequestException` ni les types Prisma
 
 ---
 
@@ -37,8 +77,8 @@ Sur ce code : **SRP / OCP / DIP violés**, LSP / ISP muets. SOLID dit *ce qui es
 
 ```
 SOLID          →   CUPID          →   CUTE DDD
-excellence         code joyeux        valeur métier
-technique
+excellence         `code joyeux`        valeur métier
+académique
 ```
 
 ---

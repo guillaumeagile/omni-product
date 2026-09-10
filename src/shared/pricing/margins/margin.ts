@@ -43,7 +43,7 @@ export class Margin {
     }
 
     /**
-     * Builds a Margin for a region, falling back to the default rate for an
+     * Builds a Margin for a region, falling back to the defau  lt rate for an
      * unrecognized region. Total: regional rates are trusted constants, so
      * no invalid Margin can result and no Result is needed.
      */

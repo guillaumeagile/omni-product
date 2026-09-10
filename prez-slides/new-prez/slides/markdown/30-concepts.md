@@ -60,7 +60,7 @@ technique
 Transformer **1 God table** en **3 Bounded Contexts** :
 
 ```
-Procurement  ──(un événement)──▶  Inventory  ──(un événement)──▶  Catalog
+Procurement  ──(event)──▶  Inventory  ──(event)──▶  Catalog
                                  │
                           Pricing (Shared Kernel)
 ```

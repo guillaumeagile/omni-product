@@ -11,6 +11,9 @@ Ce que vous apportez déjà
 - NestJS / Prisma, un ORM, des services
 - Les exceptions comme flux de contrôle
 
+Note:
+OOP - favorise composition au dessus de heritage
+
 ---
 
 ## Le point de départ

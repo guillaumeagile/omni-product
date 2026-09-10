@@ -26,7 +26,6 @@ Sur ce code : **SRP / OCP / DIP violés**, LSP / ISP muets. SOLID dit *ce qui es
 - **I**diomatic — naturel dans le langage
 - **D**omain-based — le code parle le métier
 
-> Des *directions de voyage*, pas des cases à cocher.
 
 ---
 
@@ -34,7 +33,7 @@ Sur ce code : **SRP / OCP / DIP violés**, LSP / ISP muets. SOLID dit *ce qui es
 
 - **C**ontextual · **U**biquitous · **T**estable · **E**xpressive
 
-La chaîne :
+.
 
 ```
 SOLID          →   CUPID          →   CUTE DDD
@@ -42,14 +41,15 @@ excellence         code joyeux        valeur métier
 technique
 ```
 
-CUTE dit *quoi* construire ; CUPID dit *comment*.
-
 ---
 
-## Les règles du jeu du lab
+## hands-on lab
 
-1. **Toujours valide** — constructeur privé, factory statique qui renvoie `Result<T, DomainError>` ; pas d'exception
-   pour un échec métier attendu
+1. **Toujours valide /always valid**
+   - constructeur privé
+   - factory statique
+   - `Result<T, DomainError>`
+   - pas d'exceptions
 2. **Domaine pur** — zéro import `@nestjs/*` ou `@prisma/client` sous `domain/`
 3. **Frontière** — un BC n'importe d'un autre que ses **types d'événements**
 

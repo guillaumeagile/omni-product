@@ -2,12 +2,6 @@
 
 --
 
-## Feedback ?
-
-![OpenFeedback](./img/SOLID%20-_%20CUPID%20-_%20Cute%20DDD-qr-code-openfeedback.png)
-
----
-
 ### Licences
 
 - [Beerware](https://openlist.fairfieldprogramming.org/licenses/beerware)

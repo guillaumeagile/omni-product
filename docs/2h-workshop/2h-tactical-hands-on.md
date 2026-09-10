@@ -11,7 +11,7 @@ Stryker)**.
 ```
 00:00 - 00:15 (15 min) | Part 0: As-Is Tour — Legacy Smells & The Mutation Baseline
 00:15 - 00:50 (35 min) | Part 1: Phase A — Primitive Obsession → Value Objects (Pricing Shared Kernel)
-00:50 - 01:40 (50 min) | Part 2: Phase B — Anemic CRUD → Rich Aggregates & Invariants (Choose a Track)
+00:50 - 01:40 (50 min) | Part 2: Phase B — Event Storming Done → Wire One Event Between Two BCs (Choose an Edge)
 01:40 - 01:55 (15 min) | Part 3: Phase C — Verification Gate (Unit + PBT + Mutation Testing)
 01:55 - 02:00 (05 min) | Part 4: Retrospective & CUPID Properties Checklist
 ```
@@ -195,69 +195,157 @@ applying to different product categories.
 
 ---
 
-## 🛡️ Phase B — Rich Aggregates & Invariants (50 min)
+## 🛡️ Phase B — Event Storming Done → Wire One Event Between Two BCs (50 min)
 
-Participants select **one track** according to their interest:
+**Where we pick up**: the EventStorming is behind us. The wall already holds the orange
+**domain events** (past-tense facts) and the lilac **policies** ("*whenever X, then Y*") that
+connect the Bounded Contexts. Each track's aggregate already exists on the branch, green and
+framework-free. Nothing here is about inventing new invariants — it is about making one BC
+**react to a fact stated by another**, without re-coupling them.
+
+> **The lesson in one line**: *the event is the contract, not the model.* A BC states a fact
+> about itself; another BC reacts on its own terms. The producer never knows who listens.
+
+Participants pick **one policy edge** to implement. Same recipe on every track:
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│                   CHOOSE YOUR BOUNDED CONTEXT TRACK                    │
-├────────────────────┬────────────────────┬──────────────────────────────┤
-│ Track 1: Inventory │ Track 2: Catalog   │ Track 3: Procurement         │
-│ `StockItem`        │ `CatalogItem`      │ `RegionalSupplier`           │
-│ Reservation logic  │ Slugs & Statuses   │ Region & Capacity policies   │
-└────────────────────┴────────────────────┴──────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│   Edge 1 (demo)          Edge 2                     Edge 3                     │
+│   Inventory → Catalog     Procurement → Inventory    Catalog → Sales           │
+│   🟠 StockDepleted        🟠 StockReceived           🟠 ItemPublished           │
+│   🟣 "hide the item"      🟣 "restock on receipt"    🟣 "list in storefront"    │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-### Track 1: Inventory Bounded Context (`src/inventory/`)
+### The rules — for every participant, whatever edge you pick
 
-**Legacy Problem**: `reserveStock` blindly decrements a database column with race conditions and missing invariants.
+These are non-negotiable and identical across all tracks:
 
-1. **Model the Aggregate** (`src/inventory/domain/stock-item.ts`):
-    - Identity: `StockItemId` / `ProductId`
-    - State: `availableQuantity: number`, `reservedQuantity: number`
-    - Invariants: `availableQuantity >= 0`, `reservedQuantity >= 0`
-    - Methods:
-        - `reserve(qty: number): Result<void, InsufficientStockError>`
-        - `release(qty: number): Result<void, InvalidReservationError>`
-        - `restock(qty: number): Result<void, InvalidRestockError>`
-2. **PBT Invariant**:
-    - For any sequence of valid reservations and releases:
-      $$\text{currentAvailable} + \text{currentReserved} == \text{initialStock}$$
+1. **The producer states a past fact, nothing more.**
+   The event class name is a past-tense fact (`StockDepleted`, `StockReceived`,
+   `ItemPublished`) — never a command (`HideItem`, `DoRestock`). It lives under
+   `src/<producer-bc>/domain/events/` and implements `DomainEvent` (`{ readonly name: string }`).
+   The wire name is `<producer-bc>.<past-tense-fact>`, e.g. `inventory.stock-depleted`.
+
+2. **Thin payload: IDs and quantities only.**
+   No titles, no prices, no images, no `occurredAt`. Ask "what does the consumer *actually*
+   need to act?" — usually just `productId`. If you can't justify a field, drop it. The
+   producer owns this schema; adding a field later is a breaking change to unknown consumers.
+
+3. **The aggregate records events; it never touches a bus.**
+   Domain code imports nothing from `@nestjs/*`, `@prisma/client`, or `src/shared/events/event-bus`.
+   The aggregate pushes facts into a private array and exposes `pullDomainEvents(): DomainEvent[]`
+   that drains it. The **application service** publishes them after `save()`.
+
+4. **The Boundary Rule.**
+   A consuming BC may import the producer's **event type only** — never its aggregate,
+   repository, or service. The one allowed cross-BC import is
+   `import { StockDepleted } from '../../<producer-bc>/domain/events/...'`.
+
+5. **Translate at the boundary, don't forward.**
+   The consumer's policy handler receives the producer's language (`StockDepleted`) and calls
+   *its own* aggregate in *its own* words (`catalogItem.markUnavailable()`). Different verbs on
+   purpose — that is an Anti-Corruption Layer in miniature.
+
+6. **A consumer's failure is the consumer's problem.**
+   `publish()` returns `Ok` even if a handler throws. The producer has already committed the
+   fact; it does not roll back or wait. (Production hardening — outbox, retries — is Phase C
+   discussion, not code.)
+
+7. **Tests are in-memory, synchronous, no Docker.**
+   Producer boundary test: the fact is raised **exactly once**, only when the condition
+   crosses (e.g. stock reaching 0), never on every call at 0. Policy test: given the consumer
+   aggregate in a known state + the event, the handler moves it to the expected state.
 
 ---
 
-### Track 2: Catalog Bounded Context (`src/catalog/`)
+### Pre-built scaffolding (already on the branch — `src/shared/events/`)
 
-**Legacy Problem**: Product title and slug are coupled to database columns with unvalidated image JSON blobs.
+```ts
+// src/shared/events/domain-event.ts
+export interface DomainEvent {
+    readonly name: string;   // the published contract: '<producer-bc>.<past-tense-fact>'
+}
 
-1. **Model the Aggregate** (`src/catalog/domain/catalog-item.ts`):
-    - Value Objects: `Slug`, `ProductTitle`, `ImageCollection`
-    - State: `status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'`
-    - Invariants:
-        - Cannot publish a product without a valid slug and at least one image.
-        - Slugs must be lowercase, alphanumeric with hyphens, length $\ge 3$.
-    - Methods:
-        - `publish(): Result<void, CatalogPublishError>`
-        - `updateSlug(newSlug: Slug): Result<void, CatalogError>`
-        - `archive(): Result<void, CatalogError>`
+// src/shared/events/event-bus.ts  — the port; only application services import an impl
+export interface EventBus {
+    subscribe<E extends DomainEvent>(eventName: string, handler: (event: E) => void): void;
+    publish(events: readonly DomainEvent[]): Result<void, EventBusError>;
+}
+```
+
+`InMemoryEventBus` is the workshop transport: synchronous, deterministic, `publish` always
+returns `Ok`, a throwing handler is isolated (optional failure listener, defaults to no-op).
 
 ---
 
-### Track 3: Procurement Bounded Context (`src/procurement/`)
+### The four moving parts (same on every track)
 
-**Legacy Problem**: Suppliers and regions stored as loose JSON dictionary (`suppliersRegions: Record<string, unknown>`).
+```ts
+// ① the event — producer's published language
+// src/inventory/domain/events/stock-depleted.ts
+export class StockDepleted implements DomainEvent {
+    public readonly name = 'inventory.stock-depleted';
+    constructor(public readonly productId: string) {}
+}
+```
 
-1. **Model the Aggregate** (`src/procurement/domain/regional-supplier.ts`):
-    - Value Objects: `SupplierId`, `Region`, `LeadTimeDays`
-    - Invariants:
-        - A supplier can only serve supported regions.
-        - Minimum Order Quantity (MOQ) must be $> 0$.
-    - Methods:
-        - `assignRegion(region: Region, leadTime: LeadTimeDays): Result<void, ProcurementError>`
-        - `deactivateRegion(region: Region): Result<void, ProcurementError>`
+```ts
+// ② the aggregate records — inside src/inventory/domain/stock-item.ts
+private readonly events: DomainEvent[] = [];
+
+reserve(qty: number): Result<StockItem, InsufficientStockError> {
+    // ...invariant checks + state change...
+    if (this.availableQuantity === 0) {
+        this.events.push(new StockDepleted(this.productId));
+    }
+    return ok(this);
+}
+
+pullDomainEvents(): DomainEvent[] {
+    return this.events.splice(0);
+}
+```
+
+```ts
+// ③ the application service dispatches — after persistence
+const result = stockItem.reserve(qty);
+if (result.isOk()) {
+    await this.stockItemRepository.save(stockItem);
+    this.eventBus.publish(stockItem.pullDomainEvents());
+}
+```
+
+```ts
+// ④ the consuming policy — the participants' core work
+// src/catalog/application/when-stock-depleted.ts
+import { StockDepleted } from '../../inventory/domain/events/stock-depleted'; // ONLY allowed cross-BC import
+
+export class WhenStockDepleted {
+    constructor(private readonly catalogItems: CatalogItemRepository) {}
+
+    handle(event: StockDepleted): void {
+        const item = this.catalogItems.byProductId(event.productId);
+        if (item.isNone()) return;          // not every stocked product is catalogued — fine
+        item.value.markUnavailable();       // catalog speaks "availability", not "stock"
+        this.catalogItems.save(item.value);
+    }
+}
+```
+
+---
+
+### Per-track cheat sheet (aggregate + fact + policy)
+
+| Track                       | Producer fact (🟠)                    | Consumer policy (🟣)                                  | Consumer method called          |
+|-----------------------------|---------------------------------------|------------------------------------------------------|---------------------------------|
+| **Inventory → Catalog**     | `StockDepleted { productId }`         | *whenever stock is depleted, hide the item*          | `catalogItem.markUnavailable()` |
+| **Procurement → Inventory** | `StockReceived { productId, qty }`    | *whenever a shipment is received, restock*           | `stockItem.restock(qty)`        |
+| **Catalog → Sales**         | `ItemPublished { productId, slug }`   | *whenever an item is published, list it for sale*    | `salesListing.list(...)`        |
+
+Every row is the same seven rules and the same four parts — only the vocabulary changes.
 
 ---
 

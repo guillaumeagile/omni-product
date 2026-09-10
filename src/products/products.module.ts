@@ -2,10 +2,10 @@ import {Module} from '@nestjs/common';
 import {ProductsController} from './products.controller';
 import {ProductService} from './product.service';
 import {PrismaService} from '../prisma.service';
-import {PRODUCT_CREATOR} from './product-creator';
-import {PRODUCT_READER} from './product-reader';
-import {STOCK_RESERVER} from './stock-reserver';
-import {RESELLER_PRICE_CALCULATOR} from './reseller-price-calculator';
+import {PRODUCT_CREATOR} from './abstractions/product-creator';
+import {PRODUCT_READER} from './abstractions/product-reader';
+import {STOCK_RESERVER} from './abstractions/stock-reserver';
+import {RESELLER_PRICE_CALCULATOR} from './abstractions/reseller-price-calculator';
 
 @Module({
   controllers: [ProductsController],

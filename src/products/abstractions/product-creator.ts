@@ -1,5 +1,5 @@
 import {Product} from '@prisma/client';
-import {CreateProductInput} from './create-product-input';
+import {CreateProductInput} from '../create-product-input';
 
 export const PRODUCT_CREATOR = Symbol('PRODUCT_CREATOR');
 

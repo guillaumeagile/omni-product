@@ -1,10 +1,10 @@
 import {BadRequestException, Body, Controller, Get, Inject, Param, Patch, Post, Query} from '@nestjs/common';
 import {ZodError} from 'zod';
 import {CreateProductSchema} from './create-product.schema';
-import {PRODUCT_CREATOR, ProductCreator} from './product-creator';
-import {PRODUCT_READER, ProductReader} from './product-reader';
-import {RESELLER_PRICE_CALCULATOR, ResellerPriceCalculator} from './reseller-price-calculator';
-import {STOCK_RESERVER, StockReserver} from './stock-reserver';
+import {PRODUCT_CREATOR, ProductCreator} from './abstractions/product-creator';
+import {PRODUCT_READER, ProductReader} from './abstractions/product-reader';
+import {RESELLER_PRICE_CALCULATOR, ResellerPriceCalculator} from './abstractions/reseller-price-calculator';
+import {STOCK_RESERVER, StockReserver} from './abstractions/stock-reserver';
 
 @Controller('products')
 export class ProductsController {

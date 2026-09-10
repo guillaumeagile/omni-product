@@ -1,10 +1,10 @@
 import {Test} from '@nestjs/testing';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {ProductsController} from './products.controller';
-import {PRODUCT_CREATOR} from './product-creator';
-import {PRODUCT_READER} from './product-reader';
-import {RESELLER_PRICE_CALCULATOR} from './reseller-price-calculator';
-import {STOCK_RESERVER} from './stock-reserver';
+import {PRODUCT_CREATOR} from './abstractions/product-creator';
+import {PRODUCT_READER} from './abstractions/product-reader';
+import {RESELLER_PRICE_CALCULATOR} from './abstractions/reseller-price-calculator';
+import {STOCK_RESERVER} from './abstractions/stock-reserver';
 
 describe('ProductsController', () => {
   let controller: ProductsController;

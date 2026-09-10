@@ -2,10 +2,10 @@ import {BadRequestException, Injectable, NotFoundException} from '@nestjs/common
 import {Prisma, Product} from '@prisma/client';
 import {PrismaService} from '../prisma.service';
 import {CreateProductInput} from './create-product-input';
-import {ProductCreator} from './product-creator';
-import {ProductReader} from './product-reader';
-import {ResellerPriceCalculator} from './reseller-price-calculator';
-import {StockReserver} from './stock-reserver';
+import {ProductCreator} from './abstractions/product-creator';
+import {ProductReader} from './abstractions/product-reader';
+import {ResellerPriceCalculator} from './abstractions/reseller-price-calculator';
+import {StockReserver} from './abstractions/stock-reserver';
 
 // Regional margin applied on top of the supplier's base price before VAT.
 // Pulled straight out of the legacy Spring Boot pricing job.

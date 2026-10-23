@@ -4,7 +4,6 @@ import com.omniproduct.harness.rules.BareIdentifierIsWeakRule;
 import com.omniproduct.harness.rules.EntityMustImplementIdentifiableRule;
 import com.omniproduct.harness.rules.FanOutRule;
 import com.omniproduct.harness.rules.NoGodClassRule;
-import com.omniproduct.harness.rules.NoInheritanceRule;
 import com.omniproduct.harness.rules.NoPersistenceInDomainRule;
 import com.omniproduct.harness.rules.NoServicesInEntityConstructorRule;
 import com.omniproduct.harness.rules.RichIdentifierRule;
@@ -15,7 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-// Les règles que chaque étape de l'atelier fait passer. L'étape 1 (CUPID-step-1.md) couvre HA4 à HA11.
+// Les règles que chaque étape de l'atelier fait passer. L'étape 1 (CUPID-step-1.md) couvre HA5 à HA11 ;
+// HA4 (pas d'héritage) relève de l'étape 2 : sa règle reste dans le harnais, elle n'est simplement pas câblée ici.
 public final class Steps {
 
     // Le code de l'exercice : le modèle et les services, pas le port carbone (domain/) ni l'infrastructure.
@@ -38,10 +38,9 @@ public final class Steps {
         return Map.<String, List<HarnessRule>>of("1", step1(), ALL, step1()).get(step);
     }
 
-    // HA4, HA5, HA6, HA7, HA8, HA9, HA10, HA11, HA11.1 (avertissement)
+    // HA5, HA6, HA7, HA8, HA9, HA10, HA11, HA11.1 (avertissement)
     private static List<HarnessRule> step1() {
         return List.of(
-                new NoInheritanceRule(MODEL_PACKAGE + "..", SERVICE_PACKAGE + ".."),
                 new NoGodClassRule(4, IS_MODEL),
                 new SingleConcernRule(UbiquitousLanguageMap.load(), 1, IS_MODEL_OR_SERVICE),
                 new FanOutRule(MODEL_PACKAGE + ".."),

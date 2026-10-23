@@ -44,14 +44,14 @@ HA5 → HA4, HA2 → HA6 → HA8 → HA7 → HA9, HA10 → HA11, HA11.1.
 
 ## État d'implémentation et étapes
 
-L'**étape 1** (`./harness.sh`, `docs/CUPID-step-1.md`) couvre **HA4 à HA11** uniquement. Les règles se règlent
+L'**étape 1** (`./harness.sh`, `docs/CUPID-step-1.md`) couvre **HA5 à HA11.1** uniquement. Les règles se règlent
 dans `Steps.java`.
 
 | Règle | Implémentée | Étape | Notes |
 |---|---|---|---|
 | HA1 idiomes | non | hors étape 1 | à décider (Error Prone ou Checkstyle) |
 | HA2 données immuables | oui (`ImmutableDataStructuresRule`) | étape suivante | écrite et testée, pas branchée dans l'étape 1 |
-| HA4 pas d'héritage | oui | 1 | modèle + services |
+| HA4 pas d'héritage | oui (`NoInheritanceRule`) | 2 | écrite et testée, retirée de l'étape 1 (non câblée dans `Steps.java`) |
 | HA5 pas de god class | oui | 1 | seuil 4 (le document C# annonce 6 mais le code C# exécute 4) |
 | HA6 single concern | oui | 1 | `ubiquitous-language-map.json` adapté au vocabulaire Java |
 | HA7 fan-out | oui | 1 | entité = implémente `Identifiable` ou déclare un champ `id` |

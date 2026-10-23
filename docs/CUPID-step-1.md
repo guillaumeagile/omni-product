@@ -45,12 +45,6 @@ check passes, `1` that at least one fails, `2` that the harness could not run (b
 Do not relax or rewrite the harness rules to make the exercise pass - that defeats the assessment. If a rule
 genuinely looks wrong, flag it.
 
-### HA4 - Composable: no inheritance
-
-extend through composition, not inheritance. A class in `com.omniproduct.model` or `com.omniproduct.service` must
-not extend another class. Implementing interfaces is fine, and so are the types Java forces you to derive: `Object`,
-records, enums and exceptions.
-
 ### HA5 - no god class
 
 no class shall have more than 4 public properties in `com.omniproduct.model`. A property is a public field, a

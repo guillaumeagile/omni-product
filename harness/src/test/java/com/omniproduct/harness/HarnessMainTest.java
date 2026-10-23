@@ -37,9 +37,8 @@ class HarnessMainTest {
         assertThat(result.out()).contains("[FAIL] HA5", "[FAIL] HA6", "[FAIL] HA7", "[FAIL] HA8", "[FAIL] HA9", "[FAIL] HA10");
         assertThat(result.out()).contains("'Product' has");
         assertThat(result.out()).contains("Supplier.java:", "which looks like a service");
-        // Le legacy n'hérite d'aucune classe : HA4 est vert, légitimement. HA2 n'est pas de l'étape 1.
-        assertThat(result.out()).contains("[PASS] HA4");
-        assertThat(result.out()).doesNotContain("HA2");
+        // HA4 (héritage) est une règle de l'étape 2 : elle n'apparaît pas dans la sortie de l'étape 1. HA2 non plus.
+        assertThat(result.out()).doesNotContain("HA4", "HA2");
         assertThat(result.out()).contains("Product.java:");
         assertThat(result.out()).contains("HARNESS RESULT: FAIL");
     }

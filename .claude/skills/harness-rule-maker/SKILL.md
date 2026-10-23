@@ -62,7 +62,7 @@ offsets are UTF-8 bytes (text is read from the byte array, already handled by `S
      the scratchpad, introduce the violation, run `./harness.sh`, confirm detection, restore the file, check
      `git status` shows no change to `model/`/`service/`.
    A rule green on the legacy without a mutation proof is not finished.
-6. **Wire it** into the right step in `Steps.java` (step 1 = HA4 to HA11.1; HA1/HA2 are outside step 1). Perimeters:
+6. **Wire it** into the right step in `Steps.java` (step 1 = HA5 to HA11.1; HA1, HA2 and HA4 are outside step 1). Perimeters:
    `com.omniproduct.model` and `com.omniproduct.service`, not `domain/` nor `infrastructure/`.
 7. **Update the documents**: the table and the heuristics section of `docs/harness-rules.md`, the student text
    `docs/CUPID-step-N.md` (describe only what the harness really does), the plan if the scope moved.

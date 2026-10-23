@@ -3,13 +3,17 @@ package com.omniproduct.harness;
 import com.omniproduct.harness.rules.NoGodClassRule;
 import com.omniproduct.harness.rules.NoPersistenceInDomainRule;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
 public final class HarnessMain {
+
+    private static final Set<String> STEPS = Set.of("1.1", "all");
 
     private static final String USAGE =
             "Usage: harness [--step 1.1] --classes <dossier-de-classes> <dossier-de-sources> [autres-sources...]";
@@ -21,43 +25,85 @@ public final class HarnessMain {
         System.exit(run(args));
     }
 
-    // 0 = tout passe, 1 = au moins une règle ERROR échoue, 2 = mauvais usage ou entrée inutilisable.
-    public static int run(String[] args) {
-        String step = "all";
-        List<Path> sourceRoots = new ArrayList<>();
-        List<Path> classRoots = new ArrayList<>();
-        for (int i = 0; i < args.length; i++) {
-            switch (args[i]) {
-                case "--step" -> {
-                    if (++i >= args.length) {
-                        return usage("--step requires a value: 1.1");
-                    }
-                    step = args[i];
+    private enum Status { PASS, WARN, FAIL }
+
+    private record Options(String step, List<Path> sources, List<Path> classes) {
+
+        static Options parse(List<String> args) {
+            return parse(args, new Options("all", List.of(), List.of()));
+        }
+
+        private static Options parse(List<String> args, Options acc) {
+            if (args.isEmpty()) {
+                return acc;
+            }
+            String head = args.get(0);
+            if (head.equals("--step") || head.equals("--classes")) {
+                if (args.size() < 2) {
+                    throw new IllegalArgumentException(head + " requires a value");
                 }
-                case "--classes" -> {
-                    if (++i >= args.length) {
-                        return usage("--classes requires a directory");
-                    }
-                    classRoots.add(Path.of(args[i]));
-                }
-                default -> sourceRoots.add(Path.of(args[i]));
+                Options next = head.equals("--step") ? acc.withStep(args.get(1)) : acc.withClasses(Path.of(args.get(1)));
+                return parse(args.subList(2, args.size()), next);
+            }
+            return parse(args.subList(1, args.size()), acc.withSource(Path.of(head)));
+        }
+
+        Options withStep(String value) {
+            return new Options(value, sources, classes);
+        }
+
+        Options withSource(Path path) {
+            return new Options(step, Stream.concat(sources.stream(), Stream.of(path)).toList(), classes);
+        }
+
+        Options withClasses(Path path) {
+            return new Options(step, sources, Stream.concat(classes.stream(), Stream.of(path)).toList());
+        }
+
+        void validate() {
+            if (sources.isEmpty() || classes.isEmpty()) {
+                throw new IllegalArgumentException(USAGE);
+            }
+            if (!STEPS.contains(step)) {
+                throw new IllegalArgumentException("Unknown --step value '" + step + "'. Use 1.1 or omit.");
             }
         }
-        if (sourceRoots.isEmpty() || classRoots.isEmpty()) {
-            return usage(USAGE);
+    }
+
+    private record Outcome(HarnessRule rule, List<Violation> violations) {
+
+        Status status() {
+            if (violations.isEmpty()) {
+                return Status.PASS;
+            }
+            return rule.severity() == HarnessSeverity.WARNING ? Status.WARN : Status.FAIL;
         }
-        if (!step.equals("1.1") && !step.equals("all")) {
-            return usage("Unknown --step value '" + step + "'. Use 1.1 or omit.");
+
+        void print() {
+            System.out.println("[" + status() + "] " + rule.id() + " - " + rule.name());
+            violations.forEach(v -> System.out.println("    " + v.filePath() + ":" + v.line() + "  " + v.message()));
+        }
+    }
+
+    // 0 = tout passe, 1 = au moins une règle ERROR échoue, 2 = mauvais usage ou entrée inutilisable.
+    public static int run(String[] args) {
+        Options options;
+        try {
+            options = Options.parse(List.of(args));
+            options.validate();
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+            return 2;
         }
 
         // Un dossier de classes absent ou vide signifie "le code ne compile pas" : jamais un faux PASS.
-        for (Path classRoot : classRoots) {
-            if (!hasClassFiles(classRoot)) {
-                System.err.println("No .class files under " + classRoot + " - compile the project first (./gradlew classes).");
-                return 2;
-            }
+        var uncompiled = options.classes().stream().filter(root -> !hasClassFiles(root)).findFirst();
+        if (uncompiled.isPresent()) {
+            System.err.println("No .class files under " + uncompiled.get() + " - compile the project first (./gradlew classes).");
+            return 2;
         }
-        SourceSet sources = SourceSet.load(sourceRoots, classRoots);
+
+        SourceSet sources = SourceSet.load(options.sources(), options.classes());
         if (sources.files().isEmpty()) {
             System.err.println("No .java files found under the given source path(s).");
             return 2;
@@ -67,28 +113,18 @@ public final class HarnessMain {
                 new NoGodClassRule(4, pkg -> pkg.contains(".model")),
                 new NoPersistenceInDomainRule("..model.."));
 
-        System.out.println("CUPID step " + step + " harness - deterministic structural checks");
-        System.out.println("Analyzed " + sources.files().size() + " source file(s), "
-                + sources.classes().size() + " class(es)");
-        System.out.println();
+        System.out.println("CUPID step " + options.step() + " harness - deterministic structural checks");
+        System.out.println("Analyzed " + sources.files().size() + " source file(s), " + sources.classes().size() + " class(es)\n");
 
-        boolean pass = true;
-        for (HarnessRule rule : rules) {
-            List<Violation> violations = rule.check(sources).stream()
-                    .sorted(Comparator.comparing(Violation::filePath).thenComparingInt(Violation::line))
-                    .toList();
-            boolean warning = rule.severity() == HarnessSeverity.WARNING;
-            String status = violations.isEmpty() ? "PASS" : warning ? "WARN" : "FAIL";
-            if (!violations.isEmpty() && !warning) {
-                pass = false;
-            }
-            System.out.println("[" + status + "] " + rule.id() + " - " + rule.name());
-            for (Violation v : violations) {
-                System.out.println("    " + v.filePath() + ":" + v.line() + "  " + v.message());
-            }
-        }
-        System.out.println();
-        System.out.println(pass ? "HARNESS RESULT: PASS" : "HARNESS RESULT: FAIL");
+        List<Outcome> outcomes = rules.stream()
+                .map(rule -> new Outcome(rule, rule.check(sources).stream()
+                        .sorted(Comparator.comparing(Violation::filePath).thenComparingInt(Violation::line))
+                        .toList()))
+                .toList();
+        outcomes.forEach(Outcome::print);
+
+        boolean pass = outcomes.stream().noneMatch(outcome -> outcome.status() == Status.FAIL);
+        System.out.println("\nHARNESS RESULT: " + (pass ? "PASS" : "FAIL"));
         return pass ? 0 : 1;
     }
 
@@ -96,15 +132,10 @@ public final class HarnessMain {
         if (!Files.isDirectory(root)) {
             return false;
         }
-        try (var stream = Files.walk(root)) {
-            return stream.anyMatch(p -> p.toString().endsWith(".class"));
-        } catch (java.io.IOException e) {
+        try (Stream<Path> files = Files.walk(root)) {
+            return files.anyMatch(path -> path.toString().endsWith(".class"));
+        } catch (IOException e) {
             return false;
         }
-    }
-
-    private static int usage(String message) {
-        System.err.println(message);
-        return 2;
     }
 }

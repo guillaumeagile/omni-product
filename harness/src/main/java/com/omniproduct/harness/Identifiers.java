@@ -17,8 +17,9 @@ public final class Identifiers {
     private Identifiers() {
     }
 
+    // productId, ID, product_id, idProduct, supplierIds, uuid, guid : voir Words.isIdentifier.
     public static boolean isIdName(String name) {
-        return name.equals("id") || name.endsWith("Id") || name.endsWith("Ids");
+        return Words.isIdentifier(name);
     }
 
     public static Stream<Use> uses(SourceFile file) {

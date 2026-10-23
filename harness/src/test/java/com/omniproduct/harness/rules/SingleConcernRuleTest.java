@@ -69,9 +69,59 @@ class SingleConcernRuleTest {
     }
 
     @Test
-    void vocabularyDropsTheLeadingVerbOnly() {
-        assertThat(UbiquitousLanguageMap.vocabulary("getAllSuppliers")).isEqualTo("Suppliers");
-        assertThat(UbiquitousLanguageMap.vocabulary("settings")).isEqualTo("settings");
-        assertThat(UbiquitousLanguageMap.load().concernOf("findById")).isEmpty();
+    void readsWordsAnywhereInTheName() {
+        var map = UbiquitousLanguageMap.load();
+        assertThat(map.concernOf("getProductSlug")).contains("Catalog");
+        assertThat(map.concernOf("fetch_slug")).contains("Catalog");
+        assertThat(map.concernOf("SLUGS")).contains("Catalog");
+        assertThat(map.concernOf("renderDisplayLabel")).contains("Catalog");
+        assertThat(map.concernOf("getAllSuppliers")).contains("Supplier");
+        assertThat(map.concernOf("getProductName")).contains("Lifecycle");
+        assertThat(map.concernOf("findById")).isEmpty();
+        assertThat(map.concernOf("settings")).isEmpty();
+    }
+
+    @Test
+    void doesNotNeedTheLeadingVerbToBeOneOfTheKnownOnes() {
+        assertThat(check("""
+                package demo.service;
+
+                public class ShopService {
+                    public void retrieveSlug() {}
+                    public double obtainPrice() { return 0; }
+                }
+                """)).hasSize(1);
+    }
+
+    @Test
+    void readsHiddenApiVisibilityAndFields() {
+        assertThat(check("""
+                package demo.model;
+
+                public class Sneaky {
+                    public double margin;
+                    int stock() { return 0; }
+                    protected String slug() { return null; }
+                }
+                """)).hasSize(1);
+    }
+
+    @Test
+    void fallsBackOnTheTypesAMemberHandlesWhenItsNameIsGeneric() {
+        assertThat(check("""
+                package demo.service;
+
+                public class ShopService {
+                    public Price compute() { return null; }
+                    public void apply(Stock stock) {}
+                }
+                """)).hasSize(1);
+        assertThat(check("""
+                package demo.model;
+
+                public class Product {
+                    public Slug label() { return null; }
+                }
+                """)).hasSize(1);
     }
 }

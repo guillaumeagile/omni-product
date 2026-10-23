@@ -55,7 +55,7 @@ dans `Steps.java`.
 | HA5 pas de god class | oui | 1 | seuil 4 (le document C# annonce 6 mais le code C# exécute 4) |
 | HA6 single concern | oui | 1 | `ubiquitous-language-map.json` adapté au vocabulaire Java |
 | HA7 fan-out | oui | 1 | entité = implémente `Identifiable` ou déclare un champ `id` |
-| HA8 pas de persistance | oui, partiellement | 1 | dépendance vers `jakarta.persistence` / Spring Data ; **non porté** : champs fantômes `*Csv`/`*Json` et méthodes `Sync*`/`Hydrate*` |
+| HA8 pas de persistance | oui | 1 | dépendance vers une techno de stockage (jakarta/javax.persistence, Hibernate, Spring Data/JDBC, java.sql, jOOQ, MyBatis, MongoDB) + champs fantômes `*Json`/`*Csv`/`*Xml`/`*Blob`/`*Row` + méthodes `sync*`/`hydrate*`/`persist*`/`serialize*` |
 | HA9 `Identifiable` | oui | 1 | records, interfaces et enums exemptés |
 | HA10 pas de service au constructeur | oui | 1 | échoue sur `Supplier` (constructeur ajouté à l'exercice) |
 | HA11 identifiants riches | oui | 1 | UUID/Ulid ou record qui en enveloppe un ; UUID v4 détecté |
@@ -63,3 +63,32 @@ dans `Steps.java`.
 
 Périmètre : `com.omniproduct.model` (et `com.omniproduct.service` pour HA4, HA6, HA11.1). Le port carbone
 (`domain/`) et l'infrastructure ne font pas partie de l'exercice.
+
+## Heuristiques, pas correspondances exactes
+
+Une règle qui compare des noms exacts se contourne en renommant (`fetchSlug` au lieu de `getSlug`, `productID` au lieu
+de `productId`, `PriceManager` au lieu de `PriceService`). Le harnais raisonne donc sur des **mots** (`Words` : découpe
+camelCase / snake_case / acronymes, minuscules, singulier) et sur plusieurs indices indépendants. Un faux négatif
+trivial est un défaut de la règle.
+
+| Règle | Avant (exact) | Maintenant (heuristique) |
+|---|---|---|
+| HA5 | `getX` / `isX` publics | tout accesseur sans paramètre qui renvoie une valeur (`getX`, `fetchX`, `x()`), les setters, les champs publics ; lire + écrire une propriété compte une fois ; ids exclus par mot |
+| HA6 | préfixe du nom après un verbe connu | mot ou suite de mots **n'importe où** dans le nom ; le mot-clé le plus spécifique gagne ; contexte « faible » (Lifecycle) seulement en dernier recours ; si le nom est générique, on lit les types de retour/paramètres ; API = tout sauf `private` (+ champs publics) |
+| HA8 | `jakarta.persistence`, Spring Data | + javax, Hibernate, JDBC, `java.sql`, jOOQ, MyBatis, MongoDB ; + forme stockée (`xxxJson`, `yyy_csv`) et `sync*`/`hydrate*` |
+| HA9 | interface nommée `Identifiable` | inchangé : c'est le contrat explicite de l'exercice |
+| HA10 | type du package `..service` ou nom en `Service` | package (`service`, `repository`, `application`, `infrastructure`…), suffixe (`Manager`, `Handler`, `Client`, `Gateway`, `Facade`, `Factory`…), annotation Spring, types dans les génériques ; entité = champ `id`, `<classe>Id` ou `@Id` |
+| HA11 | noms `id`/`*Id`/`*Ids`, liste de types interdits, `randomUUID()` d'un identifiant | un mot `id`/`identifier`/`uuid`/`guid`/`uid` dans le nom (casse et séparateur libres) ; **tout** type autre qu'UUID/Ulid ou record qui en enveloppe un ; tout UUID non v7 construit dans le modèle (`randomUUID`, import statique, `UUID::randomUUID`, `nameUUIDFromBytes`, `new UUID`, `UuidCreator.get*` hors `getTimeOrderedEpoch`) |
+
+Chaque contournement est écrit dans `HeuristicEvasionTest` (et son pendant `SingleConcernRuleTest`) : si une règle
+régresse vers l'égalité de chaînes, un test échoue.
+
+### Limites connues (faux négatifs restants)
+
+- HA6 : un nom sans aucun mot du vocabulaire (`apply`, `process`) avec des types génériques n'est classé nulle part ;
+  la carte `ubiquitous-language-map.json` doit être enrichie avec le métier.
+- HA10 : un service injecté par setter ou par champ `@Autowired`, ou pris par une méthode d'usine statique, n'est pas vu.
+- HA11 : le flux de données n'est pas suivi (un `Long` converti en `UUID` par un helper n'est pas détecté).
+- HA7 : la dépendance est lue dans le bytecode, donc une référence par réflexion ou par `Object` passe.
+- Plus une règle est heuristique, plus un faux positif est possible (un mot `id` dans une variable locale sans rapport) :
+  on le corrige en affinant le mot, jamais en désactivant la règle.

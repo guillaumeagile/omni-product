@@ -5,23 +5,21 @@ import com.omniproduct.harness.Node;
 import com.omniproduct.harness.SourceFile;
 import com.omniproduct.harness.SourceSet;
 import com.omniproduct.harness.Violation;
+import com.omniproduct.harness.Words;
 
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // HA5 (moteur AST) - pas de god class : au plus N propriétés publiques par type.
-// Une propriété publique est un composant de record, un champ public, ou un getter public
-// sans paramètre (getX / isX). Les propriétés dont le nom finit par "Id" sont ignorées :
-// ce sont des identifiants, pas de la surface comportementale.
+// Une propriété publique est un composant de record, un champ public, une méthode publique sans paramètre qui
+// renvoie une valeur (getX, isX, fetchX, x()) ou un setter public (setX). Lire et écrire la même propriété ne
+// compte qu'une fois. Les identifiants (id, productId, uuid...) sont ignorés : pas de surface comportementale.
 public final class NoGodClassRule implements HarnessRule {
-
-    private static final Pattern ACCESSOR = Pattern.compile("^(?:get|is)([A-Z]\\w*)$");
 
     private final int maxPublicProperties;
     private final Predicate<String> packageFilter;
@@ -62,10 +60,16 @@ public final class NoGodClassRule implements HarnessRule {
                 .stream();
     }
 
+    // Les verbes qui ne font que lire : getSlug, fetchSlug, loadSlug et slug() exposent tous la propriété « slug ».
+    private static final Set<String> READ_VERBS =
+            Set.of("get", "is", "has", "fetch", "load", "read", "find", "retrieve", "obtain", "compute", "calculate");
+    // Des méthodes sans paramètre qui ne sont pas des propriétés.
+    private static final Set<String> NOT_PROPERTIES = Set.of("toString", "hashCode", "clone", "build", "copy", "builder");
+
     private static Set<String> publicProperties(Node type) {
         List<Node> publicMembers = type.field("body").stream()
                 .flatMap(Node::children)
-                .filter(member -> member.hasModifier("public"))
+                .filter(member -> member.hasModifier("public") && !member.hasModifier("static"))
                 .toList();
 
         Stream<String> components = type.field("parameters").stream()
@@ -80,27 +84,37 @@ public final class NoGodClassRule implements HarnessRule {
                 .flatMap(declarator -> declarator.field("name").stream())
                 .map(Node::text);
 
-        Stream<String> accessors = publicMembers.stream()
-                .filter(member -> member.is("method_declaration") && hasNoParameters(member))
+        Stream<String> readers = publicMembers.stream()
+                .filter(member -> member.is("method_declaration") && parameterCount(member) == 0 && returnsAValue(member))
                 .flatMap(method -> method.field("name").stream())
-                .map(name -> accessorProperty(name.text()))
-                .flatMap(Optional::stream);
+                .map(Node::text)
+                .filter(name -> !NOT_PROPERTIES.contains(name) && !name.matches("to[A-Z].*"));
 
-        return Stream.of(components, fields, accessors)
+        Stream<String> writers = publicMembers.stream()
+                .filter(member -> member.is("method_declaration") && parameterCount(member) == 1)
+                .flatMap(method -> method.field("name").stream())
+                .map(Node::text)
+                .filter(name -> name.matches("set[A-Z].*"));
+
+        return Stream.of(components, fields, readers, writers)
                 .flatMap(properties -> properties)
-                .filter(property -> !property.endsWith("Id"))
+                .filter(name -> !Words.isIdentifier(name))
+                .map(NoGodClassRule::property)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    private static boolean hasNoParameters(Node method) {
-        return method.field("parameters").stream().allMatch(parameters -> parameters.children().findAny().isEmpty());
+    private static long parameterCount(Node method) {
+        return method.field("parameters").stream().flatMap(Node::children).count();
     }
 
-    // getName -> name, isActive -> active ; tout autre nom n'est pas un accesseur.
-    private static Optional<String> accessorProperty(String method) {
-        return Optional.of(ACCESSOR.matcher(method))
-                .filter(java.util.regex.Matcher::matches)
-                .map(matcher -> matcher.group(1))
-                .map(rest -> Character.toLowerCase(rest.charAt(0)) + rest.substring(1));
+    private static boolean returnsAValue(Node method) {
+        return method.field("type").filter(type -> !type.text().equals("void")).isPresent();
+    }
+
+    // getName / setName / name -> name : lecture et écriture d'une même propriété ne comptent qu'une fois.
+    private static String property(String member) {
+        List<String> words = Words.of(member);
+        return String.join("", words.size() > 1 && (READ_VERBS.contains(words.get(0)) || words.get(0).equals("set"))
+                ? words.subList(1, words.size()) : words);
     }
 }

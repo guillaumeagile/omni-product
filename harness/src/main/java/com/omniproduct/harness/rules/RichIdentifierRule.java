@@ -24,8 +24,6 @@ import java.util.stream.Stream;
 public final class RichIdentifierRule implements HarnessRule {
 
     private static final Set<String> RICH = Set.of("UUID", "Ulid");
-    private static final Set<String> POOR = Set.of(
-            "String", "int", "long", "short", "byte", "Integer", "Long", "Short", "Byte", "BigInteger", "Object");
 
     private final Predicate<String> packageFilter;
 
@@ -65,12 +63,12 @@ public final class RichIdentifierRule implements HarnessRule {
         if (RICH.contains(type)) {
             return Optional.empty();
         }
-        if (POOR.contains(type)) {
-            return Optional.of("is a " + type + ": use a UUID (v7) or Ulid, ideally wrapped in a record.");
-        }
+        // Tout ce qui n'est ni UUID/Ulid ni un type du projet est un identifiant pauvre (String, long, BigInteger,
+        // CharSequence, Object, ...) : on ne tient pas de liste de types interdits, qu'il suffirait de contourner.
         return Optional.ofNullable(declaredTypes.get(type))
-                .filter(declaration -> !wrapsExactlyOneRichValue(declaration))
-                .map(declaration -> "has type '" + type + "' which is not a record wrapping exactly one UUID or Ulid.");
+                .map(declaration -> Optional.of(declaration).filter(d -> !wrapsExactlyOneRichValue(d))
+                        .map(d -> "has type '" + type + "' which is not a record wrapping exactly one UUID or Ulid."))
+                .orElseGet(() -> Optional.of("is a " + type + ": use a UUID (v7) or Ulid, ideally wrapped in a record."));
     }
 
     private static boolean wrapsExactlyOneRichValue(Node declaration) {
@@ -81,31 +79,26 @@ public final class RichIdentifierRule implements HarnessRule {
         return declaration.is("record_declaration") && componentTypes.size() == 1 && RICH.contains(componentTypes.get(0));
     }
 
-    // v4 : UUID.randomUUID() / new UUID(...) qui alimentent un identifiant (initialiseur, affectation, new XxxId(...)).
+    // Tout UUID qui n'est pas un v7, où qu'il soit construit dans le modèle (initialiseur, helper `newId()`, lambda,
+    // référence de méthode) : on ne suit pas le flux de données jusqu'au champ, un modèle n'a aucune raison d'en fabriquer un.
     private static Stream<Violation> randomIdentifiers(SourceFile file) {
-        Stream<Node> initializers = Identifiers.uses(file).flatMap(use -> use.initializer().stream());
-        Stream<Node> assignments = file.descendants()
-                .filter(node -> node.is("assignment_expression"))
-                .filter(node -> node.field("left").map(Node::text).filter(left -> Identifiers.isIdName(left.substring(left.lastIndexOf('.') + 1))).isPresent())
-                .flatMap(node -> node.field("right").stream());
-        Stream<Node> identifierConstructors = file.descendants()
-                .filter(node -> node.is("object_creation_expression"))
-                .filter(node -> node.field("type").map(Identifiers::simpleName).filter(type -> type.endsWith("Id")).isPresent())
-                .flatMap(node -> node.field("arguments").stream());
-
-        return Stream.of(initializers, assignments, identifierConstructors)
-                .flatMap(expressions -> expressions)
-                .flatMap(Node::selfAndDescendants)
-                .filter(RichIdentifierRule::buildsVersion4OrEmptyUuid)
+        return file.descendants()
+                .filter(RichIdentifierRule::buildsNonV7Uuid)
                 .map(node -> new Violation(file.path(), node.line(),
                         "'" + node.text() + "' builds a UUID v4 / empty UUID: use a v7 (UuidCreator.getTimeOrderedEpoch()) or a Ulid."));
     }
 
-    private static boolean buildsVersion4OrEmptyUuid(Node node) {
+    private static boolean buildsNonV7Uuid(Node node) {
         return switch (node.type()) {
-            case "method_invocation" -> node.field("name").map(Node::text).filter("randomUUID"::equals).isPresent()
-                    && node.field("object").map(RichIdentifierRule::simpleName).filter("UUID"::equals).isPresent();
+            case "method_invocation" -> {
+                String method = node.field("name").map(Node::text).orElse("");
+                // Sans objet, c'est un import statique : `randomUUID()`.
+                String owner = node.field("object").map(RichIdentifierRule::simpleName).orElse("UUID");
+                yield (owner.equals("UUID") && Set.of("randomUUID", "nameUUIDFromBytes").contains(method))
+                        || (owner.equals("UuidCreator") && method.startsWith("get") && !method.startsWith("getTimeOrderedEpoch"));
+            }
             case "object_creation_expression" -> node.field("type").map(RichIdentifierRule::simpleName).filter("UUID"::equals).isPresent();
+            case "method_reference" -> node.text().matches(".*\\bUUID::randomUUID");
             default -> false;
         };
     }

@@ -45,7 +45,7 @@ public final class Steps {
                 new NoGodClassRule(4, IS_MODEL),
                 new SingleConcernRule(UbiquitousLanguageMap.load(), 1, IS_MODEL_OR_SERVICE),
                 new FanOutRule(MODEL_PACKAGE + ".."),
-                new NoPersistenceInDomainRule(MODEL_PACKAGE + ".."),
+                new NoPersistenceInDomainRule(MODEL_PACKAGE + "..", IS_MODEL),
                 new EntityMustImplementIdentifiableRule(MODEL_PACKAGE + ".."),
                 new NoServicesInEntityConstructorRule(MODEL_PACKAGE + ".."),
                 new RichIdentifierRule(IS_MODEL),

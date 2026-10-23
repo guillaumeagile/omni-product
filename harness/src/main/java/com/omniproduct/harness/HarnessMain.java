@@ -1,6 +1,7 @@
 package com.omniproduct.harness;
 
 import com.omniproduct.harness.rules.EntityMustImplementIdentifiableRule;
+import com.omniproduct.harness.rules.FanOutRule;
 import com.omniproduct.harness.rules.ImmutableDataStructuresRule;
 import com.omniproduct.harness.rules.NoGodClassRule;
 import com.omniproduct.harness.rules.NoInheritanceRule;
@@ -118,6 +119,7 @@ public final class HarnessMain {
                 new ImmutableDataStructuresRule(pkg -> pkg.contains(".model")),
                 new SingleConcernRule(UbiquitousLanguageMap.load(), 1, pkg -> pkg.contains(".model") || pkg.contains(".service")),
                 new EntityMustImplementIdentifiableRule("..model.."),
+                new FanOutRule("..model.."),
                 new NoInheritanceRule("..model..", "..service.."),
                 new NoPersistenceInDomainRule("..model.."));
 

@@ -50,7 +50,14 @@ public final class ArchFindings {
                 .findFirst()
                 .map(scope -> detail.contains("annotat")
                         ? annotationLine(scope, target)
-                        : scope.field("name").orElse(scope).line());
+                        : nameOf(scope).line());
+    }
+
+    // Le nom d'un type ou d'une méthode ; pour un champ, celui de son premier déclarateur (pas ses annotations).
+    private static Node nameOf(Node scope) {
+        return scope.field("name")
+                .or(() -> scope.field("declarator").flatMap(declarator -> declarator.field("name")))
+                .orElse(scope);
     }
 
     private static int annotationLine(Node scope, String target) {

@@ -2,6 +2,7 @@ package com.omniproduct.harness.rules;
 
 import com.omniproduct.harness.ArchConditions;
 import com.omniproduct.harness.ArchFindings;
+import com.omniproduct.harness.DomainTypes;
 import com.omniproduct.harness.HarnessRule;
 import com.omniproduct.harness.SourceSet;
 import com.omniproduct.harness.Violation;
@@ -16,7 +17,7 @@ import java.util.stream.Stream;
 // de même que les interfaces et les enums.
 public final class EntityMustImplementIdentifiableRule implements HarnessRule {
 
-    public static final String MARKER_INTERFACE = "Identifiable";
+    private static final String MARKER_INTERFACE = DomainTypes.MARKER_INTERFACE;
 
     private final String modelPackage;
 
@@ -41,7 +42,7 @@ public final class EntityMustImplementIdentifiableRule implements HarnessRule {
                 .that().resideInAPackage(modelPackage)
                 .and().areNotInterfaces().and().areNotEnums().and().areNotRecords().and().areNotAnonymousClasses()
                 .should(ArchConditions.eachViolation("implement " + MARKER_INTERFACE, type -> Stream.of(type)
-                        .filter(t -> t.getAllRawInterfaces().stream().noneMatch(i -> i.getSimpleName().equals(MARKER_INTERFACE)))
+                        .filter(t -> !DomainTypes.implementsMarker(t))
                         .map(t -> t.getDescription() + " does not implement <" + MARKER_INTERFACE + "> in " + t.getSourceCodeLocation()))));
     }
 }

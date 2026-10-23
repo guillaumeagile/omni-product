@@ -4,6 +4,7 @@ import com.omniproduct.harness.rules.ImmutableDataStructuresRule;
 import com.omniproduct.harness.rules.NoGodClassRule;
 import com.omniproduct.harness.rules.NoInheritanceRule;
 import com.omniproduct.harness.rules.NoPersistenceInDomainRule;
+import com.omniproduct.harness.rules.SingleConcernRule;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -114,6 +115,7 @@ public final class HarnessMain {
         List<HarnessRule> rules = List.of(
                 new NoGodClassRule(4, pkg -> pkg.contains(".model")),
                 new ImmutableDataStructuresRule(pkg -> pkg.contains(".model")),
+                new SingleConcernRule(UbiquitousLanguageMap.load(), 1, pkg -> pkg.contains(".model") || pkg.contains(".service")),
                 new NoInheritanceRule("..model..", "..service.."),
                 new NoPersistenceInDomainRule("..model.."));
 

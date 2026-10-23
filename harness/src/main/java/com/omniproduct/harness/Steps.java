@@ -1,11 +1,13 @@
 package com.omniproduct.harness;
 
+import com.omniproduct.harness.rules.BareIdentifierIsWeakRule;
 import com.omniproduct.harness.rules.EntityMustImplementIdentifiableRule;
 import com.omniproduct.harness.rules.FanOutRule;
 import com.omniproduct.harness.rules.NoGodClassRule;
 import com.omniproduct.harness.rules.NoInheritanceRule;
 import com.omniproduct.harness.rules.NoPersistenceInDomainRule;
 import com.omniproduct.harness.rules.NoServicesInEntityConstructorRule;
+import com.omniproduct.harness.rules.RichIdentifierRule;
 import com.omniproduct.harness.rules.SingleConcernRule;
 
 import java.util.List;
@@ -36,7 +38,7 @@ public final class Steps {
         return Map.<String, List<HarnessRule>>of("1", step1(), ALL, step1()).get(step);
     }
 
-    // HA4, HA5, HA6, HA7, HA8, HA9, HA10 (+ HA11 / HA11.1)
+    // HA4, HA5, HA6, HA7, HA8, HA9, HA10, HA11, HA11.1 (avertissement)
     private static List<HarnessRule> step1() {
         return List.of(
                 new NoInheritanceRule(MODEL_PACKAGE + "..", SERVICE_PACKAGE + ".."),
@@ -45,7 +47,9 @@ public final class Steps {
                 new FanOutRule(MODEL_PACKAGE + ".."),
                 new NoPersistenceInDomainRule(MODEL_PACKAGE + ".."),
                 new EntityMustImplementIdentifiableRule(MODEL_PACKAGE + ".."),
-                new NoServicesInEntityConstructorRule(MODEL_PACKAGE + ".."));
+                new NoServicesInEntityConstructorRule(MODEL_PACKAGE + ".."),
+                new RichIdentifierRule(IS_MODEL),
+                new BareIdentifierIsWeakRule(IS_MODEL_OR_SERVICE));
     }
 
     private static boolean isIn(String pkg, String base) {

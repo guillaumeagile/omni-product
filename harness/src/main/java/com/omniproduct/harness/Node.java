@@ -43,6 +43,10 @@ public record Node(SourceFile file, TSNode raw) {
         return children().flatMap(child -> Stream.concat(Stream.of(child), child.descendants()));
     }
 
+    public Stream<Node> selfAndDescendants() {
+        return Stream.concat(Stream.of(this), descendants());
+    }
+
     public Optional<Node> field(String name) {
         return Optional.ofNullable(raw.getChildByFieldName(name))
                 .filter(node -> !node.isNull())

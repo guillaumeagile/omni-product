@@ -30,12 +30,16 @@ class HarnessMainTest {
     // S'il est vert ici, c'est lui qui est cassé, pas le code.
     @Test
     void failsOnTheLegacyWorkshopCode() {
-        Run result = run("--step", "1.1", "--classes", "../build/classes/java/main", "../src/main/java");
+        Run result = run("--step", "1", "--classes", "../build/classes/java/main", "../src/main/java");
 
         assertThat(result.exitCode()).isEqualTo(1);
-        assertThat(result.out()).contains("[FAIL] HA5");
+        // Chaque règle de l'étape 1 qui doit trouver un problème dans le legacy le trouve.
+        assertThat(result.out()).contains("[FAIL] HA5", "[FAIL] HA6", "[FAIL] HA7", "[FAIL] HA8", "[FAIL] HA9", "[FAIL] HA10");
         assertThat(result.out()).contains("'Product' has");
-        assertThat(result.out()).contains("[FAIL] HA8");
+        assertThat(result.out()).contains("Supplier.java:", "which looks like a service");
+        // Le legacy n'hérite d'aucune classe : HA4 est vert, légitimement. HA2 n'est pas de l'étape 1.
+        assertThat(result.out()).contains("[PASS] HA4");
+        assertThat(result.out()).doesNotContain("HA2");
         assertThat(result.out()).contains("Product.java:");
         assertThat(result.out()).contains("HARNESS RESULT: FAIL");
     }

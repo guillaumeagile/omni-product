@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Harnais CUPID : vérifications structurelles déterministes (même code en entrée, même verdict en sortie).
 #
-# Usage : ./harness.sh [étape]        (étape : 1.1 par défaut)
+# Usage : ./harness.sh [étape]        (étape : 1 par défaut)
 #         ./harness.sh --test         (lance les tests du harnais lui-même)
 #
 # Compile le projet, puis lance le harnais (tree-sitter sur les sources, ArchUnit sur le bytecode).
@@ -22,7 +22,7 @@ if [ "${1:-}" = "--test" ]; then
     exec "${GRADLE[@]}" :harness:test
 fi
 
-STEP="${1:-1.1}"
+STEP="${1:-1}"
 
 echo "== Compilation =="
 "${GRADLE[@]}" classes :harness:installDist -q

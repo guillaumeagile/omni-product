@@ -37,7 +37,7 @@ En C#, le harnais s'appuie sur Roslyn (arbre syntaxique + `Compilation` sémanti
 - Contrats : `HarnessRule` (`id`, `name`, `severity`, `check(SourceSet) -> List<Violation>`),
   `Violation(file, line, message)`, `HarnessSeverity`.
 - `SourceSet` : fichiers `.java` triés (ordre déterministe), arbres tree-sitter, classes ArchUnit importées.
-- Runner CLI : `--step 1.1`, sortie `[PASS] / [FAIL] / [WARN] HAx - nom`, code de sortie 0 seulement si aucune erreur.
+- Runner CLI : `--step 1`, sortie `[PASS] / [FAIL] / [WARN] HAx - nom`, code de sortie 0 seulement si aucune erreur.
 - Première règle de bout en bout : HA5, pas de god class, avec son test de pinning.
 - Critère : `./gradlew :harness:test` vert ; le runner tourne sur `src/main/java/com/omniproduct`.
 

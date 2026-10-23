@@ -1,27 +1,17 @@
 package com.omniproduct.harness;
 
-import com.omniproduct.harness.rules.EntityMustImplementIdentifiableRule;
-import com.omniproduct.harness.rules.FanOutRule;
-import com.omniproduct.harness.rules.ImmutableDataStructuresRule;
-import com.omniproduct.harness.rules.NoGodClassRule;
-import com.omniproduct.harness.rules.NoInheritanceRule;
-import com.omniproduct.harness.rules.NoPersistenceInDomainRule;
-import com.omniproduct.harness.rules.SingleConcernRule;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 
 public final class HarnessMain {
 
-    private static final Set<String> STEPS = Set.of("1.1", "all");
-
     private static final String USAGE =
-            "Usage: harness [--step 1.1] --classes <dossier-de-classes> <dossier-de-sources> [autres-sources...]";
+            "Usage: harness [--step 1] --classes <dossier-de-classes> <dossier-de-sources> [autres-sources...]";
 
     private HarnessMain() {
     }
@@ -69,8 +59,8 @@ public final class HarnessMain {
             if (sources.isEmpty() || classes.isEmpty()) {
                 throw new IllegalArgumentException(USAGE);
             }
-            if (!STEPS.contains(step)) {
-                throw new IllegalArgumentException("Unknown --step value '" + step + "'. Use 1.1 or omit.");
+            if (!Steps.names().contains(step)) {
+                throw new IllegalArgumentException("Unknown --step value '" + step + "'. Use 1 or omit.");
             }
         }
     }
@@ -114,14 +104,7 @@ public final class HarnessMain {
             return 2;
         }
 
-        List<HarnessRule> rules = List.of(
-                new NoGodClassRule(4, pkg -> pkg.contains(".model")),
-                new ImmutableDataStructuresRule(pkg -> pkg.contains(".model")),
-                new SingleConcernRule(UbiquitousLanguageMap.load(), 1, pkg -> pkg.contains(".model") || pkg.contains(".service")),
-                new EntityMustImplementIdentifiableRule("..model.."),
-                new FanOutRule("..model.."),
-                new NoInheritanceRule("..model..", "..service.."),
-                new NoPersistenceInDomainRule("..model.."));
+        List<HarnessRule> rules = Steps.rules(options.step());
 
         System.out.println("CUPID step " + options.step() + " harness - deterministic structural checks");
         System.out.println("Analyzed " + sources.files().size() + " source file(s), " + sources.classes().size() + " class(es)\n");

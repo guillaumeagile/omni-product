@@ -29,4 +29,10 @@ class NoPersistenceInDomainRuleTest {
     void acceptsDomainWithoutPersistence() {
         assertThat(check("good")).isEmpty();
     }
+
+    // Témoin HA8 : un modèle qui ne sait pas comment il est stocké, avec des noms proches du vocabulaire de stockage.
+    @Test
+    void acceptsAModelThatOnlyLooksLikeStorageButIsNot() {
+        assertThat(check("ha8.good")).isEmpty();
+    }
 }

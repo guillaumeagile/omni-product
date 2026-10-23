@@ -1,0 +1,118 @@
+### Step 1: Single Responsibility → Unix Philosophy
+**"One class, one reason to change"**
+
+**Problem**: `Product` handles catalog (slug, discounts, images), pricing (`Price`), storage (stock, quantity,
+warehouse), supplier (`supplier`, `suppliersRegions`) and transport (kilos, volume) — all at once. `Supplier` holds
+its `Product`s and even takes services in its constructor. The two entities know the database (JPA annotations),
+reference each other, and identify themselves with a `String`.
+
+**Plan**:
+- Identify every distinct concern currently living in `Product` (and `Supplier`)
+- Extract each concern into its own class with a single focus
+- Use the domain vocabulary to name each class (not `ProductCatalogManager` — just `Catalog`)
+
+
+
+## **Exercise**
+
+extract a Product smallest entity that fits the Storage BC
+
+in the Storage sub domain, keep only properties that are useful for stocking the merchandise in a Warehouse
+
+same for catalog, pricing, supplier notification, and transport
+
+The code you work on lives in `src/main/java/com/omniproduct/model` (the entities) and
+`src/main/java/com/omniproduct/service` (the services). The `domain/` package (carbon port) and
+`infrastructure/` are not part of the exercise.
+
+## Assessment
+
+run your code through our harness to verify you succeed this part:
+
+```
+./harness.sh
+```
+
+Deterministic and AST-based (see `harness/`), not AI-guided - same code in, same pass/fail out, every time. The
+source is parsed with [tree-sitter](https://tree-sitter.github.io/tree-sitter) and the compiled classes are checked
+with [ArchUnit](https://www.archunit.org). Rule implementations and their pinning tests live in
+`harness/src/main/java/com/omniproduct/harness/rules/` and `harness/src/test/java/com/omniproduct/harness/rules/`.
+
+The script compiles the project first: a project that does not compile never passes. Exit code `0` means every
+check passes, `1` that at least one fails, `2` that the harness could not run (bad usage, nothing compiled).
+`[WARN]` lines never fail the harness. `./harness.sh --test` runs the harness' own tests.
+
+Do not relax or rewrite the harness rules to make the exercise pass - that defeats the assessment. If a rule
+genuinely looks wrong, flag it.
+
+### HA4 - Composable: no inheritance
+
+extend through composition, not inheritance. A class in `com.omniproduct.model` or `com.omniproduct.service` must
+not extend another class. Implementing interfaces is fine, and so are the types Java forces you to derive: `Object`,
+records, enums and exceptions.
+
+### HA5 - no god class
+
+no class shall have more than 4 public properties in `com.omniproduct.model`. A property is a public field, a
+public `getX()`/`isX()` accessor, or a record component. Properties named `id` or ending in `Id` are ignored: they
+are identifiers, not behavioural surface.
+
+### HA6 - Single Concern
+
+a class's public methods must belong to at most one bounded-context concern (Catalog, Pricing, Storage, Supplier,
+Lifecycle, Notification, Transport - see `harness/src/main/resources/ubiquitous-language-map.json`). A method is
+assigned to a concern by matching its name against that concern's vocabulary, once its leading verb (`get`, `set`,
+`find`, `create`, ...) is removed: `getSlug` belongs to Catalog, `setStock` to Storage. Generic names (`getId`,
+`getName`, `findById`) belong to no concern. A class whose public API spans two or more concerns is mixing
+responsibilities - the exact `Product` smell this exercise targets.
+
+The map also lists, per type name, vocabulary that must never creep back into that type: once `Slug` has been moved
+out of `Product`, `Product.getSlug` fails the harness.
+
+### HA7 - Fan-out
+
+applies to entities - classes in `com.omniproduct.model` that implement `Identifiable` (see HA9) or declare an `id`
+field. An entity may reference NO other entity type (strict cap of 0) - via fields, method or constructor
+parameters, return types, or generic arguments such as `List<Product>`; entities relate by identifier (e.g.
+`SupplierId`) only. Value objects (records, classes without identity), services and JDK types don't count. A class
+nested in an entity counts as that entity. An entity wiring together many unrelated entities is orchestrating too
+many concerns even if it stays under the HA5 property cap or doesn't trip HA6's vocabulary check.
+
+### HA8 - No Persistence in Domain
+
+a domain model must not know how it is stored. Any class in `com.omniproduct.model` depending on
+`jakarta.persistence.*` (`@Entity`, `@Table`, `@Id`, `@Column`, `@OneToMany`, `@Embedded`, ...) or on Spring Data
+fails the harness, whatever the number of other concerns it mixes in. Move the mapping into dedicated
+infrastructure types (JPA entities or mapping classes living outside the model) instead.
+
+### HA9 - Entities must implement `Identifiable`
+
+closes a loophole HA7 would otherwise leave open. Every class declared in `com.omniproduct.model` must implement an
+interface named `Identifiable`. Records are the value objects of the model: they have no identity and are exempt,
+as are interfaces and enums. If a class in the model is really a value object, make it a record; if it's an entity,
+implement `Identifiable`.
+
+### HA10 - No services in entity constructors
+
+an entity (a model class implementing `Identifiable` or declaring an `id` field, see HA9) must not take a service -
+a type living under `com.omniproduct.service` or simply named `*Service` - as a constructor parameter. An entity
+models data and identity; it should be constructible from plain values, value objects, or other entities. Accepting
+a service inverts the dependency direction the workshop is teaching - services depend on entities, never the other
+way round. Move the orchestration into the service layer instead.
+
+### HA11 - Identifiers are rich objects (UUID v7+ or ULID)
+
+every `id` / `*Id` / `*Ids` field, local variable, record component, getter return type or parameter of the model
+(anything outside the `service` package) must be a `UUID` or a `Ulid`, or a record wrapping exactly one of them
+(`record ProductId(UUID value)`). A `String`, `int` or `long` identifier is a violation. For `*Ids` collections and
+maps the element and key types are checked. "At least v7" is checked by shape: `UUID.randomUUID()` (v4) and
+`new UUID(...)` are flagged where they build an identifier; a v7 passes.
+
+The JDK has no UUID v7 generator: add a library such as
+[uuid-creator](https://github.com/f4b6a3/uuid-creator) (`UuidCreator.getTimeOrderedEpoch()`) or
+[ulid-creator](https://github.com/f4b6a3/ulid-creator) (`UlidCreator.getUlid()`).
+
+**HA11.1 (warning only, `[WARN]`):** primitive obsession on identifiers, services included. Any id member whose type
+is not declared in the analysed source (so a JDK or library type used raw: `String`, `int`, `UUID`, `Ulid`, `URI`,
+...) gets a warning asking for a domain record, so a `ProductId` cannot be mixed up with a `SupplierId`. A `String`
+id therefore both fails HA11 and warns in HA11.1.

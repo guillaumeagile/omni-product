@@ -41,3 +41,25 @@ en phase 2). La liste exacte des checks est un livrable de la phase 3.
 ## Ordre de portage (phase 3)
 
 HA5 → HA4, HA2 → HA6 → HA8 → HA7 → HA9, HA10 → HA11, HA11.1.
+
+## État d'implémentation et étapes
+
+L'**étape 1** (`./harness.sh`, `docs/CUPID-step-1.md`) couvre **HA4 à HA11** uniquement. Les règles se règlent
+dans `Steps.java`.
+
+| Règle | Implémentée | Étape | Notes |
+|---|---|---|---|
+| HA1 idiomes | non | hors étape 1 | à décider (Error Prone ou Checkstyle) |
+| HA2 données immuables | oui (`ImmutableDataStructuresRule`) | étape suivante | écrite et testée, pas branchée dans l'étape 1 |
+| HA4 pas d'héritage | oui | 1 | modèle + services |
+| HA5 pas de god class | oui | 1 | seuil 4 (le document C# annonce 6 mais le code C# exécute 4) |
+| HA6 single concern | oui | 1 | `ubiquitous-language-map.json` adapté au vocabulaire Java |
+| HA7 fan-out | oui | 1 | entité = implémente `Identifiable` ou déclare un champ `id` |
+| HA8 pas de persistance | oui, partiellement | 1 | dépendance vers `jakarta.persistence` / Spring Data ; **non porté** : champs fantômes `*Csv`/`*Json` et méthodes `Sync*`/`Hydrate*` |
+| HA9 `Identifiable` | oui | 1 | records, interfaces et enums exemptés |
+| HA10 pas de service au constructeur | oui | 1 | échoue sur `Supplier` (constructeur ajouté à l'exercice) |
+| HA11 identifiants riches | oui | 1 | UUID/Ulid ou record qui en enveloppe un ; UUID v4 détecté |
+| HA11.1 identifiant nu | oui | 1 | avertissement seulement |
+
+Périmètre : `com.omniproduct.model` (et `com.omniproduct.service` pour HA4, HA6, HA11.1). Le port carbone
+(`domain/`) et l'infrastructure ne font pas partie de l'exercice.

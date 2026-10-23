@@ -16,7 +16,9 @@ Rules are in `harness/src/main/java/com/omniproduct/harness/rules/`, steps in `S
    different casing or separator, a plural, another verb or suffix must not be enough to evade it. Reason on **words**
    (`Words.of`, `Words.isIdentifier`), combine several independent signals (name, package, suffix, annotation, types
    in generics, bytecode dependencies) and prefer "anything that is not X" over a blacklist of forbidden names.
-   A trivial false negative is a defect of the rule. Document the remaining ones in `docs/harness-rules.md`.
+   Combining signals must lower **both** error kinds: harder to evade (fewer false negatives) and fairer (a single
+   weak signal never condemns, so fewer false positives). A trivial false negative or a false positive is a defect of
+   the rule. Document the remaining limits in `docs/harness-rules.md`.
 2. **Never fix the model to turn the harness green.** `model/` and `service/` are *deliberately poorly designed*. A
    harness that finds problems there proves it works; a harness that is green on the legacy is suspicious. The only
    allowed edit of legacy code is an explicit exercise change requested by the user (e.g. `Supplier` taking services

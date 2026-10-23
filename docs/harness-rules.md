@@ -90,5 +90,12 @@ régresse vers l'égalité de chaînes, un test échoue.
 - HA10 : un service injecté par setter ou par champ `@Autowired`, ou pris par une méthode d'usine statique, n'est pas vu.
 - HA11 : le flux de données n'est pas suivi (un `Long` converti en `UUID` par un helper n'est pas détecté).
 - HA7 : la dépendance est lue dans le bytecode, donc une référence par réflexion ou par `Object` passe.
-- Plus une règle est heuristique, plus un faux positif est possible (un mot `id` dans une variable locale sans rapport) :
-  on le corrige en affinant le mot, jamais en désactivant la règle.
+
+## Ce que « heuristique » promet
+
+Une heuristique recoupe plusieurs indices indépendants au lieu de se fier à un seul nom : elle est plus difficile à
+contourner (moins de faux négatifs) **et** plus juste (moins de faux positifs), parce qu'un indice isolé ne suffit
+plus à condamner. C'est l'intention. Les choix qui la tiennent : mots entiers (`valid`, `android` ne sont pas des
+identifiants), contexte « faible » qui ne compte qu'en dernier recours (Lifecycle), types lus seulement quand le nom
+ne dit rien. Si un faux positif apparaît quand même, c'est un défaut de la règle : on ajoute un indice ou on affine le
+mot, on ne désactive pas la règle.

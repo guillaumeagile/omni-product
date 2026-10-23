@@ -83,13 +83,34 @@ trivial est un défaut de la règle.
 Chaque contournement est écrit dans `HeuristicEvasionTest` (et son pendant `SingleConcernRuleTest`) : si une règle
 régresse vers l'égalité de chaînes, un test échoue.
 
-### Limites connues (faux négatifs restants)
+### Passe faux négatifs (tests `FalseNegativeProbeTest`, `ArchEvasionTest`, fixtures `*/evasion`)
 
-- HA6 : un nom sans aucun mot du vocabulaire (`apply`, `process`) avec des types génériques n'est classé nulle part ;
-  la carte `ubiquitous-language-map.json` doit être enrichie avec le métier.
-- HA10 : un service injecté par setter ou par champ `@Autowired`, ou pris par une méthode d'usine statique, n'est pas vu.
-- HA11 : le flux de données n'est pas suivi (un `Long` converti en `UUID` par un helper n'est pas détecté).
-- HA7 : la dépendance est lue dans le bytecode, donc une référence par réflexion ou par `Object` passe.
+Corrigés pendant la passe (chaque cas est un test) :
+
+- HA5 : les membres publics d'une **interface** (publics par défaut) ; les constantes `public static` ne comptent pas.
+- HA6 : un mot-clé multi-mots se trouve dans n'importe quel ordre (`getLabelForDisplay`) ; le vocabulaire français
+  `Tva` est rangé dans Pricing.
+- HA7 : une entité qui atteint une autre entité **à travers un value object** (`Basket -> Offer(Supplier)`) est signalée.
+- HA8 : verbes `flush` et `reload` ; forme stockée `...Serialized` et `...Dump`.
+- HA9 : un **record qui porte un identifiant** est une entité : il doit implémenter `Identifiable`. Avant, il échappait
+  à HA7, HA9 et HA10. Un record sans identifiant reste un value object.
+- HA10 : un record entité est aussi contrôlé.
+- HA11 : `var` n'est plus une fausse alerte ; le paramètre d'un setter d'identifiant (`setSupplierId(String value)`) est
+  vérifié ; les identifiants métier `siren`, `siret`, `sku`, `ean`, `gtin`, `isbn` sont des identifiants.
+
+Restent des faux négatifs, assumés (par conception ou faute de moyen sûr de les voir) :
+
+- HA6 : un vocabulaire métier manquant (`getCost` pour Pricing) ; un nom générique (`apply`, `process`) sans type
+  du vocabulaire. Le remède est d'enrichir `ubiquitous-language-map.json`, pas de durcir la règle.
+- HA7 : la fuite est suivie sur **un** niveau de value object seulement.
+- HA8 : `toJson`/`fromJson` ne sont pas signalés (risque de faux positif sur un export légitime) ; `@Transactional`
+  (Spring) n'est pas dans la liste (pas de Spring sur le classpath des tests).
+- HA10 : un service injecté par setter, par champ `@Autowired`, par une méthode d'usine statique, ou avec un nom neutre
+  (`PriceCalculator`, `Notifier`) n'est pas vu.
+- HA11 : le flux de données n'est pas suivi (un `Long` converti en `UUID` par un helper) ; un argument littéral passé à
+  un constructeur (`new Product("ABC")`) n'est pas un paramètre nommé ; un identifiant nommé `key`, `code` ou
+  `reference` n'est pas reconnu.
+- HA5 : un accesseur qui prend un paramètre n'est pas une propriété ; `protected` n'est pas compté.
 
 ## Ce que « heuristique » promet
 

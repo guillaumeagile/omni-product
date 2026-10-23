@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-// Ce que le harnais appelle une entité : une classe du modèle (pas un record, qui est un value object)
-// qui a une identité, c'est-à-dire qui implémente `Identifiable` ou déclare un champ `id`.
+// Ce que le harnais appelle une entité : un type du modèle qui a une identité, c'est-à-dire qui implémente
+// `Identifiable` ou déclare un champ `id` (ou `<nom>Id`, ou une annotation @Id). Un record est une entité s'il porte
+// un identifiant : un record sans identifiant est un value object, exempté de HA9.
 public final class DomainTypes {
 
     public static final String MARKER_INTERFACE = "Identifiable";
@@ -16,8 +17,13 @@ public final class DomainTypes {
     }
 
     public static boolean isEntity(JavaClass type) {
-        boolean isClass = !type.isInterface() && !type.isEnum() && !type.isRecord() && !type.isAnonymousClass();
-        return isClass && (implementsMarker(type) || declaresId(type));
+        boolean isType = !type.isInterface() && !type.isEnum() && !type.isAnonymousClass();
+        return isType && (implementsMarker(type) || declaresId(type));
+    }
+
+    // Un record sans identité : un value object, que HA7, HA9 et HA10 ne jugent pas comme une entité.
+    public static boolean isValueRecord(JavaClass type) {
+        return type.isRecord() && !isEntity(type);
     }
 
     public static boolean implementsMarker(JavaClass type) {

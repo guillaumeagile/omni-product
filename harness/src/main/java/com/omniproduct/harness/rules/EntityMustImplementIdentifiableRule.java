@@ -40,8 +40,9 @@ public final class EntityMustImplementIdentifiableRule implements HarnessRule {
     public List<Violation> check(SourceSet sources) {
         return ArchFindings.of(sources, ArchRuleDefinition.classes()
                 .that().resideInAPackage(modelPackage)
-                .and().areNotInterfaces().and().areNotEnums().and().areNotRecords().and().areNotAnonymousClasses()
+                .and().areNotInterfaces().and().areNotEnums().and().areNotAnonymousClasses()
                 .should(ArchConditions.eachViolation("implement " + MARKER_INTERFACE, type -> Stream.of(type)
+                        .filter(t -> !DomainTypes.isValueRecord(t))
                         .filter(t -> !DomainTypes.implementsMarker(t))
                         .map(t -> t.getDescription() + " does not implement <" + MARKER_INTERFACE + "> in " + t.getSourceCodeLocation()))));
     }

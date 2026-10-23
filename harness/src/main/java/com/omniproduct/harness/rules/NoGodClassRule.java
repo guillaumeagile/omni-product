@@ -44,7 +44,7 @@ public final class NoGodClassRule implements HarnessRule {
         return sources.files().stream()
                 .filter(file -> packageFilter.test(file.packageName()))
                 .flatMap(SourceFile::descendants)
-                .filter(node -> node.is("class_declaration", "record_declaration"))
+                .filter(node -> node.is("class_declaration", "record_declaration", "interface_declaration"))
                 .flatMap(this::violation)
                 .toList();
     }
@@ -67,9 +67,12 @@ public final class NoGodClassRule implements HarnessRule {
     private static final Set<String> NOT_PROPERTIES = Set.of("toString", "hashCode", "clone", "build", "copy", "builder");
 
     private static Set<String> publicProperties(Node type) {
+        // Dans une interface, un membre sans modifieur est public ; seul `private` le cache.
+        boolean interfaceType = type.is("interface_declaration");
         List<Node> publicMembers = type.field("body").stream()
                 .flatMap(Node::children)
-                .filter(member -> member.hasModifier("public") && !member.hasModifier("static"))
+                .filter(member -> (member.hasModifier("public") || (interfaceType && !member.hasModifier("private")))
+                        && !member.hasModifier("static"))
                 .toList();
 
         Stream<String> components = type.field("parameters").stream()

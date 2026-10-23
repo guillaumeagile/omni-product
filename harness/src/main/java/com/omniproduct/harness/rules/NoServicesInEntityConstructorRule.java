@@ -48,10 +48,10 @@ public final class NoServicesInEntityConstructorRule implements HarnessRule {
     public List<Violation> check(SourceSet sources) {
         return ArchFindings.of(sources, ArchRuleDefinition.classes()
                 .that().resideInAPackage(modelPackage)
-                .and().areNotInterfaces().and().areNotEnums().and().areNotRecords()
+                .and().areNotInterfaces().and().areNotEnums().and().areNotAnonymousClasses()
                 .should(ArchConditions.eachViolation("not take a service in their constructor", entity ->
                         entity.getConstructors().stream()
-                                .filter(constructor -> DomainTypes.isEntity(entity))
+                                .filter(constructor -> DomainTypes.isEntity(entity) && !DomainTypes.isValueRecord(entity))
                                 .flatMap(constructor -> constructor.getParameters().stream()
                                         .flatMap(parameter -> parameter.getType().getAllInvolvedRawTypes().stream())
                                         .filter(NoServicesInEntityConstructorRule::isService)

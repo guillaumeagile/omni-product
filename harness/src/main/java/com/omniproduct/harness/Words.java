@@ -3,14 +3,15 @@ package com.omniproduct.harness;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.IntStream;
 
 // Les règles raisonnent sur des mots, pas sur des chaînes exactes : `getProductSlug`, `fetch_slug`, `SLUGS` et
 // `slug()` parlent tous du slug. Un nom est découpé (camelCase, snake_case, acronymes), mis en minuscules et
 // ramené au singulier, ce qui rend la comparaison insensible à la casse, au séparateur et au pluriel.
 public final class Words {
 
-    private static final Set<String> IDENTIFIER_WORDS = Set.of("id", "identifier", "uuid", "guid", "uid");
+    // Les identifiants métier (SIREN, SKU, EAN...) sont des identifiants comme les autres : un String n'a rien à y faire.
+    private static final Set<String> IDENTIFIER_WORDS =
+            Set.of("id", "identifier", "uuid", "guid", "uid", "siren", "siret", "sku", "ean", "gtin", "isbn");
 
     private Words() {
     }
@@ -24,10 +25,10 @@ public final class Words {
                 .toList();
     }
 
-    // Suppose que `sub` apparaît dans `words`, de façon contiguë et dans l'ordre : [display, label] dans [get, display, label].
+    // Tous les mots de `sub` apparaissent dans `words`, dans n'importe quel ordre : [display, label] dans
+    // [label, for, display]. Un mot isolé se réduit à un test d'appartenance.
     public static boolean contains(List<String> words, List<String> sub) {
-        return !sub.isEmpty() && IntStream.rangeClosed(0, words.size() - sub.size())
-                .anyMatch(start -> words.subList(start, start + sub.size()).equals(sub));
+        return !sub.isEmpty() && words.containsAll(sub);
     }
 
     // Un nom parle d'identité dès qu'un de ses mots est id / identifier / uuid / guid / uid : productId, ID, product_id,

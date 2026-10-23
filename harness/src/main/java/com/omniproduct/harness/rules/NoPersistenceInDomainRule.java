@@ -25,8 +25,9 @@ public final class NoPersistenceInDomainRule implements HarnessRule {
             "jakarta.persistence..", "javax.persistence..", "org.hibernate..", "org.springframework.data..",
             "org.springframework.jdbc..", "org.springframework.orm..", "java.sql..", "javax.sql..",
             "org.jooq..", "org.mybatis..", "org.apache.ibatis..", "com.mongodb.."};
-    private static final Set<String> STORED_FORM_SUFFIXES = Set.of("csv", "json", "xml", "blob", "row");
-    private static final Set<String> STORAGE_VERBS = Set.of("sync", "hydrate", "persist", "serialize", "deserialize");
+    private static final Set<String> STORED_FORM_SUFFIXES = Set.of("csv", "json", "xml", "blob", "row", "serialized", "dump");
+    private static final Set<String> STORAGE_VERBS =
+            Set.of("sync", "hydrate", "persist", "serialize", "deserialize", "flush", "reload");
 
     private final String domainPackage;
     private final Predicate<String> packageFilter;

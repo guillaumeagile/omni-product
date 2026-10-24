@@ -40,6 +40,32 @@ Each baby step goes in its own pull request, so you can see how much code each r
   renamed? Answering these questions is how you learn the refactoring, not just the green light.
 - **Never touch `harness/`** in a PR.
 
+### The game
+
+Every pull request is refereed by a GitHub Action (`harness-game`). It runs the harness on the base branch and on
+your PR, then comments your PR with a scorecard: the rules that moved, your points, your level and your badges.
+
+- **Branch** `team-<name>/step-1/ha<N>-<what>`, for example `team-red/step-1/ha9-identifiable`. The first segment is
+  your team on the leaderboard.
+- **Target**: the rule in the PR title (`HA9 green: ...`), or in the branch name (`ha9`, `ha4-3`). Without a target,
+  the PR is off game.
+- **Accepted** when the target turns green, no other rule regresses, the project compiles and `harness/` is
+  untouched. Otherwise the check fails: push a fix, the scorecard updates.
+
+| You... | Points |
+|---|---|
+| turn the target green | +10 |
+| beat a boss (HA4.3 ADT, HA4.5 exhaustive switch) | +20 |
+| resolve a warning (`[WARN]`) | +3 |
+| remove violations on a rule that is still red | +1 each, up to +5 |
+| turn exactly one rule green (a real baby step) | +5 |
+| keep the diff small (50 changed lines or less, tests and Markdown excluded) | +3 |
+| break a rule that was green | -5 each |
+
+Badges: 🍼 Baby step, 🧼 No regression, 🤏 Small diff, 👑 Boss defeated, 🧠 Compiler-checked. After each merge, the
+pinned issue **CUPID workshop leaderboard** ranks the teams. Run `./harness.sh` locally before pushing: the referee
+uses the same harness.
+
 ## Assessment
 
 run your code through our harness to verify you succeed this part:

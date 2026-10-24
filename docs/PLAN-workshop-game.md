@@ -126,3 +126,15 @@ Deux ou trois PR de test sur une branche d'équipe jetable (une PR verte, une PR
 ## Ordre
 
 Lot 1 -> Lot 2 -> Lot 3 -> Lot 4 -> Lot 7 -> Lot 5 -> Lot 6. Phase 3 après l'atelier de l'étape 2.
+
+## État
+
+| Lot | État | Vérification |
+|---|---|---|
+| 1 résultats sealed | fait | tests du harnais + mutation sur le legacy (cast et résultat ignoré détectés) |
+| 2 rapport JSON | fait | test : le JSON reflète la sortie texte de l'étape 2 sur le legacy |
+| 3 arbitre | fait | tests sur paires de rapports ; essai local base/tête (baby step HA3 simulé : +18) |
+| 4 GitHub Action `harness-game` | écrite | étapes rejouées en local ; **pas encore jouée sur GitHub** (lot 7) |
+| 5 classement `harness-leaderboard` | écrit | tests du calcul ; **workflow pas encore joué sur GitHub** |
+| 6 textes étudiants | partiel | `CUPID-step-1.md` (règles du jeu) et `Workshop.md` faits ; `CUPID-step1-2.md` reste à passer en Java |
+| 7 essai du principe | à faire | PR de test à ouvrir puis supprimer |

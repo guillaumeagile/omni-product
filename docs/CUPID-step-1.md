@@ -25,6 +25,21 @@ The code you work on lives in `src/main/java/com/omniproduct/model` (the entitie
 `src/main/java/com/omniproduct/service` (the services). The `domain/` package (carbon port) and
 `infrastructure/` are not part of the exercise.
 
+## How to work: one pull request per baby step
+
+Each baby step goes in its own pull request, so you can see how much code each rule really costs:
+
+- **One PR = one rule turned green.** Run `./harness.sh`, pick one `[FAIL]` line, fix only that and open a PR. If
+  you are tempted to fix two rules at once, split the work into two PRs.
+- **Stack the PRs.** Branch each step from the previous one (`step-1/ha9-identifiable` from `step-1/ha8-no-jpa`), and
+  target the previous branch, so that each diff shows one step and nothing else.
+- **Name the rule in the title**: `HA9 green: Product and Supplier implement Identifiable`.
+- **Paste the harness output in the description**, before and after: the rule that turned green, and any rule
+  that turned red because of it (that happens, say so rather than hiding it).
+- **Read the diff before merging.** Small or large? Did it touch services too? Was the class split, or only
+  renamed? Answering these questions is how you learn the refactoring, not just the green light.
+- **Never touch `harness/`** in a PR.
+
 ## Assessment
 
 run your code through our harness to verify you succeed this part:

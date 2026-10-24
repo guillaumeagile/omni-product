@@ -74,7 +74,7 @@ public final class Steps {
                 new NoThrowInConstructorRule(IS_MODEL),
                 new ProductHasAdtPropertyRule(IS_MODEL),
                 new ValueObjectFactoryRule(IS_MODEL),
-                new MatchOverAdtRule(IS_MODEL),
+                new MatchOverAdtRule(IS_MODEL_OR_SERVICE),
                 new NoClockInModelRule(MODEL_PACKAGE + ".."),
                 new SellChecksCanSellBeforeWithdrawRule(IS_MODEL_OR_SERVICE)).stream()).toList();
     }

@@ -51,7 +51,7 @@ public final class SourceTypes {
         };
     }
 
-    // Arguments de type d'un type générique : Either<E, Price> -> [E, Price].
+    // Arguments de type d'un type générique : Validated<Price> -> [Price], Map<K, V> -> [K, V].
     public static List<Node> typeArguments(Node type) {
         return type.children().filter(child -> child.is("type_arguments")).flatMap(Node::children).toList();
     }

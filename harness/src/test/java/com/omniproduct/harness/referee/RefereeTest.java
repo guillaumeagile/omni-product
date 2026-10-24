@@ -132,6 +132,6 @@ class RefereeTest {
         assertThat(markdown).doesNotContain("| HA2 ", "| HA7 ");
         assertThat(lines.get(lines.size() - 1))
                 .isEqualTo(Scorecard.MARKER + "{\"target\":\"HA9\",\"outcome\":\"ACCEPTED\",\"score\":15,"
-                        + "\"badges\":[\"🍼 Baby step\",\"🧼 No regression\"]} -->");
+                        + "\"level\":\"Single Concern Adept (2/4)\",\"badges\":[\"🍼 Baby step\",\"🧼 No regression\"]} -->");
     }
 }

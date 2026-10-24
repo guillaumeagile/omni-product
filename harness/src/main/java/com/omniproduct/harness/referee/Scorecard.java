@@ -61,11 +61,11 @@ public final class Scorecard {
     }
 
     // Ce que le classement relit dans chaque commentaire de l'arbitre.
-    public record Marker(String target, String outcome, int score, List<String> badges) {
+    public record Marker(String target, String outcome, int score, String level, List<String> badges) {
     }
 
     private static String marker(Verdict verdict) {
-        Marker data = new Marker(verdict.target().orElse(""), verdict.outcome().name(), verdict.score(), verdict.badges());
+        Marker data = new Marker(verdict.target().orElse(""), verdict.outcome().name(), verdict.score(), verdict.level(), verdict.badges());
         try {
             return MARKER + JSON.writeValueAsString(data) + " -->";
         } catch (JsonProcessingException e) {

@@ -1,0 +1,59 @@
+# Classement de l'atelier : après chaque PR fusionnée, recalcule le tableau à partir des commentaires de l'arbitre
+# (workflow harness-game) sur toutes les PR fusionnées, et met à jour l'issue épinglée « CUPID workshop leaderboard ».
+name: harness-leaderboard
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+
+concurrency:
+  group: harness-leaderboard
+  cancel-in-progress: false
+
+jobs:
+  leaderboard:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TITLE: CUPID workshop leaderboard
+    steps:
+      # Le code de la branche cible fait foi (le classement n'exécute pas le code d'une PR).
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.5.0"
+
+      - name: Build the referee
+        run: gradle :harness:installDist -q
+
+      - name: Compute the leaderboard
+        run: |
+          gh pr list --state merged --limit 1000 --json number,headRefName,comments > "$RUNNER_TEMP/prs.json"
+          java -cp "harness/build/install/harness/lib/*" com.omniproduct.harness.referee.Leaderboard \
+            --prs "$RUNNER_TEMP/prs.json" --out "$RUNNER_TEMP/leaderboard.md"
+          cat "$RUNNER_TEMP/leaderboard.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Update the pinned issue
+        run: |
+          number=$(gh issue list --state open --search "\"$TITLE\" in:title" --json number,title \
+            --jq "map(select(.title == \"$TITLE\")) | .[0].number // empty")
+          if [ -z "$number" ]; then
+            url=$(gh issue create --title "$TITLE" --body-file "$RUNNER_TEMP/leaderboard.md")
+            gh issue pin "$url" || true
+          else
+            gh issue edit "$number" --body-file "$RUNNER_TEMP/leaderboard.md"
+          fi

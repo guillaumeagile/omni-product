@@ -94,7 +94,15 @@ models data and identity; it should be constructible from plain values, value ob
 a service inverts the dependency direction the workshop is teaching - services depend on entities, never the other
 way round. Move the orchestration into the service layer instead.
 
-### HA11 - Identifiers are rich objects (UUID v7+ or ULID)
+### HA11 - Domain concepts are not raw primitives
+
+a member of the model (field, parameter, record component or method return) whose name designates a concept of the
+ubiquitous language (`harness/src/main/resources/ubiquitous-language-map.json`, e.g. `slug`, `price`, `quantity`,
+`kilos`) must not be a raw `String`, `int`, `long`, `Double` or `BigDecimal`. Give it a domain type: a record holding
+the value, e.g. `record Price(BigDecimal amount)`. Generic names (`name`, `description`) are out of scope, and
+identifiers belong to HA12.
+
+### HA12 - Identifiers are rich objects (UUID v7+ or ULID)
 
 every `id` / `*Id` / `*Ids` field, local variable, record component, getter return type or parameter of the model
 (anything outside the `service` package) must be a `UUID` or a `Ulid`, or a record wrapping exactly one of them
@@ -106,7 +114,7 @@ The JDK has no UUID v7 generator: add a library such as
 [uuid-creator](https://github.com/f4b6a3/uuid-creator) (`UuidCreator.getTimeOrderedEpoch()`) or
 [ulid-creator](https://github.com/f4b6a3/ulid-creator) (`UlidCreator.getUlid()`).
 
-**HA11.1 (warning only, `[WARN]`):** primitive obsession on identifiers, services included. Any id member whose type
+**HA12.1 (warning only, `[WARN]`):** primitive obsession on identifiers, services included. Any id member whose type
 is not declared in the analysed source (so a JDK or library type used raw: `String`, `int`, `UUID`, `Ulid`, `URI`,
 ...) gets a warning asking for a domain record, so a `ProductId` cannot be mixed up with a `SupplierId`. A `String`
-id therefore both fails HA11 and warns in HA11.1.
+id therefore both fails HA12 and warns in HA12.1.

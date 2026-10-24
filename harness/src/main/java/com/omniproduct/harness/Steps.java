@@ -6,6 +6,7 @@ import com.omniproduct.harness.rules.FanOutRule;
 import com.omniproduct.harness.rules.NoGodClassRule;
 import com.omniproduct.harness.rules.NoPersistenceInDomainRule;
 import com.omniproduct.harness.rules.NoServicesInEntityConstructorRule;
+import com.omniproduct.harness.rules.PrimitiveObsessionRule;
 import com.omniproduct.harness.rules.RichIdentifierRule;
 import com.omniproduct.harness.rules.SingleConcernRule;
 
@@ -14,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-// Les règles que chaque étape de l'atelier fait passer. L'étape 1 (CUPID-step-1.md) couvre HA5 à HA11 ;
+// Les règles que chaque étape de l'atelier fait passer. L'étape 1 (CUPID-step-1.md) couvre HA5 à HA12.1 ;
 // HA4 (pas d'héritage) relève de l'étape 2 : sa règle reste dans le harnais, elle n'est simplement pas câblée ici.
 public final class Steps {
 
@@ -38,15 +39,17 @@ public final class Steps {
         return Map.<String, List<HarnessRule>>of("1", step1(), ALL, step1()).get(step);
     }
 
-    // HA5, HA6, HA7, HA8, HA9, HA10, HA11, HA11.1 (avertissement)
+    // HA5, HA6, HA7, HA8, HA9, HA10, HA11, HA12, HA12.1 (avertissement)
     private static List<HarnessRule> step1() {
+        UbiquitousLanguageMap language = UbiquitousLanguageMap.load();
         return List.of(
                 new NoGodClassRule(4, IS_MODEL),
-                new SingleConcernRule(UbiquitousLanguageMap.load(), 1, IS_MODEL_OR_SERVICE),
+                new SingleConcernRule(language, 1, IS_MODEL_OR_SERVICE),
                 new FanOutRule(MODEL_PACKAGE + ".."),
                 new NoPersistenceInDomainRule(MODEL_PACKAGE + "..", IS_MODEL),
                 new EntityMustImplementIdentifiableRule(MODEL_PACKAGE + ".."),
                 new NoServicesInEntityConstructorRule(MODEL_PACKAGE + ".."),
+                new PrimitiveObsessionRule(language, IS_MODEL),
                 new RichIdentifierRule(IS_MODEL),
                 new BareIdentifierIsWeakRule(IS_MODEL_OR_SERVICE));
     }

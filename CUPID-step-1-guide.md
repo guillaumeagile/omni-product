@@ -5,7 +5,7 @@ lire sa sortie. Il ne donne pas la réponse : la conception des parties Storage,
 Notification et Transport vous appartient.
 
 Lisez d'abord [docs/CUPID-step-1.md](docs/CUPID-step-1.md) pour l'énoncé du problème et la définition des règles
-(HA5 à HA11.1). Ce guide est le mode d'emploi.
+(HA5 à HA12.1). Ce guide est le mode d'emploi.
 
 ## 1. Ce que vous modifiez
 
@@ -36,7 +36,7 @@ Le script compile d'abord le projet. Un projet qui ne compile pas ne passe jamai
 - `1` : au moins une vérification échoue
 - `2` : le harnais n'a pas pu tourner
 
-Les lignes `[WARN]` ne font jamais échouer le harnais, mais les avertissements HA11.1 valent la peine d'être lus.
+Les lignes `[WARN]` ne font jamais échouer le harnais, mais les avertissements HA12.1 valent la peine d'être lus.
 
 Lancez-le une fois sur le code d'origine, avant toute modification. Vous devriez voir des échecs sur la plupart des
 règles : c'est le point de départ, pas un problème de votre installation. Gardez la sortie pour comparer avec les
@@ -56,7 +56,7 @@ faites : cet ordre marche mieux que de corriger les échecs dans l'ordre où ils
    `harness/src/main/resources/ubiquitous-language-map.json`. Les mots de ce fichier sont ceux que le harnais
    recherche, c'est donc un bon guide pour les noms que vous rencontrerez.
 2. **Retirer les identifiants qui ne sont pas des valeurs métier.** Décidez ce qui est un identifiant et ce qui est
-   une propriété. Repérez les identifiants (voir HA11, section 4) pour savoir lesquels seront à corriger à l'étape 8.
+   une propriété. Repérez les identifiants (voir HA11 et HA12, section 4) pour savoir lesquels seront à corriger aux étapes 8 et 9.
 3. **Découper les entités.** Extrayez une classe par préoccupation (HA5, HA6). Gardez chaque classe extraite petite.
 4. **Couper les références entre entités** (HA7). Une entité ne se relie à une autre que par son identifiant.
 5. **Retirer la persistance du modèle** (HA8). Le modèle n'importe pas JPA. Si le mapping reste nécessaire, il vit
@@ -64,7 +64,9 @@ faites : cet ordre marche mieux que de corriger les échecs dans l'ordre où ils
 6. **Faire déclarer à chaque classe du modèle ce qu'elle est** (HA9). Soit elle implémente `Identifiable`, soit
    c'est un record.
 7. **Retirer les services des constructeurs d'entités** (HA10). Déplacez l'orchestration dans un service.
-8. **Rendre les identifiants riches** (HA11). Chaque identifiant restant devient un `UUID` v7 ou un `Ulid`, ou un
+8. **Donner un type aux concepts du domaine** (HA11). Une valeur brute qui porte un concept (`String slug`,
+   `long price`, `int quantity`) devient un record du domaine (`record Price(BigDecimal amount)`).
+9. **Rendre les identifiants riches** (HA12). Chaque identifiant restant devient un `UUID` v7 ou un `Ulid`, ou un
    record qui en enveloppe un. Traitez-le en dernier, une fois les classes stabilisées, puisque c'est le point qui
    touche le plus de code.
 
@@ -122,7 +124,15 @@ Une entité (voir HA9) ne doit pas prendre un service en paramètre de construct
 `com.omniproduct.service` ou un type dont le nom se termine par `Service`. Passez à la place les valeurs dont
 l'entité a besoin, ou déplacez l'appel dans le service qui crée l'entité.
 
-### HA11 - les identifiants sont des UUID v7 ou des ULID
+### HA11 - pas de valeur brute pour un concept du domaine
+
+Un champ, un paramètre, un composant de record ou un retour de méthode dont le nom désigne un concept du vocabulaire
+(`harness/src/main/resources/ubiquitous-language-map.json`, par exemple `slug`, `price`, `quantity`, `kilos`) ne
+peut pas être un `String`, un `int`, un `long`, un `Double` ou un `BigDecimal` nu. Il lui faut un type du domaine,
+un record qui enveloppe la valeur. Les noms génériques (`name`, `description`) ne sont pas concernés, et les
+identifiants relèvent de HA12.
+
+### HA12 - les identifiants sont des UUID v7 ou des ULID
 
 Chaque `id`, `*Id` et `*Ids` du modèle (champs, variables locales, composants de record, types de retour des
 getters, paramètres) doit être un `UUID` ou un `Ulid`, ou un record qui enveloppe exactement l'un des deux, comme
@@ -134,7 +144,7 @@ Le JDK ne fournit pas de générateur UUID v7. Ajoutez une bibliothèque comme
 [ulid-creator](https://github.com/f4b6a3/ulid-creator) (`UlidCreator.getUlid()`). `UUID.randomUUID()` produit une
 version 4 et échoue là où il construit un identifiant.
 
-L'avertissement HA11.1 n'est pas un échec : il signale tout identifiant dont le type est une classe de bibliothèque
+L'avertissement HA12.1 n'est pas un échec : il signale tout identifiant dont le type est une classe de bibliothèque
 brute, comme `UUID` ou `String`, afin qu'un `ProductId` ne soit pas confondu avec un `SupplierId`. Vous pouvez le
 laisser, mais c'est un bon indice d'endroit où un record aiderait.
 

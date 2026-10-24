@@ -15,13 +15,14 @@ sur le Java en phase 3.
 | HA8 | Pas de persistance dans le domaine | Le modèle ne connaît pas son stockage | Annotations `jakarta.persistence.*` (`@Entity`, `@Table`, `@Column`, `@OneToMany`…) et Spring Data sur les types du domaine ; champs fantômes `*Csv`/`*Json` ; méthodes `sync*`/`hydrate*` | AST (annotations, noms) + BYTECODE (dépendance vers `jakarta.persistence`) | Error |
 | HA9 | Entités implémentent `Identifiable` | Une seule réponse à « est-ce une entité ? » | Tout type du package `...model..` implémente `Identifiable` | BYTECODE | Error |
 | HA10 | Pas de service dans le constructeur d'une entité | Les services dépendent des entités, jamais l'inverse | Constructeur d'une entité avec un paramètre du package `..service..` ou nommé `*Service` | BYTECODE | Error |
-| HA11 | Identifiants riches | `Id`/`*Id`/`*Ids` : UUID ou ULID, ou record qui en enveloppe un ; jamais `String`/`int`/`long` ; v7 minimum | Voir « UUID v7 » ci-dessous ; interdire `UUID.randomUUID()` (v4) et valeurs nulles/vides en contexte d'id | AST | Error |
-| HA11.1 | Identifiant nu = faible | Primitive obsession sur les ids | Tout `Id`/`*Id`/`*Ids` dont le type n'est pas déclaré dans le source (String, int, UUID…) | AST | Warning |
+| HA11 | Concept du domaine non primitif | Un membre du modèle dont le nom désigne un concept du vocabulaire porte un type du domaine (record), pas une valeur brute | Champ, paramètre, composant ou retour nommé par le vocabulaire (contexte fort, pas `Lifecycle`) et typé `String`/`int`/`long`/`BigDecimal`… ; identifiants exclus (HA12) | AST | Error |
+| HA12 | Identifiants riches | `Id`/`*Id`/`*Ids` : UUID ou ULID, ou record qui en enveloppe un ; jamais `String`/`int`/`long` ; v7 minimum | Voir « UUID v7 » ci-dessous ; interdire `UUID.randomUUID()` (v4) et valeurs nulles/vides en contexte d'id | AST | Error |
+| HA12.1 | Identifiant nu = faible | Primitive obsession sur les ids | Tout `Id`/`*Id`/`*Ids` dont le type n'est pas déclaré dans le source (String, int, UUID…) | AST | Warning |
 
 ## Adaptations propres à Java
 
 - **UUID v7** : le JDK 21 n'a pas de `UUID.v7()`. Le legacy et les corrigés utiliseront une bibliothèque
-  (`com.github.f4b6a3:uuid-creator` ou `ulid-creator`) ; à choisir en phase 4. La règle HA11 reconnaît
+  (`com.github.f4b6a3:uuid-creator` ou `ulid-creator`) ; à choisir en phase 4. La règle HA12 reconnaît
   `UuidCreator.getTimeOrderedEpoch()` / `UlidCreator.getUlid()` et signale `UUID.randomUUID()`.
 - **Persistance** : le C# visait les data annotations EF Core ; ici ce sont les annotations JPA
   (`jakarta.persistence`) et les dépendances Spring Data (`JpaRepository`) dans les types du domaine.
@@ -40,11 +41,11 @@ en phase 2). La liste exacte des checks est un livrable de la phase 3.
 
 ## Ordre de portage (phase 3)
 
-HA5 → HA4, HA2 → HA6 → HA8 → HA7 → HA9, HA10 → HA11, HA11.1.
+HA5 → HA4, HA2 → HA6 → HA8 → HA7 → HA9, HA10 → HA12, HA12.1.
 
 ## État d'implémentation et étapes
 
-L'**étape 1** (`./harness.sh`, `docs/CUPID-step-1.md`) couvre **HA5 à HA11.1** uniquement. Les règles se règlent
+L'**étape 1** (`./harness.sh`, `docs/CUPID-step-1.md`) couvre **HA5 à HA12.1** uniquement. Les règles se règlent
 dans `Steps.java`.
 
 | Règle | Implémentée | Étape | Notes |
@@ -58,10 +59,11 @@ dans `Steps.java`.
 | HA8 pas de persistance | oui | 1 | dépendance vers une techno de stockage (jakarta/javax.persistence, Hibernate, Spring Data/JDBC, java.sql, jOOQ, MyBatis, MongoDB) + champs fantômes `*Json`/`*Csv`/`*Xml`/`*Blob`/`*Row` + méthodes `sync*`/`hydrate*`/`persist*`/`serialize*` |
 | HA9 `Identifiable` | oui | 1 | records, interfaces et enums exemptés |
 | HA10 pas de service au constructeur | oui | 1 | échoue sur `Supplier` (constructeur ajouté à l'exercice) |
-| HA11 identifiants riches | oui | 1 | UUID/Ulid ou record qui en enveloppe un ; UUID v4 détecté |
-| HA11.1 identifiant nu | oui | 1 | avertissement seulement |
+| HA11 concept non primitif | oui | 1 | étroite : nom du vocabulaire (contexte fort) + type brut ; identifiants exclus |
+| HA12 identifiants riches | oui | 1 | UUID/Ulid ou record qui en enveloppe un ; UUID v4 détecté |
+| HA12.1 identifiant nu | oui | 1 | avertissement seulement |
 
-Périmètre : `com.omniproduct.model` (et `com.omniproduct.service` pour HA4, HA6, HA11.1). Le port carbone
+Périmètre : `com.omniproduct.model` (et `com.omniproduct.service` pour HA4, HA6, HA12.1). Le port carbone
 (`domain/`) et l'infrastructure ne font pas partie de l'exercice.
 
 ## Heuristiques, pas correspondances exactes
@@ -78,7 +80,7 @@ trivial est un défaut de la règle.
 | HA8 | `jakarta.persistence`, Spring Data | + javax, Hibernate, JDBC, `java.sql`, jOOQ, MyBatis, MongoDB ; + forme stockée (`xxxJson`, `yyy_csv`) et `sync*`/`hydrate*` |
 | HA9 | interface nommée `Identifiable` | inchangé : c'est le contrat explicite de l'exercice |
 | HA10 | type du package `..service` ou nom en `Service` | package (`service`, `repository`, `application`, `infrastructure`…), suffixe (`Manager`, `Handler`, `Client`, `Gateway`, `Facade`, `Factory`…), annotation Spring, types dans les génériques ; entité = champ `id`, `<classe>Id` ou `@Id` |
-| HA11 | noms `id`/`*Id`/`*Ids`, liste de types interdits, `randomUUID()` d'un identifiant | un mot `id`/`identifier`/`uuid`/`guid`/`uid` dans le nom (casse et séparateur libres) ; **tout** type autre qu'UUID/Ulid ou record qui en enveloppe un ; tout UUID non v7 construit dans le modèle (`randomUUID`, import statique, `UUID::randomUUID`, `nameUUIDFromBytes`, `new UUID`, `UuidCreator.get*` hors `getTimeOrderedEpoch`) |
+| HA12 | noms `id`/`*Id`/`*Ids`, liste de types interdits, `randomUUID()` d'un identifiant | un mot `id`/`identifier`/`uuid`/`guid`/`uid` dans le nom (casse et séparateur libres) ; **tout** type autre qu'UUID/Ulid ou record qui en enveloppe un ; tout UUID non v7 construit dans le modèle (`randomUUID`, import statique, `UUID::randomUUID`, `nameUUIDFromBytes`, `new UUID`, `UuidCreator.get*` hors `getTimeOrderedEpoch`) |
 
 Chaque contournement est écrit dans `HeuristicEvasionTest` (et son pendant `SingleConcernRuleTest`) : si une règle
 régresse vers l'égalité de chaînes, un test échoue.
@@ -95,7 +97,7 @@ Corrigés pendant la passe (chaque cas est un test) :
 - HA9 : un **record qui porte un identifiant** est une entité : il doit implémenter `Identifiable`. Avant, il échappait
   à HA7, HA9 et HA10. Un record sans identifiant reste un value object.
 - HA10 : un record entité est aussi contrôlé.
-- HA11 : `var` n'est plus une fausse alerte ; le paramètre d'un setter d'identifiant (`setSupplierId(String value)`) est
+- HA12 : `var` n'est plus une fausse alerte ; le paramètre d'un setter d'identifiant (`setSupplierId(String value)`) est
   vérifié ; les identifiants métier `siren`, `siret`, `sku`, `ean`, `gtin`, `isbn` sont des identifiants.
 
 Restent des faux négatifs, assumés (par conception ou faute de moyen sûr de les voir) :
@@ -107,7 +109,7 @@ Restent des faux négatifs, assumés (par conception ou faute de moyen sûr de l
   (Spring) n'est pas dans la liste (pas de Spring sur le classpath des tests).
 - HA10 : un service injecté par setter, par champ `@Autowired`, par une méthode d'usine statique, ou avec un nom neutre
   (`PriceCalculator`, `Notifier`) n'est pas vu.
-- HA11 : le flux de données n'est pas suivi (un `Long` converti en `UUID` par un helper) ; un argument littéral passé à
+- HA12 : le flux de données n'est pas suivi (un `Long` converti en `UUID` par un helper) ; un argument littéral passé à
   un constructeur (`new Product("ABC")`) n'est pas un paramètre nommé ; un identifiant nommé `key`, `code` ou
   `reference` n'est pas reconnu.
 - HA5 : un accesseur qui prend un paramètre n'est pas une propriété ; `protected` n'est pas compté.

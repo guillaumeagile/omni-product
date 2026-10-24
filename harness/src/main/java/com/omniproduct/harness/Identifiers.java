@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 // Repère les identifiants dans le source : tout champ, paramètre, variable locale, composant de record ou
-// getter nommé `id`, `*Id` ou `*Ids`. Sert HA11 (identifiants riches) et HA11.1 (identifiants nus).
+// getter nommé `id`, `*Id` ou `*Ids`. Sert HA12 (identifiants riches) et HA12.1 (identifiants nus).
 public final class Identifiers {
 
     // Un identifiant : son nom, son type, et la valeur qui l'initialise s'il y en a une.

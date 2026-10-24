@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// HA11 (moteur AST) - les identifiants sont des objets riches : tout `id` / `*Id` / `*Ids` (champ, variable
+// HA12 (moteur AST) - les identifiants sont des objets riches : tout `id` / `*Id` / `*Ids` (champ, variable
 // locale, retour, paramètre, composant de record) est un UUID ou un Ulid, ou un record qui en enveloppe
 // exactement un (record ProductId(UUID value)). Jamais String / int / long. Pour une collection ou une map
 // d'identifiants, ce sont les types d'éléments et de clés qui comptent.
@@ -33,7 +33,7 @@ public final class RichIdentifierRule implements HarnessRule {
 
     @Override
     public String id() {
-        return "HA11";
+        return "HA12";
     }
 
     @Override

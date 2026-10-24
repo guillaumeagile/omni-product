@@ -93,7 +93,7 @@ class FalseNegativeProbeTest {
                 .check(Fixtures.load("ha8.evasion"))).hasSize(3);
     }
 
-    // HA11 ----------------------------------------------------------------------------------------------------
+    // HA12 ----------------------------------------------------------------------------------------------------
 
     @Test
     void ha11DoesNotConfuseAVarDeclaredIdWithAType() {

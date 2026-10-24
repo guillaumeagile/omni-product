@@ -14,10 +14,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// HA11.1 (moteur AST, avertissement seulement) - primitive obsession sur les identifiants. Tout `id` / `*Id` /
+// HA12.1 (moteur AST, avertissement seulement) - primitive obsession sur les identifiants. Tout `id` / `*Id` /
 // `*Ids` (services compris) dont le type n'est pas déclaré dans le source analysé est un type JDK ou bibliothèque
 // utilisé tel quel (String, int, UUID, URI...). On demande un record du domaine, pour qu'un ProductId ne puisse
-// pas être confondu avec un SupplierId. Un identifiant String échoue donc HA11 ET avertit ici.
+// pas être confondu avec un SupplierId. Un identifiant String échoue donc HA12 ET avertit ici.
 public final class BareIdentifierIsWeakRule implements HarnessRule {
 
     private final Predicate<String> packageFilter;
@@ -28,7 +28,7 @@ public final class BareIdentifierIsWeakRule implements HarnessRule {
 
     @Override
     public String id() {
-        return "HA11.1";
+        return "HA12.1";
     }
 
     @Override

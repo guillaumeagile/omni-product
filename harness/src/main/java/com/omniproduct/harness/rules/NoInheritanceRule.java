@@ -12,7 +12,7 @@ import com.tngtech.archunit.lang.syntax.ArchRuleDefinition;
 import java.util.List;
 import java.util.Set;
 
-// HA4 (moteurs BYTECODE + AST) - Composable : on étend par composition, pas par héritage de classe.
+// HA4.1 (moteur BYTECODE) - Composable : on étend par composition, pas par héritage de classe.
 // Toute classe qui dérive d'une autre classe est signalée. Implémenter des interfaces est permis,
 // de même que les types que Java impose de dériver : Object, Record, Enum et les exceptions.
 public final class NoInheritanceRule implements HarnessRule {
@@ -29,7 +29,7 @@ public final class NoInheritanceRule implements HarnessRule {
 
     @Override
     public String id() {
-        return "HA4";
+        return "HA4.1";
     }
 
     @Override

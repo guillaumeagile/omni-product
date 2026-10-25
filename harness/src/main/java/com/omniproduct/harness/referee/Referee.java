@@ -64,8 +64,13 @@ public final class Referee {
 
     public enum Outcome { ACCEPTED, REJECTED, OFF_GAME }
 
+    // breakdown : d'où viennent les points, une ligne par source ; score en est la somme.
     public record Verdict(Outcome outcome, Optional<String> target, List<RuleChange> changes, List<String> problems,
-                          List<String> notes, int score, String level, List<String> badges, List<String> measures) {
+                          List<String> notes, int score, String level, List<String> badges, List<String> measures,
+                          List<Points> breakdown) {
+    }
+
+    public record Points(String reason, int points) {
     }
 
     public static Optional<String> target(PullRequest pr) {
@@ -89,7 +94,7 @@ public final class Referee {
         if (target.isEmpty()) {
             return new Verdict(Outcome.OFF_GAME, target, List.of(), List.of(),
                     List.of("No baby step target found: put the rule in the PR title (`HA9 green: ...`) or in the branch name (`step-1/ha9-...`)."),
-                    0, level(head.get()), List.of(), List.of());
+                    0, level(head.get()), List.of(), List.of(), List.of());
         }
 
         List<RuleChange> changes = changes(base, head.get(), target.get());
@@ -124,13 +129,21 @@ public final class Referee {
                 .flatMap(lines -> lines)
                 .toList();
 
-        int score = changes.stream().mapToInt(RuleChange::points).sum()
-                + progress(changes)
-                + (babyStep ? SINGLE_GREEN_BONUS : 0)
-                + (smallDiff ? SMALL_DIFF_BONUS : 0)
-                + tokensRemoved.map(removed -> Math.min(TOKEN_CAP, Math.max(0, removed) / TOKENS_PER_POINT)).orElse(0L).intValue()
-                + branchesRemoved.map(removed -> Math.min(COMPLEXITY_CAP, Math.max(0, removed) / COMPLEXITY_PER_POINT)).orElse(0L).intValue()
-                + (accepted ? CkTable.points(base, head.get()) : 0);
+        List<Points> breakdown = Stream.of(
+                        changes.stream().filter(rule -> rule.points() != 0).map(rule -> new Points(reason(rule), rule.points())),
+                        Stream.of(
+                                new Points("Violations removed on rules still red (up to +" + PROGRESS_CAP + ")", progress(changes)),
+                                new Points("🍼 Baby step: exactly one rule turned green", babyStep ? SINGLE_GREEN_BONUS : 0),
+                                new Points("🤏 Small diff: " + pr.changedTokens() + " changed tokens", smallDiff ? SMALL_DIFF_BONUS : 0),
+                                new Points("Tokens removed (+1 per " + TOKENS_PER_POINT + ", up to +" + TOKEN_CAP + ")",
+                                        tokensRemoved.map(removed -> Math.min(TOKEN_CAP, Math.max(0, removed) / TOKENS_PER_POINT)).orElse(0L).intValue()),
+                                new Points("Cyclomatic complexity removed (+1 per " + COMPLEXITY_PER_POINT + ", up to +" + COMPLEXITY_CAP + ")",
+                                        branchesRemoved.map(removed -> Math.min(COMPLEXITY_CAP, Math.max(0, removed) / COMPLEXITY_PER_POINT)).orElse(0L).intValue()),
+                                new Points("📐 CK metrics improved (up to +" + CkTable.CK_CAP + ")", accepted ? CkTable.points(base, head.get()) : 0)))
+                .flatMap(lines -> lines)
+                .filter(line -> line.points() != 0)
+                .toList();
+        int score = breakdown.stream().mapToInt(Points::points).sum();
 
         List<String> badges = Stream.of(
                         babyStep ? Optional.of("🍼 Baby step") : Optional.<String>empty(),
@@ -144,11 +157,18 @@ public final class Referee {
                 .toList();
 
         return new Verdict(accepted ? Outcome.ACCEPTED : Outcome.REJECTED, target, changes, problems, notes,
-                score, level(head.get()), badges, CkTable.lines(base, head.get()));
+                score, level(head.get()), badges, CkTable.lines(base, head.get(), accepted), breakdown);
     }
 
     private static Verdict rejected(Optional<String> target, List<RuleChange> changes, List<String> problems) {
-        return new Verdict(Outcome.REJECTED, target, changes, problems, List.of(), 0, "-", List.of(), List.of());
+        return new Verdict(Outcome.REJECTED, target, changes, problems, List.of(), 0, "-", List.of(), List.of(), List.of());
+    }
+
+    private static String reason(RuleChange rule) {
+        return rule.regressed() ? "`" + rule.id() + "` regressed (was green)"
+                : rule.base().filter(base -> base.status().equals(WARN)).isPresent() ? "`" + rule.id() + "` warning resolved"
+                : BOSSES.contains(rule.id()) ? "👑 `" + rule.id() + "` boss defeated"
+                : "`" + rule.id() + "` turned green" + (rule.target() ? " 🎯" : "");
     }
 
     private static List<RuleChange> changes(Optional<HarnessReport> base, HarnessReport head, String target) {

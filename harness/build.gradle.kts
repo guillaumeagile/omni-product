@@ -21,6 +21,9 @@ dependencies {
     // Sémantique sur le bytecode compilé
     implementation("com.tngtech.archunit:archunit:1.5.1")
 
+    // Complexité cyclomatique : la règle CyclomaticComplexity de PMD, outil éprouvé, plutôt qu'un calcul maison
+    implementation("net.sourceforge.pmd:pmd-java:7.7.0")
+
     // Lecture de ubiquitous-language-map.json
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
 

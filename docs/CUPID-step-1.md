@@ -59,8 +59,16 @@ your PR, then comments your PR with a scorecard: the rules that moved, your poin
 | resolve a warning (`[WARN]`) | +3 |
 | remove violations on a rule that is still red | +1 each, up to +5 |
 | turn exactly one rule green (a real baby step) | +5 |
-| keep the diff small (50 changed lines or less, tests and Markdown excluded) | +3 |
+| keep the diff small (400 changed tokens or less in `src/main/java`) | +3 |
+| remove tokens from `model/` and `service/` | +1 per 100 tokens, up to +5 |
+| remove cyclomatic complexity from `model/` and `service/` | +1 per 5 points, up to +5 |
 | break a rule that was green | -5 each |
+
+The code is measured in **tokens**, not lines: tokens are what an agent reads and writes, and a long line costs
+more than a short one. Identifiers are split at capitals (`getSellByDate` is 4 tokens) and each symbol counts; it
+is a deterministic proxy, not the tokenizer of one model. Cyclomatic complexity is measured by
+[PMD](https://pmd.github.io/pmd/pmd_rules_java_design.html#cyclomaticcomplexity). A rise in complexity is shown
+in the scorecard but never penalized: an exhaustive `switch` (HA4.5) adds one branch per case.
 
 Badges: 🍼 Baby step, 🧼 No regression, 🤏 Small diff, 👑 Boss defeated, 🧠 Compiler-checked. After each merge, the
 pinned issue **CUPID workshop leaderboard** ranks the teams. Run `./harness.sh` locally before pushing: the referee

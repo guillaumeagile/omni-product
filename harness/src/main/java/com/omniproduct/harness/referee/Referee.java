@@ -2,10 +2,12 @@ package com.omniproduct.harness.referee;
 
 import com.omniproduct.harness.HarnessReport;
 import com.omniproduct.harness.HarnessReport.RuleResult;
+import com.omniproduct.harness.Metrics;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.ToLongFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -29,12 +31,17 @@ public final class Referee {
     static final int SINGLE_GREEN_BONUS = 5;
     static final int SMALL_DIFF_BONUS = 3;
     static final int REGRESSION = -5;
+    // Coût agentique : tokens et branches retirés du code de l'étape (model/ et service/).
+    static final long TOKENS_PER_POINT = 100;
+    static final long TOKEN_CAP = 5;
+    static final long COMPLEXITY_PER_POINT = 5;
+    static final long COMPLEXITY_CAP = 5;
 
     private Referee() {
     }
 
-    // Ce que l'Action sait de la PR : titre, branche, fichiers modifiés, lignes modifiées hors tests.
-    public record PullRequest(String title, String branch, List<String> changedFiles, int changedLines, int smallDiff) {
+    // Ce que l'Action sait de la PR : titre, branche, fichiers modifiés, tokens modifiés dans model/ et service/.
+    public record PullRequest(String title, String branch, List<String> changedFiles, long changedTokens, long smallDiffTokens) {
     }
 
     // Une règle vue des deux côtés. base vide : la règle n'existait pas dans le rapport de la base.
@@ -101,21 +108,27 @@ public final class Referee {
 
         boolean accepted = problems.isEmpty();
         boolean babyStep = accepted && greens == 1;
-        boolean smallDiff = accepted && pr.changedLines() <= pr.smallDiff();
+        boolean smallDiff = accepted && pr.changedTokens() <= pr.smallDiffTokens();
+        Optional<Long> tokensRemoved = reduction(base, head.get(), Metrics::tokens);
+        Optional<Long> branchesRemoved = reduction(base, head.get(), Metrics::complexity);
 
         List<String> notes = Stream.of(
                         accepted && greens > 1
                                 ? Stream.of(greens + " rules turned green at once: that is not a baby step anymore, no baby-step bonus.")
                                 : Stream.<String>empty(),
-                        smallDiff ? Stream.of("Small diff: " + pr.changedLines() + " changed lines (limit " + pr.smallDiff() + ").")
-                                : Stream.<String>empty())
+                        smallDiff ? Stream.of("Small diff: " + pr.changedTokens() + " changed tokens (limit " + pr.smallDiffTokens() + ").")
+                                : Stream.<String>empty(),
+                        measured("Tokens in model/ and service/", base, head.get(), Metrics::tokens),
+                        measured("Cyclomatic complexity of model/ and service/", base, head.get(), Metrics::complexity))
                 .flatMap(lines -> lines)
                 .toList();
 
         int score = changes.stream().mapToInt(RuleChange::points).sum()
                 + progress(changes)
                 + (babyStep ? SINGLE_GREEN_BONUS : 0)
-                + (smallDiff ? SMALL_DIFF_BONUS : 0);
+                + (smallDiff ? SMALL_DIFF_BONUS : 0)
+                + tokensRemoved.map(removed -> Math.min(TOKEN_CAP, Math.max(0, removed) / TOKENS_PER_POINT)).orElse(0L).intValue()
+                + branchesRemoved.map(removed -> Math.min(COMPLEXITY_CAP, Math.max(0, removed) / COMPLEXITY_PER_POINT)).orElse(0L).intValue();
 
         List<String> badges = Stream.of(
                         babyStep ? Optional.of("🍼 Baby step") : Optional.<String>empty(),
@@ -149,6 +162,26 @@ public final class Referee {
                         .orElse(BOSSES.contains(head.id()) ? BOSS_GREEN : GREEN)
                 : unscored.regressed() ? REGRESSION : 0;
         return new RuleChange(head.id(), head.severity(), base, head, target, points);
+    }
+
+    // Réduction d'une mesure entre la base et la tête (positive si la PR retire du code). Vide sans rapport de base.
+    static Optional<Long> reduction(Optional<HarnessReport> base, HarnessReport head, ToLongFunction<Metrics> measure) {
+        return base.flatMap(report -> Optional.ofNullable(report.metrics()))
+                .flatMap(before -> Optional.ofNullable(head.metrics())
+                        .map(after -> measure.applyAsLong(before) - measure.applyAsLong(after)));
+    }
+
+    // Une note qui dit la valeur avant et après, sans point (les points sont dans reduction).
+    private static Stream<String> measured(String label, Optional<HarnessReport> base, HarnessReport head, ToLongFunction<Metrics> measure) {
+        return base.flatMap(report -> Optional.ofNullable(report.metrics()))
+                .flatMap(before -> Optional.ofNullable(head.metrics())
+                        .map(after -> label + ": " + measure.applyAsLong(before) + " → " + measure.applyAsLong(after)
+                                + " (" + signed(measure.applyAsLong(after) - measure.applyAsLong(before)) + ")."))
+                .stream();
+    }
+
+    private static String signed(long delta) {
+        return delta > 0 ? "+" + delta : String.valueOf(delta);
     }
 
     // +1 par violation retirée sur une règle encore rouge, plafonné : le progrès compte, sans remplacer le vert.

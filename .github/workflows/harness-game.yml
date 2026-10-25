@@ -2,6 +2,9 @@
 # rapports JSON, commente la PR (verdict, score, niveau, badges) et fait échouer le check si la PR n'est pas un
 # baby step (règle cible pas verte, régression, harness/ modifié, projet qui ne compile pas).
 #
+# Mesures du score : les tokens (coût de lecture et d'écriture pour un agent) remplacent les lignes ; la complexité
+# cyclomatique vient de PMD (règle CyclomaticComplexity). Les deux sont dans les rapports JSON du harnais.
+#
 # Les PR doivent être internes au dépôt (une équipe = un préfixe de branche, team-red/step-1/ha9-...) : depuis un
 # fork, le jeton est en lecture seule et le commentaire est impossible. On n'utilise pas pull_request_target, qui
 # exécuterait le code des étudiants avec des droits en écriture.
@@ -28,7 +31,8 @@ jobs:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       PR_TITLE: ${{ github.event.pull_request.title }}
       PR_BRANCH: ${{ github.event.pull_request.head.ref }}
-      SMALL_DIFF: "50"
+      # Petit diff : tokens ajoutés ou retirés dans src/main/java (tests et Markdown exclus).
+      SMALL_DIFF_TOKENS: "400"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,11 +58,12 @@ jobs:
       - name: Harness on the pull request
         run: ./harness.sh all --json "$RUNNER_TEMP/head.json" || true
 
-      - name: Changed files and lines
+      - name: Changed files and tokens
         run: |
           git diff --name-only "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/changed-files.txt"
-          git diff --numstat "$BASE_SHA...$HEAD_SHA" -- . ':(exclude)src/test' ':(exclude)*.md' \
-            | awk '{ lines += $1 + $2 } END { print lines + 0 }' > "$RUNNER_TEMP/changed-lines.txt"
+          git diff -U0 "$BASE_SHA...$HEAD_SHA" -- src/main/java > "$RUNNER_TEMP/changes.diff"
+          java -cp "$RUNNER_TEMP/base/harness/build/install/harness/lib/*" com.omniproduct.harness.Tokens \
+            --diff "$RUNNER_TEMP/changes.diff" > "$RUNNER_TEMP/changed-tokens.txt"
 
       - name: Referee
         id: referee
@@ -68,8 +73,8 @@ jobs:
             --base "$RUNNER_TEMP/base.json" --head "$RUNNER_TEMP/head.json" \
             --title "$PR_TITLE" --branch "$PR_BRANCH" \
             --changed-files "$RUNNER_TEMP/changed-files.txt" \
-            --changed-lines "$(cat "$RUNNER_TEMP/changed-lines.txt")" \
-            --small-diff "$SMALL_DIFF" \
+            --changed-tokens "$(cat "$RUNNER_TEMP/changed-tokens.txt")" \
+            --small-diff "$SMALL_DIFF_TOKENS" \
             --out "$RUNNER_TEMP/scorecard.md"
           echo "exit=$?" >> "$GITHUB_OUTPUT"
 

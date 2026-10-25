@@ -66,7 +66,9 @@ du baby step, et rend un verdict et un score.
 | Violations en baisse sur une règle encore rouge | +1 par violation retirée, plafonné à +5 |
 | Avertissement résolu (HA12.1, HA4.7) | +3 |
 | Une seule règle au vert dans la PR (vrai baby step) | +5 |
-| Petit diff (moins de N lignes hors tests) | +3 |
+| Petit diff (400 tokens modifiés au plus dans `src/main/java`) | +3 |
+| Tokens retirés de `model/` et `service/` | +1 par 100 tokens, plafonné à +5 |
+| Complexité cyclomatique retirée (PMD) | +1 par 5 points, plafonné à +5 ; une hausse est affichée, pas pénalisée |
 | Régression (PASS -> FAIL) | -5 par règle |
 | `harness/` modifié | PR rejetée, 0 point |
 
@@ -119,7 +121,8 @@ Deux ou trois PR de test sur une branche d'équipe jetable (une PR verte, une PR
 
 ## Points ouverts (à trancher par l'animateur)
 
-- Le barème et les seuils (N lignes pour un « petit diff », niveaux).
+- Le barème est validé. Les seuils en tokens (400 pour un petit diff, 100 tokens par point) sont à calibrer sur les
+  premières PR.
 - Le contrôle de l'arbitre est-il un check **obligatoire** (la PR ne peut pas être fusionnée) ou seulement un commentaire ?
 - Classement : issue épinglée, ou page partagée.
 
@@ -138,3 +141,4 @@ Lot 1 -> Lot 2 -> Lot 3 -> Lot 4 -> Lot 7 -> Lot 5 -> Lot 6. Phase 3 après l'at
 | 5 classement `harness-leaderboard` | écrit | tests du calcul ; **workflow pas encore joué sur GitHub** |
 | 6 textes étudiants | partiel | `CUPID-step-1.md` (règles du jeu) et `Workshop.md` faits ; `CUPID-step1-2.md` reste à passer en Java |
 | 7 essai du principe | à faire | PR de test à ouvrir puis supprimer |
+| mesures tokens + PMD | fait | rapport JSON (`metrics`), arbitre et Action ; test PMD sur valeurs McCabe calculées à la main |

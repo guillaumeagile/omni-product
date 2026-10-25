@@ -1,6 +1,7 @@
 package com.omniproduct.harness.referee;
 
 import com.omniproduct.harness.HarnessReport;
+import com.omniproduct.harness.Metrics;
 import com.omniproduct.harness.HarnessReport.RuleResult;
 import com.omniproduct.harness.referee.Referee.Outcome;
 import com.omniproduct.harness.referee.Referee.PullRequest;
@@ -20,7 +21,11 @@ class RefereeTest {
     }
 
     private static Optional<HarnessReport> report(RuleResult... rules) {
-        return Optional.of(new HarnessReport("2", "FAIL", List.of(rules)));
+        return Optional.of(new HarnessReport("2", "FAIL", List.of(rules), null));
+    }
+
+    private static Optional<HarnessReport> reportWith(Metrics metrics, RuleResult... rules) {
+        return Optional.of(new HarnessReport("2", "FAIL", List.of(rules), metrics));
     }
 
     private static PullRequest pr(String title) {
@@ -133,5 +138,35 @@ class RefereeTest {
         assertThat(lines.get(lines.size() - 1))
                 .isEqualTo(Scorecard.MARKER + "{\"target\":\"HA9\",\"outcome\":\"ACCEPTED\",\"score\":15,"
                         + "\"level\":\"Single Concern Adept (2/4)\",\"badges\":[\"🍼 Baby step\",\"🧼 No regression\"]} -->");
+    }
+
+    @Test
+    void removedTokensAndBranchesEarnPointsCappedPerMeasure() {
+        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6),
+                rule("HA7", "PASS", 0), rule("HA9", "FAIL", 2));
+        Verdict verdict = Referee.judge(base, reportWith(new Metrics(2800, 25, 5),
+                rule("HA7", "PASS", 0), rule("HA9", "PASS", 0)), pr("HA9 green"));
+
+        assertThat(verdict.outcome()).isEqualTo(Outcome.ACCEPTED);
+        assertThat(verdict.score()).isEqualTo(Referee.GREEN + 2 + 3 + Referee.SINGLE_GREEN_BONUS);
+    }
+
+    @Test
+    void tokenAndComplexityRewardsAreCapped() {
+        Optional<HarnessReport> base = reportWith(new Metrics(100_000, 200, 9), rule("HA9", "FAIL", 2));
+        Verdict verdict = Referee.judge(base, reportWith(new Metrics(0, 0, 0), rule("HA9", "PASS", 0)), pr("HA9 green"));
+
+        assertThat(verdict.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + Referee.TOKEN_CAP + Referee.COMPLEXITY_CAP);
+        assertThat(verdict.notes()).anySatisfy(note -> assertThat(note).contains("Tokens in model/ and service/: 100000 → 0 (-100000)"));
+    }
+
+    @Test
+    void aRiseInComplexityIsShownButNotPenalized() {
+        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6), rule("HA9", "FAIL", 2));
+        Verdict verdict = Referee.judge(base, reportWith(new Metrics(3000, 46, 7), rule("HA9", "PASS", 0)), pr("HA9 green"));
+
+        assertThat(verdict.outcome()).isEqualTo(Outcome.ACCEPTED);
+        assertThat(verdict.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS);
+        assertThat(verdict.notes()).anySatisfy(note -> assertThat(note).contains("Cyclomatic complexity of model/ and service/: 40 → 46 (+6)"));
     }
 }

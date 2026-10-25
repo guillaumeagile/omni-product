@@ -61,7 +61,8 @@ class HarnessMainTest {
             assertThat(rule.violations()).isPositive();
             assertThat(result.out()).contains("[FAIL] HA5");
         });
-        assertThat(report.rule("HA4.6")).hasValueSatisfying(rule -> assertThat(rule.status()).isEqualTo("PASS"));
+        // Exercice volontaire (Perishable.isPastSellBy lit LocalDate.now()) : HA4.6 est rouge sur le legacy de l'étape 2.
+        assertThat(report.rule("HA4.6")).hasValueSatisfying(rule -> assertThat(rule.status()).isEqualTo("FAIL"));
         assertThat(report.rule("HA12.1")).hasValueSatisfying(rule -> {
             assertThat(rule.status()).isEqualTo("WARN");
             assertThat(rule.severity()).isEqualTo("WARNING");

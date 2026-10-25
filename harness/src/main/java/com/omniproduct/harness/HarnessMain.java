@@ -133,7 +133,7 @@ public final class HarnessMain {
         boolean pass = outcomes.stream().noneMatch(outcome -> outcome.status() == Status.FAIL);
         System.out.println("\nHARNESS RESULT: " + (pass ? "PASS" : "FAIL"));
         options.json().ifPresent(file -> new HarnessReport(options.step(), pass ? "PASS" : "FAIL",
-                outcomes.stream().map(Outcome::toResult).toList()).write(file));
+                outcomes.stream().map(Outcome::toResult).toList(), Metrics.of(sources)).write(file));
         return pass ? 0 : 1;
     }
 

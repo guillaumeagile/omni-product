@@ -3,7 +3,7 @@ package com.omniproduct.model;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 public class Supplier implements Identifiable {
-    private String id;
+    private SupplierId id;
 
     private String name;
 
@@ -13,24 +13,22 @@ public class Supplier implements Identifiable {
 
     public Supplier() {}
 
-    public Supplier(String id, String name, String contactEmail, String contactPhone,
-                   String country, String region) {
+    public Supplier(SupplierId id, String name, Contact contact, Address address) {
         this.id = id;
         this.name = name;
-        this.contact = new Contact(contactEmail, contactPhone);
-        this.address = new Address(country, region);
+        this.contact = contact;
+        this.address = address;
     }
 
-    public record Contact(String contactEmail, String contactPhone) {}
+    public record Contact(Email contactEmail, Phone contactPhone) {}
 
-    public record Address(String country, String region) {}
+    public record Address(Country country, Region region) {}
 
-    @Override
-    public String getId() {
+    public SupplierId getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(SupplierId id) {
         this.id = id;
     }
 

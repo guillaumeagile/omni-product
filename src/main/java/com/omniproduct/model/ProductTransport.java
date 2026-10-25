@@ -1,3 +1,3 @@
 package com.omniproduct.model;
 
-public record ProductTransport(Double kilos, String volume) {}
+public record ProductTransport(Weight weight, Volume volume) {}

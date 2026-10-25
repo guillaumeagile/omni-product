@@ -9,7 +9,7 @@ public class Perishable extends Product {
     private final LocalDate sellByDate;
     private final LocalDate useByDate;
 
-    public Perishable(String id, String name, Price price, LocalDate sellByDate, LocalDate useByDate) {
+    public Perishable(ProductId id, String name, Price price, LocalDate sellByDate, LocalDate useByDate) {
         super(id, name, price);
         this.sellByDate = Objects.requireNonNull(sellByDate, "sellByDate must not be null");
         this.useByDate = Objects.requireNonNull(useByDate, "useByDate must not be null");

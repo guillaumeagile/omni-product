@@ -33,11 +33,10 @@ class HarnessMainTest {
         Run result = run("--step", "1", "--classes", "../build/classes/java/main", "../src/main/java");
 
         assertThat(result.exitCode()).isEqualTo(1);
-        // Le code de départ de l'étape 2 a fait une partie de l'étape 1 (HA5, HA6, HA8, HA9, HA10 verts) ; ce qui reste
-        // rouge est trouvé : la hiérarchie Perishable/NonExpiring référence l'entité Product (HA7), les montants sont
-        // des Double bruts (HA11), les identifiants des String (HA12, et l'avertissement HA12.1).
-        assertThat(result.out()).contains("[PASS] HA5", "[FAIL] HA7", "[FAIL] HA11", "[FAIL] HA12 ", "[WARN] HA12.1");
-        assertThat(result.out()).contains("Perishable.java:", "Product.java:", "is a raw Double");
+        // Le code de départ de l'étape 2 a fait l'étape 1, sauf HA7 : la hiérarchie Perishable/NonExpiring (exercice
+        // HA4.1 de l'étape 2) référence l'entité Product. Le harnais la trouve.
+        assertThat(result.out()).contains("[PASS] HA5", "[PASS] HA11", "[PASS] HA12 ", "[PASS] HA12.1", "[FAIL] HA7");
+        assertThat(result.out()).contains("Perishable.java:", "NonExpiring.java:");
         // HA4 (héritage) est une règle de l'étape 2 : elle n'apparaît pas dans la sortie de l'étape 1. HA2 non plus.
         assertThat(result.out()).doesNotContain("HA4", "HA2");
         assertThat(result.out()).contains("HARNESS RESULT: FAIL");
@@ -64,7 +63,8 @@ class HarnessMainTest {
         });
         // Exercice volontaire (Perishable.isPastSellBy lit LocalDate.now()) : HA4.6 est rouge sur le legacy de l'étape 2.
         assertThat(report.rule("HA4.6")).hasValueSatisfying(rule -> assertThat(rule.status()).isEqualTo("FAIL"));
-        assertThat(report.rule("HA12.1")).hasValueSatisfying(rule -> {
+        // Exercice volontaire (ProductService.sellOne retire du stock sans canSell) : l'avertissement HA4.7.
+        assertThat(report.rule("HA4.7")).hasValueSatisfying(rule -> {
             assertThat(rule.status()).isEqualTo("WARN");
             assertThat(rule.severity()).isEqualTo("WARNING");
         });

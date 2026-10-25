@@ -7,8 +7,9 @@ Lisez d'abord [docs/CUPID-step1-2.md](docs/CUPID-step1-2.md) pour l'énoncé (im
 et la définition des règles (HA2, HA3, HA4.1 à HA4.7). Ce guide est le mode d'emploi.
 
 `./harness.sh 2` lance aussi toutes les règles de l'étape 1 (HA5 à HA12.1) : si l'étape 1 est rouge, l'étape 2 ne
-peut pas passer. Le code de départ de la phase 2 a déjà fait une partie de l'étape 1 (HA5, HA6, HA8, HA9 et HA10 sont
-verts, la persistance et ses tests CRUD ont été retirés) ; HA7, HA11 et HA12 restent à faire.
+peut pas passer. Le code de départ de la phase 2 a fait l'étape 1 (la persistance et ses tests CRUD ont été retirés,
+les concepts et les identifiants sont des records), sauf HA7 : la hiérarchie `Perishable`/`NonExpiring` référence
+l'entité `Product`, et c'est l'exercice HA4.1 de l'étape 2 qui la fera disparaître.
 
 ## 1. Ce que vous modifiez
 
@@ -43,8 +44,8 @@ Le script compile d'abord le projet. Un projet qui ne compile pas ne passe jamai
 Les lignes `[WARN]` ne font jamais échouer le harnais. HA4.7 en est une : elle ne bloque pas, mais elle compte pour le
 score du jeu.
 
-Lancez-le une fois avant toute modification, pour voir votre point de départ. Vous verrez des échecs sur HA7, HA11,
-HA12, HA2, HA3 et HA4 : c'est normal. Ne modifiez rien sous `harness/` pour faire passer une vérification. Si une règle vous semble
+Lancez-le une fois avant toute modification, pour voir votre point de départ. Vous verrez des échecs sur HA7, HA2,
+HA3 et HA4 : c'est normal. Ne modifiez rien sous `harness/` pour faire passer une vérification. Si une règle vous semble
 fausse, notez pourquoi et signalez-le à l'animateur de l'atelier.
 
 Pour le jeu, lancez aussi `./harness.sh 2 --json rapport.json` : c'est ce rapport que l'arbitre compare entre votre

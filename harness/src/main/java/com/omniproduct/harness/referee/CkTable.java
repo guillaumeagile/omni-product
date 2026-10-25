@@ -39,7 +39,7 @@ final class CkTable {
             new Row("Mutable fields (non final)", "+1 per 2 removed, up to +5", CkMetrics::mutableFields, 2, 5, true),
             new Row("Assignments", "+1 per 2 removed, up to +4", CkMetrics::assignments, 2, 4, true),
             new Row("Loops", "+1 per loop removed, up to +4", CkMetrics::loops, 1, 4, true),
-            new Row("Lambdas", "+2 per lambda added, up to +3", CkMetrics::lambdas, 0.5, 3, false),
+            new Row("Lambdas", "+2 per lambda added, up to +10", CkMetrics::lambdas, 0.5, 10, false),
             new Row("Max nesting", "+1 per level removed, up to +4", CkMetrics::maxNesting, 1, 4, true));
 
     private CkTable() {

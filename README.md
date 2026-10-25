@@ -242,7 +242,7 @@ pourquoi dans **Files changed**. Le nombre de classes est affiché sans points :
 | champs mutables (non `final`) | +1 par 2 retirés, jusqu'à +5 |
 | affectations | +1 par 2 retirées, jusqu'à +4 |
 | boucles | +1 par boucle retirée, jusqu'à +4 |
-| lambdas | +2 par lambda ajoutée, jusqu'à +3 |
+| lambdas | +2 par lambda ajoutée, jusqu'à +10 |
 | imbrication max | +1 par niveau retiré, jusqu'à +4 |
 
 CK ne voit pas les records (limite de CK 0.7.0) : en phase 2, un record n'est pas mesuré.

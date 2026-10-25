@@ -200,8 +200,8 @@ class RefereeTest {
         Verdict worse = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(1, 900, 90, 200, 1.0, 200, 900, 90, 0, 12)),
                 rule("HA9", "PASS", 0)), pr("HA9 green"));
 
-        // Pas de plafond total : la somme des plafonds par mesure (5+4+5+4+5+4+4+3+4).
-        assertThat(best.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + 38);
+        // Pas de plafond total : la somme des plafonds par mesure (5+4+5+4+5+4+4+10+4).
+        assertThat(best.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + 45);
         assertThat(worse.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS);
     }
 

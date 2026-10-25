@@ -52,8 +52,10 @@ vert ou au rouge.
 
 ### 1. Préparer la branche
 
-1. **Partez de la branche de la phase** (`java-bdxio-phase1` ou `java-bdxio-phase2`). Travaillez dans le dépôt de
-   l'atelier, pas dans un fork : depuis un fork, l'arbitre ne peut pas commenter, sauf si vous l'autorisez dans votre fork.
+1. **Partez de la branche de la phase, à jour** (`java-bdxio-phase1` pour les règles HA5 à HA12.1,
+   `java-bdxio-phase2` pour celles de la phase 2) : `git switch java-bdxio-phase1 && git pull`. Elle contient les
+   baby steps déjà fusionnés. Travaillez dans le dépôt de l'atelier, pas dans un fork : depuis un fork, l'arbitre ne
+   peut pas commenter, sauf si vous l'autorisez dans votre fork.
 2. **Nommez la branche** `team-<équipe>/step-<N>/ha<règle>-<quoi>`. Le premier segment est le nom de votre équipe au
    classement.
    - phase 1 : `team-red/step-1/ha9-identifiable`
@@ -64,6 +66,7 @@ vert ou au rouge.
 
 ```
 git switch java-bdxio-phase1
+git pull
 git switch -c team-red/step-1/ha9-identifiable
 # ... le refactoring ...
 ./harness.sh all
@@ -76,9 +79,13 @@ git push -u origin team-red/step-1/ha9-identifiable
 La **base** d'une PR est la branche dans laquelle elle serait fusionnée. GitHub propose `main` par défaut, et c'est le
 piège : `main` n'a pas d'arbitre, la PR est alors « hors jeu ».
 
-- **Première PR de la phase** : base `java-bdxio-phase1` (ou `java-bdxio-phase2` en phase 2).
-- **PR suivantes** : base = la branche de votre baby step précédent. Les PR s'empilent, et chaque diff ne montre
-  qu'une étape.
+**La base est toujours la branche de la phase** : `java-bdxio-phase1` pour une règle de la phase 1,
+`java-bdxio-phase2` pour une règle de la phase 2. Jamais `main`, jamais la branche d'un autre baby step.
+
+C'est ce qui rend le score progressif : l'arbitre compare la PR à l'état de la phase, qui contient tous les baby steps
+déjà fusionnés. Chaque PR n'est donc notée que sur ce qu'elle apporte. C'est aussi pourquoi chaque branche part de la
+branche de la phase à jour, et pas de la branche du baby step précédent : sinon, son diff contiendrait aussi les
+étapes précédentes.
 
 Sur GitHub, après le push : bouton **Compare & pull request**, puis, dans la liste **base:** en haut à gauche,
 choisissez `java-bdxio-phase1` avant de cliquer sur **Create pull request**. En ligne de commande :
@@ -91,7 +98,7 @@ gh pr create --base java-bdxio-phase1 --title "HA9 green: Product and Supplier i
 Dans la description, collez la sortie du harnais avant et après.
 
 Vous vous êtes trompé de base ? Bouton **Edit** à côté du titre de la PR, changez la base : l'arbitre repasse tout
-seul.
+seul. En ligne de commande : `gh pr edit <numéro> --base java-bdxio-phase1`.
 
 ### 3. Lire le verdict de l'arbitre
 
@@ -117,7 +124,7 @@ dans une section qu'il réécrit à chaque passage : ne la modifiez pas, le rest
 consultables.
 
 Le check est vert si la PR est acceptée, rouge sinon. Dans ce cas, poussez un correctif sur la même branche : l'arbitre
-repasse et met son commentaire à jour. Le détail est aussi dans l'onglet **Checks** de la PR.
+repasse tout seul et publie un nouveau commentaire. Le détail est aussi dans l'onglet **Checks** de la PR.
 
 ### 4. Relire le code : Files changed
 
@@ -146,8 +153,9 @@ l'explique, et signale ce qui fait passer une règle sans corriger le défaut qu
 
 ### 5. Fusionner et monter au classement
 
-Après chaque fusion, l'issue épinglée **CUPID workshop leaderboard** classe les équipes. La PR suivante part de la
-branche que vous venez de terminer.
+Après chaque fusion, l'issue épinglée **CUPID workshop leaderboard** classe les équipes. Pour le baby step suivant,
+revenez sur la branche de la phase, mettez-la à jour (`git switch java-bdxio-phase1 && git pull`), et créez-en une
+nouvelle branche : retour à l'étape 1.
 
 ### Quand une PR est acceptée
 
@@ -196,8 +204,8 @@ pourquoi dans **Files changed**. Le nombre de classes est affiché sans points :
 
 CK ne voit pas les records (limite de CK 0.7.0). En phase 2, les points viennent donc de mesures **PMD**
 équivalentes, qui lisent Java 21 (records, `sealed`, `switch` à motifs) : fan-out (couplage), WMC max, TCC min
-(cohésion), champs mutables, affectations, boucles, lambdas, complexité cognitive totale et max ; plafond par mesure, sans plafond total. CK
-reste affiché pour comparaison, sans points.
+(cohésion), champs mutables, affectations, boucles, lambdas, complexité cognitive totale et max ; plafond par mesure,
+sans plafond total. CK reste affiché pour comparaison, sans points.
 
 ### Niveaux et badges
 
@@ -218,6 +226,13 @@ Le niveau dépend de la part des règles bloquantes (hors `[WARN]`) au vert dans
 | 🤏 Small diff | le diff fait 400 tokens ou moins |
 | 👑 Boss defeated | HA4.3 ou HA4.5 passe au vert (phase 2) |
 | 🧠 Compiler-checked | HA4.5 passe au vert (phase 2) |
+
+### Jouer avec un agent
+
+Vous pouvez jouer avec un agent de code (Claude Code, Copilot, Cursor...). Ses consignes sont dans
+[AGENTS.md](AGENTS.md) : il gère les branches, les commits et la PR, il compile et lance le harnais. Mais c'est vous
+qui décidez : il vous propose des options et leurs compromis, il ne tranche pas, et il ne cherche pas à deviner le
+score. Le harnais n'est qu'une heuristique : l'exercice, c'est votre réflexion sur CUPID.
 
 ### Règles du jeu
 

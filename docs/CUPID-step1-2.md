@@ -24,8 +24,8 @@ if applicable. An absent adjustment is simply missing from the ordered list of a
 The code you work on lives in `src/main/java/com/omniproduct/model` and `src/main/java/com/omniproduct/service`, as in
 step 1. Run `./harness.sh 2`: it runs the step 1 rules and the step 2 rules.
 
-Work as in step 1: **one pull request per baby step**, each turning one HA rule green, stacked on the previous one
-(see "How to work" and "The game" in `CUPID-step-1.md`). The diff of each PR is the lesson: you see what each rule costs.
+Work as in step 1: **one pull request per baby step**, each turning one HA rule green, branched from and
+targeting `java-bdxio-phase2` (see "How to work" and "The game" in `CUPID-step-1.md`). The diff of each PR is the lesson: you see what each rule costs.
 
 ## Harness (HA)
 

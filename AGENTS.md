@@ -30,13 +30,17 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
    gh pr create --draft --base java-bdxio-phase1 --title "HA9 green: ..." --body "<sortie du harnais avant et après>"
    ```
 8. **Laisse faire l'arbitre.** L'Action `harness-game` se lance toute seule à chaque push. Ne la relance pas, ne
-   modifie pas son commentaire, ni la section qu'elle écrit dans la description de la PR.
+   modifie pas son commentaire, ni la section qu'elle écrit dans la description de la PR. **Un check `harness-game`
+   rouge n'est pas une panne à réparer** : c'est le verdict « Not accepted », souvent une règle verte qui a rougi. Ne
+   touche pas au workflow, ne relance pas le job : lis le commentaire de l'arbitre avec l'humain. Seul un commentaire
+   « Arbitre CUPID : en panne » est une panne, à signaler à l'animateur.
 9. **Lis le verdict avec l'humain.** Relie chaque ligne du score à un changement de code (onglet **Files changed**, ou
    `gh pr diff`). La PR est comparée au départ de la phase : son diff contient tous les baby steps ; pour le dernier
    seul, `git diff <branche précédente>..HEAD`. Signale ce qui a fait passer une règle sans corriger le défaut qu'elle
    vise. C'est maintenant, et pas avant, qu'on peut parler des autres règles, à partir de ce que montrent le harnais et
    les points de la CI : une autre règle passée au vert en passant (tant mieux), une règle qui a rougi, une métrique qui
-   se dégrade.
+   se dégrade. Une régression est acceptable si elle est temporaire : l'humain choisit de la corriger sur la même
+   branche ou de la réparer dans un baby step suivant. Ne choisis pas à sa place.
 10. **Ne fusionne jamais.** La PR reste en draft, ouverte. Retour à l'étape 2 pour la règle suivante.
 
 ## Ce que tu ne fais pas

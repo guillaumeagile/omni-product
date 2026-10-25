@@ -258,7 +258,23 @@ jobs:
             ${{ runner.temp }}/scorecard.md
           if-no-files-found: warn
 
+      # Le check reste rouge quand l'arbitre refuse le round, mais il dit pourquoi : un refus (une règle verte qui
+      # rougit, le plus souvent) est un verdict du jeu, pas une panne de la CI.
       - name: Verdict
+        env:
+          REFEREE_EXIT: ${{ steps.referee.outputs.exit }}
         run: |
           cat "$RUNNER_TEMP/scorecard.md" >> "$GITHUB_STEP_SUMMARY"
-          test "${{ steps.referee.outputs.exit }}" = "0"
+          case "$REFEREE_EXIT" in
+            0) ;;
+            1)
+              reasons=$(grep '^- ❌ ' "$RUNNER_TEMP/scorecard.md" | sed 's/^- ❌ //; s/`//g' | paste -sd ';' - | sed 's/;/ ; /g')
+              echo "::error title=Round non accepté par l'arbitre (ce n'est pas une panne)::${reasons:-voir le commentaire de la PR}. Le score et le classement sont à jour : lis le commentaire de l'arbitre. Une régression temporaire est acceptable, elle se corrige dans un prochain baby step."
+              exit 1 ;;
+            "")
+              echo "::error title=Pas d'arbitre sur cette base::la base de la PR n'a pas de harnais utilisable. La PR doit viser java-bdxio-phase1 ou java-bdxio-phase2 ; sinon, prévenir l'animateur."
+              exit 1 ;;
+            *)
+              echo "::error title=Arbitre en panne::l'arbitre n'a pas rendu de verdict (code '${REFEREE_EXIT}'). Prévenir l'animateur."
+              exit 1 ;;
+          esac

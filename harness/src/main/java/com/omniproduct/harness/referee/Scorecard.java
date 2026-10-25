@@ -22,7 +22,7 @@ public final class Scorecard {
     }
 
     public static String markdown(Verdict verdict) {
-        String title = "## 🎮 CUPID referee" + verdict.target().map(target -> " — " + target).orElse("");
+        String title = "## 🎮 Arbitre CUPID" + verdict.target().map(target -> " — " + target).orElse("");
         String outcome = switch (verdict.outcome()) {
             case ACCEPTED -> "**✅ Baby step accepted**";
             case REJECTED -> "**❌ Not accepted**";

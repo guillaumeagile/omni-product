@@ -45,11 +45,12 @@ rouge, et c'est voulu.
 
 ## Le jeu : une PR par baby step
 
-Chaque baby step est une pull request qui fait passer **une seule** règle du rouge au vert. Une GitHub Action (l'arbitre,
-`harness-game`) lance le harnais sur la base de la PR puis sur la PR. Elle compare les deux rapports et commente la PR
-avec un tableau de score.
+Chaque baby step est une pull request (PR) qui fait passer **une seule** règle du rouge au vert. Chaque PR passe
+devant **l'arbitre CUPID** : une GitHub Action (le check `harness-game`) qui lance le harnais sur la base de la PR, puis
+sur la PR elle-même. L'arbitre compare les deux résultats, commente la PR avec un tableau de score et met le check au
+vert ou au rouge.
 
-### Mode d'emploi
+### 1. Préparer la branche
 
 1. **Partez de la branche de la phase** (`java-bdxio-phase1` ou `java-bdxio-phase2`). Travaillez dans le dépôt de
    l'atelier, pas dans un fork : depuis un fork, l'arbitre ne peut pas commenter, sauf si vous l'autorisez dans votre fork.
@@ -57,14 +58,91 @@ avec un tableau de score.
    classement.
    - phase 1 : `team-red/step-1/ha9-identifiable`
    - phase 2 : `team-red/step-2/ha4-3-shelf-life`
-3. **Choisissez une ligne `[FAIL]`** du harnais. Corrigez cette règle, et seulement elle. A priori, faites dans l'ordre de numérotation des règles.
+3. **Choisissez une ligne `[FAIL]`** du harnais. Corrigez cette règle, et seulement elle. A priori, faites dans l'ordre
+   de numérotation des règles.
 4. **Lancez `./harness.sh all`** en local avant de pousser. L'arbitre utilise le même harnais.
-5. **Ouvrez la PR** avec la règle cible dans le titre : `HA9 green: Product and Supplier implement Identifiable`. Sans
-   cible dans le titre ou dans la branche, la PR est hors jeu.
-6. **Empilez les PR.** La PR suivante part de la branche précédente et la vise, pour que chaque diff montre une seule
-   étape.
-7. **Lisez le commentaire de l'arbitre.** Si le check échoue, poussez un correctif : le tableau de score se met à jour.
-8. Après chaque fusion, l'issue épinglée **CUPID workshop leaderboard** classe les équipes.
+
+```
+git switch java-bdxio-phase1
+git switch -c team-red/step-1/ha9-identifiable
+# ... le refactoring ...
+./harness.sh all
+git commit -am "HA9 green: Product and Supplier implement Identifiable"
+git push -u origin team-red/step-1/ha9-identifiable
+```
+
+### 2. Créer la PR, vers la bonne base
+
+La **base** d'une PR est la branche dans laquelle elle serait fusionnée. GitHub propose `main` par défaut, et c'est le
+piège : `main` n'a pas d'arbitre, la PR est alors « hors jeu ».
+
+- **Première PR de la phase** : base `java-bdxio-phase1` (ou `java-bdxio-phase2` en phase 2).
+- **PR suivantes** : base = la branche de votre baby step précédent. Les PR s'empilent, et chaque diff ne montre
+  qu'une étape.
+
+Sur GitHub, après le push : bouton **Compare & pull request**, puis, dans la liste **base:** en haut à gauche,
+choisissez `java-bdxio-phase1` avant de cliquer sur **Create pull request**. En ligne de commande :
+
+```
+gh pr create --base java-bdxio-phase1 --title "HA9 green: Product and Supplier implement Identifiable"
+```
+
+**Le titre nomme la règle cible** (`HA9 green: ...`). Sans cible dans le titre ni dans la branche, la PR est hors jeu.
+Dans la description, collez la sortie du harnais avant et après.
+
+Vous vous êtes trompé de base ? Bouton **Edit** à côté du titre de la PR, changez la base : l'arbitre repasse tout
+seul.
+
+### 3. Lire le verdict de l'arbitre
+
+Une minute ou deux après l'ouverture de la PR, l'arbitre commente la PR :
+
+```
+🎮 Arbitre CUPID — HA5
+✅ Baby step accepted
+- Tokens in model/ and service/: 2638 → 3141 (+503).
+- Cyclomatic complexity of model/ and service/: 81 → 101 (+20).
+
+| Rule    | Base         | This PR      | Points |
+| HA5 🎯  | 🔴 FAIL (2)  | 🟢 PASS      | +10    |
+| HA6     | 🔴 FAIL (8)  | 🔴 FAIL (6)  |        |
+| HA8     | 🔴 FAIL (30) | 🔴 FAIL (40) |        |
+| HA9     | 🔴 FAIL (5)  | 🔴 FAIL (10) |        |
+Score: +17 · Level: Unix Apprentice (1/8) · Badges: 🍼 Baby step, 🧼 No regression
+```
+
+Le check est vert si la PR est acceptée, rouge sinon. Dans ce cas, poussez un correctif sur la même branche : l'arbitre
+repasse et met son commentaire à jour. Le détail est aussi dans l'onglet **Checks** de la PR.
+
+### 4. Relire le code : Files changed
+
+Le score ne suffit pas. Ouvrez l'onglet **Files changed** de la PR et faites une **revue de code**, à la main ou avec
+un agent, pour relier chaque ligne du verdict à un changement de code :
+
+- **La règle cible** : quelle modification l'a fait passer au vert ? Est-ce un vrai découpage, ou seulement un
+  renommage qui trompe la règle ?
+- **Les autres règles** : pourquoi le nombre de violations bouge-t-il ? Dans l'exemple, HA5 passe au vert, mais HA8
+  passe de 30 à 40 violations et HA9 de 5 à 10 : les nouvelles classes `@Embeddable` portent des annotations JPA et
+  n'implémentent pas `Identifiable`. Une règle déjà rouge qui empire ne coûte pas de points, mais c'est du travail pour les PR suivantes.
+- **Les tokens et la complexité** : +503 tokens et +20 de complexité, est-ce le prix normal d'un découpage, ou du code
+  dupliqué ?
+- **Les services** : la PR les a-t-elle touchés ? Fallait-il ?
+
+Pour une revue agentique, donnez à l'agent le diff et le commentaire de l'arbitre, par exemple avec Claude Code :
+
+```
+gh pr diff <numéro> > pr.diff
+gh pr view <numéro> --comments > verdict.txt
+claude "Relis pr.diff. Pour chaque ligne du verdict de l'arbitre (verdict.txt), indique le changement de code qui
+l'explique, et signale ce qui fait passer une règle sans corriger le défaut qu'elle vise."
+```
+
+Écrivez vos conclusions en commentaire de la PR avant de la fusionner : c'est là que se fait l'apprentissage.
+
+### 5. Fusionner et monter au classement
+
+Après chaque fusion, l'issue épinglée **CUPID workshop leaderboard** classe les équipes. La PR suivante part de la
+branche que vous venez de terminer.
 
 ### Quand une PR est acceptée
 

@@ -9,7 +9,7 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
 1. **Repère la phase.** Phase 1 : règles HA5 à HA12.1, branche `java-bdxio-phase1`. Phase 2 : règles HA2, HA3,
    HA4.x, branche `java-bdxio-phase2`. En cas de doute, demande.
 2. **Crée la branche du baby step.** Au premier baby step de la phase, pars de la branche de la phase. Ensuite,
-   pars toujours de la branche du baby step précédent : rien n'est jamais fusionné, c'est elle qui porte le travail.
+   pars toujours de la branche du baby step précédent : rien n'est fusionné dans la branche de la phase, c'est elle qui porte le travail.
    ```
    git switch <baby step précédent, ou java-bdxio-phase1 au premier>
    git switch -c team-<équipe>/step-<N>/ha<règle>-<quoi>
@@ -45,7 +45,7 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
    les points de la CI : une autre règle passée au vert en passant (tant mieux), une règle qui a rougi, une métrique qui
    se dégrade. Une régression est acceptable si elle est temporaire : l'humain choisit de la corriger sur la même
    branche ou de la réparer dans un baby step suivant. Ne choisis pas à sa place.
-10. **Ne fusionne jamais.** La PR reste en draft, ouverte. Retour à l'étape 2 pour la règle suivante.
+10. **Ne fusionne jamais la PR dans la branche de la phase.** Elle reste en draft, ouverte. Retour à l'étape 2 pour la règle suivante.
 
 ## Ce que tu ne fais pas
 
@@ -60,8 +60,11 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
   que tu observes, propose des pistes, et demande à l'humain ce qu'il veut faire. Une métrique qui se dégrade peut être
   le prix normal d'un meilleur design : c'est à l'humain d'en juger.
 - **Ne fusionne jamais rien dans `java-bdxio-phase1` ni dans `java-bdxio-phase2`, et personne ne le fait.** Pas de
-  `gh pr merge`, pas de `gh pr ready` : les PR restent en draft. Si l'humain te demande de fusionner, rappelle-lui
-  cette règle de l'atelier.
+  `gh pr merge` d'une PR qui vise ces branches, pas de `gh pr ready` : les PR du jeu restent en draft. Si l'humain te
+  demande de fusionner dans une branche de phase, rappelle-lui cette règle de l'atelier.
+  Fusionner entre les branches d'équipe est autorisé, quand l'humain le décide : une branche de baby step dans une
+  autre (`git merge`), ou la branche de la phase dans une branche d'équipe pour récupérer ses mises à jour. Seules les
+  deux branches de phase sont protégées.
 - **Ne touche jamais** à `harness/`, `.github/`, `domain/`, `infrastructure/`. Ne pousse pas sur `main` ni sur les
   branches de phase. Ne travaille pas dans un fork.
 

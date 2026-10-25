@@ -23,7 +23,8 @@ Ne touchez pas à `domain/` ni à `infrastructure/` : ils sont hors exercice.
 
 L'étape 2 ne découpe plus les entités. Elle change la manière dont elles s'expriment :
 
-- les données sont des `record` immuables, sans setter ;
+- les données sont immuables, sans setter : des `record` pour les valeurs, des classes à champs `final` pour les
+  entités ;
 - les alternatives (un produit périssable ou non périssable, une vente possible ou refusée, un retrait réussi ou non)
   sont des `sealed interface` dont chaque alternative est un record ;
 - les échecs attendus sont renvoyés comme des valeurs, pas levés comme des exceptions ;
@@ -58,8 +59,8 @@ Un baby step = une PR = une règle qui passe de rouge à vert (voir la section �
 branche part du baby step précédent). L'ordre ci-dessous est celui qui
 coûte le moins de réécriture : une règle en amont rend souvent la suivante plus facile.
 
-1. **HA2 : données immuables.** Transformez les classes de données en `record`, retirez les setters et les champs
-   mutables, et remplacez les collections modifiables par des collections immuables.
+1. **HA2 : données immuables.** Faites des valeurs des `record`, rendez `final` tous les champs des classes qui
+   restent (les entités), retirez les setters, et remplacez les collections modifiables par des collections immuables.
 2. **HA3 : les records sont des value objects.** Créez `Price` comme record dans un package `valueobject`, sans
    VAT. Aucun record ne doit implémenter `Identifiable`, et le package `valueobject` ne contient que des records.
 3. **HA4.1 : pas d'héritage.** Aucune classe ni aucun record ne doit étendre une autre classe. Les interfaces et
@@ -91,9 +92,10 @@ Le texte des règles dans [docs/CUPID-step1-2.md](docs/CUPID-step1-2.md) fait au
 
 ### HA2 - données immuables
 
-Les données sont des `record`, sans setter. Les champs sont `final`. Aucune collection modifiable (`ArrayList`,
-`HashMap`, `HashSet`...) n'apparaît en champ ni dans un type public. Utilisez `List.of`, `Map.of`, ou des collections
-immuables.
+Les valeurs sont des `record` ; une entité reste une classe (elle implémente `Identifiable`, HA9), dont tous les
+champs sont `final`. Aucun setter. Aucune collection modifiable de `java.util` (`List`, `Map`, `ArrayList`,
+`HashMap`...) ni aucun tableau n'apparaît en champ ni dans un type. Utilisez `List.of`, `Map.of`, ou les collections
+immuables de vavr.
 
 ### HA3 - un record n'est jamais une entité
 

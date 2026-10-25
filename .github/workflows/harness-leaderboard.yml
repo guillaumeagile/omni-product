@@ -37,7 +37,7 @@ jobs:
         with:
           gradle-version: "9.5.0"
 
-      - name: Build the referee
+      - name: Construire l'arbitre
         run: gradle :harness:installDist -q
 
       - name: Compute the leaderboard

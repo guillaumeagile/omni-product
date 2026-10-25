@@ -24,7 +24,7 @@ concurrency:
 
 jobs:
   referee:
-    name: Score the baby step (harness on base and PR)
+    name: Arbitre CUPID (harnais sur la base et sur la PR)
     runs-on: ubuntu-latest
     env:
       BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -69,17 +69,17 @@ jobs:
             echo "playable=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Base without referee
+      - name: Base sans arbitre
         if: steps.base.outputs.playable != 'true'
         env:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
           {
-            echo "## Harness game: off game"
+            echo "## 🎮 Arbitre CUPID : hors jeu"
             echo
-            echo "The base branch \`$BASE_REF\` has no harness referee, so this PR cannot be scored."
-            echo "Target the branch of your phase (\`java-bdxio-phase1\` or \`java-bdxio-phase2\`) or the branch of your previous baby step,"
-            echo "then push again or reopen the PR."
+            echo "La branche de base \`$BASE_REF\` n'a pas d'arbitre : cette PR ne peut pas être notée."
+            echo "Changez la base de la PR (bouton **Edit** à côté du titre) pour la branche de votre phase"
+            echo "(\`java-bdxio-phase1\` ou \`java-bdxio-phase2\`), ou pour la branche de votre baby step précédent."
           } > "$RUNNER_TEMP/scorecard.md"
 
       - name: Harness on the pull request
@@ -94,7 +94,7 @@ jobs:
           java -cp "$RUNNER_TEMP/base/harness/build/install/harness/lib/*" com.omniproduct.harness.Tokens \
             --diff "$RUNNER_TEMP/changes.diff" > "$RUNNER_TEMP/changed-tokens.txt"
 
-      - name: Referee
+      - name: Arbitre
         id: referee
         if: steps.base.outputs.playable == 'true'
         run: |

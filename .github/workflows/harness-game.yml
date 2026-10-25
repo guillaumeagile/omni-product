@@ -33,7 +33,7 @@ jobs:
     name: Arbitre CUPID (harnais sur la base et sur la PR)
     runs-on: ubuntu-latest
     env:
-      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      # La base vient du commit de fusion de la PR (GITHUB_SHA), voir l'étape « Base of the PR ».
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
       PR_TITLE: ${{ github.event.pull_request.title }}
@@ -55,6 +55,15 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "9.5.0"
+
+      # La base est le premier parent du commit de fusion (refs/pull/N/merge) : c'est de lui que vient ce workflow.
+      # github.event.pull_request.base.sha peut être en retard sur la branche de la phase : le workflow récent
+      # appelait alors un arbitre ancien, qui ne connaissait pas ses options.
+      - name: Base of the PR
+        run: |
+          git fetch -q origin "$GITHUB_SHA"
+          echo "BASE_SHA=$(git rev-parse "$GITHUB_SHA^1")" >> "$GITHUB_ENV"
+          echo "Base : $(git rev-parse "$GITHUB_SHA^1") (événement : ${{ github.event.pull_request.base.sha }})"
 
       # L'arbitre et le harnais de la base font foi : le code de la PR ne juge pas la PR.
       # Une base sans harnais (par exemple main) ne peut pas arbitrer : la PR doit viser la branche de la phase
@@ -161,6 +170,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          if [ ! -s "$RUNNER_TEMP/scorecard.md" ]; then
+            printf '%s\n\n%s\n' "## 🎮 Arbitre CUPID : en panne" \
+              "L'arbitre n'a pas pu écrire son verdict : voir l'onglet **Checks** de la PR, et prévenir l'animateur." \
+              > "$RUNNER_TEMP/scorecard.md"
+          fi
           url=$(gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/scorecard.md")
           echo "$url"
           new_id=${url##*#issuecomment-}
@@ -193,7 +207,10 @@ jobs:
               "Niveau : " + .level,
               "",
               (if (.badges | length) > 0
-                then "# " + (.badges | map(split(" ")[0]) | join(" ")) + "\n\n**Badges :** " + (.badges | join(" · ")) + "\n"
+                then (.badges | map("![" + . + "](https://img.shields.io/badge/" + (gsub("-"; "--") | gsub("_"; "__") | @uri)
+                    + "-" + ({"🍼 Baby step": "2ea44f", "🧼 No regression": "1f6feb", "🤏 Small diff": "8250df",
+                             "👑 Boss defeated": "d4a017", "🧠 Compiler-checked": "e36209"}[.] // "555555")
+                    + "?style=for-the-badge)") | join(" ")) + "\n"
                 else empty end),
               "_Mis à jour par l’arbitre à chaque push ; le détail est dans son commentaire._",
               "<!-- arbitre-cupid:end -->"' > "$RUNNER_TEMP/section.md"

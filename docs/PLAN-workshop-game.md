@@ -105,7 +105,7 @@ niveau, badges. Le score d'une équipe est recalculé à partir des commentaires
 - `docs/CUPID-step-1.md` : section « How to work » (fait), plus les règles du jeu (titre de PR, cible, barème, badges).
 - `docs/CUPID-step1-2.md` : version Java du texte (aujourd'hui texte C#) : sealed au lieu de `OneOf`, `switch` au lieu
   de `Match`, `./harness.sh 2`, mêmes règles du jeu.
-- `docs/Workshop.md` : déroulé de l'atelier en PR et jeu.
+- `Workshop-CUTE DDD-full day.md` : déroulé de l'atelier en PR et jeu.
 
 ## Lot 7 : essai du principe
 
@@ -139,6 +139,6 @@ Lot 1 -> Lot 2 -> Lot 3 -> Lot 4 -> Lot 7 -> Lot 5 -> Lot 6. Phase 3 après l'at
 | 3 arbitre | fait | tests sur paires de rapports ; essai local base/tête (baby step HA3 simulé : +18) |
 | 4 GitHub Action `harness-game` | écrite | étapes rejouées en local ; **pas encore jouée sur GitHub** (lot 7) |
 | 5 classement `harness-leaderboard` | écrit | tests du calcul ; **workflow pas encore joué sur GitHub** |
-| 6 textes étudiants | partiel | `CUPID-step-1.md` (règles du jeu) et `Workshop.md` faits ; `CUPID-step1-2.md` reste à passer en Java |
+| 6 textes étudiants | partiel | `CUPID-step-1.md` (règles du jeu) et `Workshop-CUTE DDD-full day.md` faits ; `CUPID-step1-2.md` reste à passer en Java |
 | 7 essai du principe | à faire | PR de test à ouvrir puis supprimer |
 | mesures tokens + PMD | fait | tokens par JTokkit (o200k_base), complexité par PMD ; rapport JSON (`metrics`), arbitre et Action ; tests sur valeurs de référence |

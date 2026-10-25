@@ -110,7 +110,8 @@ Products now have a shelf life, and the two kinds differ in their dates, not in 
    set once at creation (no setter).
 3. **Validate the invariant at the boundary.** Dates are input data, so a static factory `Perishable.create(...)`
    that returns a sealed result `PerishableCreation permits Perishable, InvalidDates` is better than a constructor
-   that throws (HA4.2, HA4.4). `InvalidDates` is a record, not an exception.
+   that throws (HA4.2, HA4.4). `InvalidDates` is a record, not an exception. A Vavr `Either<InvalidDates, Perishable>`
+   (or `Validation`) is accepted too.
 4. **Put the behaviour behind a `switch`**, so each alternative is handled and the compiler checks it:
    `Product.canSell(today)` returns `sealed interface SaleDecision permits Sellable, PastSellByDate`. A `Perishable`
    refuses the sale after `sellByDate`; a `NonExpiring` never refuses (HA4.5).
@@ -138,7 +139,7 @@ object* here is a `record` that does not implement `Identifiable`.
 | HA4.1 | No class or record extends another class (interfaces and `implements` are fine). Checked on the bytecode. | error |
 | HA4.2 | No `throw`, `assert` or guard call (`requireNonNull`, `checkArgument`...) in a constructor. Return a sealed result from a factory instead. | error |
 | HA4.3 | `Product` has at least one property typed by a `sealed interface` of value objects, with no setter. | error |
-| HA4.4 | At least one value object has a static `create`/`build`/`of`/`from`/`make` returning a sealed result whose alternatives include the value object itself and an error record. | error |
+| HA4.4 | At least one value object has a static `create`/`build`/`of`/`from`/`make` returning a sealed result whose alternatives include the value object itself and an error record, or a Vavr ADT (`Either`, `Validation`, `Try`, `Option`) whose success type is the value object. | error |
 | HA4.5 | No `instanceof` or cast on a sealed type or its alternatives; no sealed result ignored as a statement; at least one `switch` covers every alternative of an ADT whose alternatives are all records. | error |
 | HA4.6 | The model never reads the clock: no `LocalDate.now()`, `Instant.now()`, `System.currentTimeMillis()`, `new Date()`, `Clock.systemUTC()`... Pass `today` or inject a `Clock`. | error |
 | HA4.7 | In a method whose name contains "sell", `canSell` is called before `withdraw`. | warning |

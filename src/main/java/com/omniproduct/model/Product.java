@@ -1,5 +1,6 @@
 package com.omniproduct.model;
 
+import com.omniproduct.model.valueobject.Price;
 import jakarta.persistence.*;
 import java.util.List;
 import java.util.Map;
@@ -132,30 +133,6 @@ public class Product {
     
     public com.omniproduct.model.Supplier getSupplier() { return supplier; }
     public void setSupplier(com.omniproduct.model.Supplier supplier) { this.supplier = supplier; }
-    
-    @Embeddable
-    public static class Price {
-        private Double base;
-        private Double tax;
-        private Double taxRate;
-        
-        public Price() {}
-        
-        public Price(Double base, Double tax, Double taxRate) {
-            this.base = base;
-            this.tax = tax;
-            this.taxRate = taxRate;
-        }
-        
-        public Double getBase() { return base; }
-        public void setBase(Double base) { this.base = base; }
-        
-        public Double getTax() { return tax; }
-        public void setTax(Double tax) { this.tax = tax; }
-        
-        public Double getTaxRate() { return taxRate; }
-        public void setTaxRate(Double taxRate) { this.taxRate = taxRate; }
-    }
     
     @Embeddable
     public static class Warehouse {

@@ -2,6 +2,7 @@ package com.omniproduct.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omniproduct.model.Product;
+import com.omniproduct.model.valueobject.Price;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -27,7 +28,7 @@ public class ProductControllerTest {
 
     @Test
     public void testCrudOperations() throws Exception {
-        Product.Price price = new Product.Price(100.0, 20.0, 0.2);
+        Price price = new Price(100.0, 20.0, 0.2);
         Product.Warehouse warehouse = new Product.Warehouse("Main Warehouse");
         Product.Supplier supplier1 = new Product.Supplier("Supplier1", "SIREN123", "TVA456");
         Product product = new Product(

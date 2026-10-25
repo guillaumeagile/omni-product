@@ -30,4 +30,13 @@ public class ProductService {
     public void deleteById(String id) {
         productRepository.deleteById(id);
     }
+
+    // Vente d'un produit : le retrait de stock vient avant tout contrôle de vente (HA4.7, avertissement).
+    public void sellOne(Product product) {
+        withdrawStock(product);
+    }
+
+    private void withdrawStock(Product product) {
+        product.setStock(product.getStock() - 1);
+    }
 }

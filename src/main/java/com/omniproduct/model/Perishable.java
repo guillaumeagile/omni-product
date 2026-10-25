@@ -20,4 +20,7 @@ public class Perishable extends Product {
     public LocalDate getSellByDate() { return sellByDate; }
 
     public LocalDate getUseByDate() { return useByDate; }
+
+    // Dérive l'état du jour : pratique, mais le modèle ne doit pas lire l'horloge (HA4.6).
+    public boolean isPastSellBy() { return LocalDate.now().isAfter(sellByDate); }
 }

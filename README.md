@@ -45,17 +45,28 @@ rouge, et c'est voulu.
 
 ## Le jeu : une PR par baby step
 
-Chaque baby step est une pull request (PR) qui fait passer **une seule** règle du rouge au vert. Chaque PR passe
+Chaque baby step est une pull request (PR) **en brouillon** (draft) qui fait passer **une seule** règle du rouge au
+vert.
+
+> **On ne fusionne jamais.** Personne ne fusionne de PR dans `java-bdxio-phase1` ni dans `java-bdxio-phase2`, jamais :
+> ces branches restent le point de départ commun à toutes les équipes. Vos PR restent en **draft**, ouvertes, et
+> vos baby steps s'enchaînent sur vos propres branches.
+
+Chaque PR passe
 devant **l'arbitre CUPID** : une GitHub Action (le check `harness-game`) qui lance le harnais sur la base de la PR, puis
 sur la PR elle-même. L'arbitre compare les deux résultats, commente la PR avec un tableau de score et met le check au
 vert ou au rouge.
 
 ### 1. Préparer la branche
 
-1. **Partez de la branche de la phase, à jour** (`java-bdxio-phase1` pour les règles HA5 à HA12.1,
-   `java-bdxio-phase2` pour celles de la phase 2) : `git switch java-bdxio-phase1 && git pull`. Elle contient les
-   baby steps déjà fusionnés. Travaillez dans le dépôt de l'atelier, pas dans un fork : depuis un fork, l'arbitre ne
-   peut pas commenter, sauf si vous l'autorisez dans votre fork.
+1. **Partez de la bonne branche.**
+   - Premier baby step de la phase : la branche de la phase (`java-bdxio-phase1` pour les règles HA5 à HA12.1,
+     `java-bdxio-phase2` pour celles de la phase 2).
+   - Baby steps suivants : la branche de **votre baby step précédent**. Rien n'étant fusionné, c'est elle qui porte
+     votre travail.
+
+   Travaillez dans le dépôt de l'atelier, pas dans un fork : depuis un fork, l'arbitre ne peut pas commenter, sauf si
+   vous l'autorisez dans votre fork.
 2. **Nommez la branche** `team-<équipe>/step-<N>/ha<règle>-<quoi>`. Le premier segment est le nom de votre équipe au
    classement.
    - phase 1 : `team-red/step-1/ha9-identifiable`
@@ -65,8 +76,7 @@ vert ou au rouge.
 4. **Lancez `./harness.sh all`** en local avant de pousser. L'arbitre utilise le même harnais.
 
 ```
-git switch java-bdxio-phase1
-git pull
+git switch team-red/step-1/ha8-no-jpa        # le baby step précédent (au premier : java-bdxio-phase1)
 git switch -c team-red/step-1/ha9-identifiable
 # ... le refactoring ...
 ./harness.sh all
@@ -76,23 +86,25 @@ git push -u origin team-red/step-1/ha9-identifiable
 
 ### 2. Créer la PR, vers la bonne base
 
-La **base** d'une PR est la branche dans laquelle elle serait fusionnée. GitHub propose `main` par défaut, et c'est le
+La **base** d'une PR est la branche à laquelle l'arbitre la compare. GitHub propose `main` par défaut, et c'est le
 piège : `main` n'a pas d'arbitre, la PR est alors « hors jeu ».
 
 **La base est toujours la branche de la phase** : `java-bdxio-phase1` pour une règle de la phase 1,
 `java-bdxio-phase2` pour une règle de la phase 2. Jamais `main`, jamais la branche d'un autre baby step.
 
-C'est ce qui rend le score progressif : l'arbitre compare la PR à l'état de la phase, qui contient tous les baby steps
-déjà fusionnés. Chaque PR n'est donc notée que sur ce qu'elle apporte. C'est aussi pourquoi chaque branche part de la
-branche de la phase à jour, et pas de la branche du baby step précédent : sinon, son diff contiendrait aussi les
-étapes précédentes.
+C'est ce qui rend le score progressif : chaque PR est comparée au point de départ de la phase, et votre branche
+contient tous vos baby steps précédents. D'une PR à la suivante, vous voyez donc le chemin parcouru depuis le legacy.
 
-Sur GitHub, après le push : bouton **Compare & pull request**, puis, dans la liste **base:** en haut à gauche,
-choisissez `java-bdxio-phase1` avant de cliquer sur **Create pull request**. En ligne de commande :
+**La PR est toujours un brouillon (draft).** Sur GitHub, après le push : bouton **Compare & pull request**, choisissez
+`java-bdxio-phase1` dans la liste **base:** en haut à gauche, puis, dans la flèche à côté du bouton vert, **Create
+draft pull request**. En ligne de commande :
 
 ```
-gh pr create --base java-bdxio-phase1 --title "HA9 green: Product and Supplier implement Identifiable"
+gh pr create --draft --base java-bdxio-phase1 --title "HA9 green: Product and Supplier implement Identifiable"
 ```
+
+Ne cliquez jamais sur **Ready for review** ni sur **Merge** : la PR reste en draft, ouverte, jusqu'à la fin de
+l'atelier. L'arbitre la note quand même à chaque push.
 
 **Le titre nomme la règle cible** (`HA9 green: ...`). Sans cible dans le titre ni dans la branche, la PR est hors jeu.
 Dans la description, collez la sortie du harnais avant et après.
@@ -149,13 +161,16 @@ claude "Relis pr.diff. Pour chaque ligne du verdict de l'arbitre (verdict.txt), 
 l'explique, et signale ce qui fait passer une règle sans corriger le défaut qu'elle vise."
 ```
 
-Écrivez vos conclusions en commentaire de la PR avant de la fusionner : c'est là que se fait l'apprentissage.
+Comme la PR est comparée au départ de la phase, **Files changed** montre tous vos baby steps depuis le legacy. Pour
+ne voir que le dernier, choisissez ses commits dans le menu **Commits** de Files changed, ou en local :
+`git diff team-red/step-1/ha8-no-jpa..team-red/step-1/ha9-identifiable`.
 
-### 5. Fusionner et monter au classement
+Écrivez vos conclusions en commentaire de la PR : c'est là que se fait l'apprentissage.
 
-Après chaque fusion, l'issue épinglée **CUPID workshop leaderboard** classe les équipes. Pour le baby step suivant,
-revenez sur la branche de la phase, mettez-la à jour (`git switch java-bdxio-phase1 && git pull`), et créez-en une
-nouvelle branche : retour à l'étape 1.
+### 5. Ne pas fusionner, passer au baby step suivant
+
+Ne fusionnez pas la PR : laissez-la en draft, ouverte. Pour le baby step suivant, créez une nouvelle branche à partir
+de celle que vous venez de terminer, puis une nouvelle PR draft vers la branche de la phase : retour à l'étape 1.
 
 ### Quand une PR est acceptée
 
@@ -233,6 +248,7 @@ score. Le harnais n'est qu'une heuristique : l'exercice, c'est votre réflexion 
 
 ### Règles du jeu
 
+- **Personne ne fusionne jamais dans `java-bdxio-phase1` ni dans `java-bdxio-phase2`.** Les PR restent en draft.
 - Ne modifiez jamais `harness/` pour faire passer une règle. Si une règle vous semble fausse, notez pourquoi et
   signalez-le à l'animateur.
 - Un échec que vous provoquez en corrigeant autre chose se dit dans la PR : ne le cachez pas.

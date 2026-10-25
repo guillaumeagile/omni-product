@@ -31,8 +31,10 @@ Each baby step goes in its own pull request, so you can see how much code each r
 
 - **One PR = one rule turned green.** Run `./harness.sh`, pick one `[FAIL]` line, fix only that and open a PR. If
   you are tempted to fix two rules at once, split the work into two PRs.
-- **Stack the PRs.** Branch each step from the previous one (`step-1/ha9-identifiable` from `step-1/ha8-no-jpa`), and
-  target the previous branch, so that each diff shows one step and nothing else.
+- **Always target the phase branch** (`java-bdxio-phase1`, or `java-bdxio-phase2` for a phase 2 rule), never
+  `main` nor the branch of another step. Branch each step from the up-to-date phase branch (`git switch
+  java-bdxio-phase1 && git pull`), which holds the steps already merged: each PR is then scored only on what it adds,
+  and its diff shows one step and nothing else.
 - **Name the rule in the title**: `HA9 green: Product and Supplier implement Identifiable`.
 - **Paste the harness output in the description**, before and after: the rule that turned green, and any rule
   that turned red because of it (that happens, say so rather than hiding it).

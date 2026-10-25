@@ -42,6 +42,7 @@ public final class Scorecard {
                         problems.isEmpty() && notes.isEmpty() ? Stream.<String>empty() : Stream.of(""),
                         table.stream(),
                         table.isEmpty() ? Stream.<String>empty() : Stream.of(""),
+                        breakdown(verdict).stream(),
                         score.isEmpty() ? Stream.<String>empty() : Stream.of(score, ""),
                         verdict.measures().stream(),
                         verdict.measures().isEmpty() ? Stream.<String>empty() : Stream.of(""),
@@ -60,6 +61,17 @@ public final class Scorecard {
                 .toList();
         return rows.isEmpty() ? List.of()
                 : Stream.concat(Stream.of("| Rule | Base | This PR | Points |", "|---|---|---|---|"), rows.stream()).toList();
+    }
+
+    // Le récapitulatif du score : une ligne par source de points, puis le total.
+    private static List<String> breakdown(Verdict verdict) {
+        return verdict.outcome() == Outcome.OFF_GAME || verdict.breakdown().isEmpty() ? List.of()
+                : Stream.of(
+                                Stream.of("| Score | Points |", "|---|---:|"),
+                                verdict.breakdown().stream().map(line -> "| " + line.reason() + " | " + signed(line.points()) + " |"),
+                                Stream.of("| **Total** | **" + signed(verdict.score()) + "** |", ""))
+                        .flatMap(lines -> lines)
+                        .toList();
     }
 
     // Ce que le classement relit dans chaque commentaire de l'arbitre.

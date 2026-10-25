@@ -214,4 +214,29 @@ class RefereeTest {
         assertThat(verdict.outcome()).isEqualTo(Outcome.REJECTED);
         assertThat(verdict.score()).isEqualTo(1);
     }
+
+    @Test
+    void theScorecardRecapsWhereEachPointComesFrom() {
+        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, ck(8, 37, 14, 28, 0.90, 27, 64, 0, 5, 0)),
+                rule("HA7", "PASS", 0), rule("HA9", "FAIL", 2), rule("HA11", "FAIL", 10), rule("HA12.1", "WARN", 3));
+        Verdict verdict = Referee.judge(base, reportWith(new Metrics(2800, 30, 6, ck(13, 59, 11, 13, 0.75, 32, 75, 0, 5, 0)),
+                rule("HA7", "FAIL", 1), rule("HA9", "PASS", 0), rule("HA11", "FAIL", 8), rule("HA12.1", "PASS", 0)),
+                new PullRequest("HA9 green", "", List.of(), 120, 400));
+
+        String markdown = Scorecard.markdown(verdict);
+
+        assertThat(verdict.breakdown().stream().mapToInt(Referee.Points::points).sum()).isEqualTo(verdict.score());
+        assertThat(markdown).contains(
+                "| Score | Points |",
+                "| `HA9` turned green 🎯 | +10 |",
+                "| `HA7` regressed (was green) | -5 |",
+                "| `HA12.1` warning resolved | +3 |",
+                "| Violations removed on rules still red (up to +5) | +2 |",
+                "| Tokens removed (+1 per 100, up to +5) | +2 |",
+                "| Cyclomatic complexity removed (+1 per 2, up to +10) | +5 |",
+                "| **Total** | **" + "+" + verdict.score() + "** |");
+        // Refusée (régression de HA7) : ni bonus de baby step ou de petit diff, ni points CK.
+        assertThat(markdown).doesNotContain("Baby step: exactly one", "Small diff:", "CK metrics improved");
+        assertThat(markdown).contains("CK metrics of model/ and service/: +5, not counted: the PR is not accepted");
+    }
 }

@@ -52,8 +52,9 @@ final class CkTable {
                 .orElse(0);
     }
 
-    static List<String> lines(Optional<HarnessReport> base, HarnessReport head) {
-        return pair(base, head).map(pair -> table(pair.before(), pair.after(), points(base, head))).orElse(List.of());
+    // counted : faux pour une PR refusée, dont les points CK ne comptent pas.
+    static List<String> lines(Optional<HarnessReport> base, HarnessReport head, boolean counted) {
+        return pair(base, head).map(pair -> table(pair.before(), pair.after(), points(base, head), counted)).orElse(List.of());
     }
 
     private record Pair(CkMetrics before, CkMetrics after) {
@@ -67,10 +68,10 @@ final class CkTable {
         return report.map(HarnessReport::metrics).map(Metrics::ck);
     }
 
-    private static List<String> table(CkMetrics before, CkMetrics after, int total) {
+    private static List<String> table(CkMetrics before, CkMetrics after, int total, boolean counted) {
         return Stream.of(
                         Stream.of("<details><summary>📐 CK metrics of model/ and service/: " + signed(total)
-                                        + " (up to +" + CK_CAP + ")</summary>", "",
+                                        + (counted ? " (up to +" + CK_CAP + ")" : ", not counted: the PR is not accepted") + "</summary>", "",
                                 "| Metric | Base | This PR | Δ | Points | Rule |", "|---|---|---|---|---|---|"),
                         ROWS.stream().map(row -> row(row, before, after)),
                         Stream.of("", "Measured by [CK](https://github.com/mauricioaniche/ck) 0.7.0. "

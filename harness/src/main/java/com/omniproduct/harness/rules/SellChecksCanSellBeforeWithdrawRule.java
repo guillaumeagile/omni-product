@@ -1,7 +1,6 @@
 package com.omniproduct.harness.rules;
 
 import com.omniproduct.harness.HarnessRule;
-import com.omniproduct.harness.HarnessSeverity;
 import com.omniproduct.harness.Node;
 import com.omniproduct.harness.SourceFile;
 import com.omniproduct.harness.SourceSet;
@@ -16,7 +15,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// HA4.7 (moteur AST, avertissement) - une vente ne retire du stock que si le domaine l'a permise : le retrait doit
+// HA4.7 (moteur AST, erreur) - une vente ne retire du stock que si le domaine l'a permise : le retrait doit
 // DÉPENDRE de la décision `canSell`, pas seulement venir après elle dans le texte. Un retrait est gardé quand il se
 // trouve :
 //   - dans une branche d'un `if`, d'un ternaire ou d'un `switch` dont la condition porte la décision ;
@@ -61,12 +60,7 @@ public final class SellChecksCanSellBeforeWithdrawRule implements HarnessRule {
 
     @Override
     public String name() {
-        return "A sale withdraws stock only when canSell allows it (warning)";
-    }
-
-    @Override
-    public HarnessSeverity severity() {
-        return HarnessSeverity.WARNING;
+        return "A sale withdraws stock only when canSell allows it";
     }
 
     @Override

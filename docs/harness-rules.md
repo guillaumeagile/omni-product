@@ -15,7 +15,7 @@ sur le Java en phase 3.
 | HA4.4 | Validation à la frontière | Un value object a une fabrique `create`/`build`/`of`/`from`/`make` qui renvoie un résultat scellé (lui-même ou un record d'erreur), ou une ADT de Vavr (`Either`, `Validation`, `Try`, `Option`) dont le succès est le value object | Aucune fabrique ; résultat ni scellé ni Vavr (`Optional` du JDK, `Either` maison) ; value object du côté de l'erreur (`Either<Price, String>`) ; erreur scellée qui n'est pas un record | AST | Error |
 | HA4.5 | Match exhaustif sur l'ADT | Les alternatives, et les résultats scellés, sont traités par un `switch` qui les couvre toutes | `instanceof` ou cast vers une ADT ou une alternative ; résultat scellé ignoré (appel en simple instruction) ; aucun `switch` exhaustif | AST | Error |
 | HA4.6 | Le modèle ne lit pas l'horloge | Le modèle reçoit `today`, ou un `Clock` injecté | `LocalDate.now()`, `Instant.now()`, `System.currentTimeMillis()`, `new Date()`, `Clock.systemUTC()`… dans `model` | BYTECODE (appels, imports statiques compris) | Error |
-| HA4.7 | La vente dépend de `canSell` | Une vente ne retire du stock que si le domaine l'a permise | Le retrait doit se trouver dans une branche (`if`, ternaire, `switch`) ou une lambda (`map`, `Option.when`) qui dépend de la décision, ou après une clause de garde qui renvoie le refus ; un `canSell` ignoré ne garde rien | AST | Warning |
+| HA4.7 | La vente dépend de `canSell` | Une vente ne retire du stock que si le domaine l'a permise | Le retrait doit se trouver dans une branche (`if`, ternaire, `switch`) ou une lambda (`map`, `Option.when`) qui dépend de la décision, ou après une clause de garde qui renvoie le refus ; un `canSell` ignoré ne garde rien | AST | Error |
 | HA5 | Pas de god class | Au plus 4 propriétés publiques par type (hors `*Id`) | Compter les composants de `record`, les getters publics et les champs publics, hors noms finissant par `Id` | AST | Error |
 | HA6 | Single concern | Les méthodes publiques d'une classe couvrent au plus 1 contexte borné ; restrictions de vocabulaire par type | Même `ubiquitous-language-map.json` ; préfixe du nom de méthode comparé aux mots-clés par contexte | AST | Error |
 | HA7 | Fan-out | Une entité ne référence aucune autre entité, seulement des ids | Champs, paramètres, retours, locaux, arguments génériques (`List<Supplier>`, `Supplier[]`, `Optional<Supplier>`) | BYTECODE (dépendances de type) + AST pour la ligne | Error |
@@ -81,7 +81,7 @@ dans `Steps.java`.
 | HA4.4 fabrique à résultat scellé | oui | 2 | `create`/`build`… renvoie une ADT scellée (le value object ou un record d'erreur) ou une ADT de Vavr du value object |
 | HA4.5 switch exhaustif | oui | 2 | pas de `instanceof`, de cast ni de résultat scellé ignoré ; un `switch` couvre les alternatives ; model et service |
 | HA4.6 pas d'horloge | oui | 2 | BYTECODE |
-| HA4.7 la vente dépend de `canSell` | oui | 2 | avertissement ; vérifie la dépendance au résultat, plus l'ordre du texte |
+| HA4.7 la vente dépend de `canSell` | oui | 2 | erreur ; vérifie la dépendance au résultat, plus l'ordre du texte |
 
 Périmètre : `com.omniproduct.model` (et `com.omniproduct.service` pour HA4.1, HA4.7, HA6, HA12.1). Le port carbone
 (`domain/`) et l'infrastructure ne font pas partie de l'exercice.
@@ -153,7 +153,7 @@ Restent des faux négatifs, assumés (par conception ou faute de moyen sûr de l
   qui renvoie `void` serait signalée à tort. Un résultat rangé dans une variable puis jamais lu n'est pas vu. Un
   `default` n'est pas compté comme alternative.
 - HA4.6 : une horloge lue par une bibliothèque tierce, ou par réflexion, n'est pas vue.
-- HA4.7 : la séquence n'est vue que dans une même méthode ; avertissement seulement, il ne fait jamais échouer le harnais.
+- HA4.7 : la décision n'est suivie que dans une même méthode (variables locales) ; un retrait délégué à une autre classe n'est vu que par les mots de son nom.
 
 ## Ce que « heuristique » promet
 

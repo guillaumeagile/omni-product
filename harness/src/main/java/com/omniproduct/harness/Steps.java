@@ -65,7 +65,6 @@ public final class Steps {
     }
 
     // L'étape 1 plus HA2 (données immuables), HA3 (value objects), HA4.1 à HA4.7 (composable, ADT, horloge, vente).
-    // HA4.7 est un avertissement.
     private static List<HarnessRule> step2() {
         return Stream.concat(step1().stream(), List.<HarnessRule>of(
                 new ImmutableDataStructuresRule(IS_MODEL),

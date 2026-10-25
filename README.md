@@ -216,7 +216,7 @@ Une PR est acceptée quand :
 |---|---|
 | faites passer la règle cible au vert | +10 |
 | battez un boss (HA4.3 ADT, HA4.5 switch exhaustif, phase 2) | +20 |
-| résolvez un avertissement (`[WARN]` : HA12.1, HA4.7) | +3 |
+| résolvez un avertissement (`[WARN]` : HA12.1) | +3 |
 | retirez des violations d'une règle encore rouge | +1 par violation, jusqu'à +5 |
 | ne faites passer qu'une seule règle au vert (un vrai baby step) | +5 |
 | gardez un petit diff (400 tokens modifiés au plus dans `src/main/java`) | +3 |

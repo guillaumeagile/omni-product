@@ -64,7 +64,7 @@ du baby step, et rend un verdict et un score.
 | Règle cible au vert | +10 |
 | Règle « boss » (HA4.3, HA4.5) au vert | +20 |
 | Violations en baisse sur une règle encore rouge | +1 par violation retirée, plafonné à +5 |
-| Avertissement résolu (HA12.1, HA4.7) | +3 |
+| Avertissement résolu (HA12.1) | +3 |
 | Une seule règle au vert dans la PR (vrai baby step) | +5 |
 | Petit diff (400 tokens modifiés au plus dans `src/main/java`) | +3 |
 | Tokens retirés de `model/` et `service/` | +1 par 100 tokens, plafonné à +5 |

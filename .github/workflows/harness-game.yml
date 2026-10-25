@@ -190,8 +190,11 @@ jobs:
               "### 🎮 Arbitre CUPID" + (if .target == "" then "" else " — " + .target end) + " : " + $verdict
                 + (if .outcome == "OFF_GAME" then "" else " · **" + (if .score > 0 then "+" else "" end) + (.score | tostring) + "**" end),
               "",
-              "Niveau : " + .level + (if (.badges | length) > 0 then " · Badges : " + (.badges | join(", ")) else "" end),
+              "Niveau : " + .level,
               "",
+              (if (.badges | length) > 0
+                then "# " + (.badges | map(split(" ")[0]) | join(" ")) + "\n\n**Badges :** " + (.badges | join(" · ")) + "\n"
+                else empty end),
               "_Mis à jour par l’arbitre à chaque push ; le détail est dans son commentaire._",
               "<!-- arbitre-cupid:end -->"' > "$RUNNER_TEMP/section.md"
           gh pr view "$PR_NUMBER" --json body --jq .body > "$RUNNER_TEMP/body.md"

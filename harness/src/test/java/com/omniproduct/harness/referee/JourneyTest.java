@@ -47,6 +47,8 @@ class JourneyTest {
                 "| HA9 | 🔴 FAIL (5) | 🟢 PASS |",
                 "- Tokens in model/ and service/: 3000 → 2800");
         assertThat(markdown).doesNotContain("| HA10 |", "rules turned green at once");
+        // Les badges en grand : leurs emojis en titre, puis leurs noms.
+        assertThat(markdown).contains("\n# 🍼 🧼 🤏\n", "**Badges:** 🍼 Baby step · 🧼 No regression · 🤏 Small diff");
     }
 
     @Test

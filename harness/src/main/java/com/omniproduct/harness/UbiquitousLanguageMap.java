@@ -14,9 +14,12 @@ import java.util.Optional;
 // Le vocabulaire de chaque contexte borné (ubiquitous-language-map.json). Un nom de membre appartient à un contexte
 // dès qu'un de ses mots (ou une suite de mots, pour "DisplayLabel") est un mot-clé du contexte, où qu'il soit dans le
 // nom : getSlug, fetchSlug, slug(), displaySlug, getProductSlug.
+// naturalIdentifiers : les identifiants dont le code est l'identité, attribué hors du système (siren, tva...). HA12 ne
+// leur demande pas d'UUID ; tout autre identifiant est généré par le système et doit être riche.
 public record UbiquitousLanguageMap(Map<String, List<String>> concerns,
                                     Map<String, List<String>> restrictions,
-                                    List<String> weakConcerns) {
+                                    List<String> weakConcerns,
+                                    List<String> naturalIdentifiers) {
 
     private record Match(String concern, int words, int length) {
     }
@@ -27,6 +30,7 @@ public record UbiquitousLanguageMap(Map<String, List<String>> concerns,
     public UbiquitousLanguageMap {
         restrictions = restrictions == null ? Map.of() : restrictions;
         weakConcerns = weakConcerns == null ? List.of() : weakConcerns;
+        naturalIdentifiers = naturalIdentifiers == null ? List.of() : naturalIdentifiers;
     }
 
     public static UbiquitousLanguageMap load() {

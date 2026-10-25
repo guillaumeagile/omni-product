@@ -2,6 +2,7 @@ package com.omniproduct.harness.rules;
 
 import com.omniproduct.harness.HarnessRule;
 import com.omniproduct.harness.Identifiers;
+import com.omniproduct.harness.Words;
 import com.omniproduct.harness.Node;
 import com.omniproduct.harness.SourceFile;
 import com.omniproduct.harness.SourceSet;
@@ -84,10 +85,15 @@ public final class SingleConcernRule implements HarnessRule {
                         .stream());
     }
 
-    // Le nom d'abord ; un nom générique (get, compute, apply) se lit alors à travers les types qu'il manipule.
+    // Le nom d'abord ; un nom générique (get, compute, apply) se lit alors à travers les types qu'il manipule. Un type
+    // d'identifiant (ProductId, SupplierId) n'appartient à aucun contexte, comme un nom d'identifiant (getId) : typer
+    // l'identité d'une entité ne lui ajoute pas de préoccupation.
     private Optional<String> concernOf(Member member) {
         return languageMap.concernOf(member.name())
-                .or(() -> member.types().stream().flatMap(type -> languageMap.concernOf(type).stream()).findFirst());
+                .or(() -> member.types().stream()
+                        .filter(type -> !Words.isIdentifier(type))
+                        .flatMap(type -> languageMap.concernOf(type).stream())
+                        .findFirst());
     }
 
     private Optional<String> forbiddenKeyword(String typeName, Member member) {

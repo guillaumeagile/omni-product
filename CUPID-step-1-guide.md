@@ -144,9 +144,15 @@ Le JDK ne fournit pas de générateur UUID v7. Ajoutez une bibliothèque comme
 [ulid-creator](https://github.com/f4b6a3/ulid-creator) (`UlidCreator.getUlid()`). `UUID.randomUUID()` produit une
 version 4 et échoue là où il construit un identifiant.
 
+Seuls les identifiants générés par le système sont concernés. Un **identifiant naturel**, dont le code est l'identité
+et est attribué hors du système (SIREN, SIRET, numéro de TVA `tvaId`, SKU, EAN, GTIN, ISBN), n'a pas besoin d'UUID :
+un record court comme `record Siren(String value)` suffit. La liste est `naturalIdentifiers` dans
+`harness/src/main/resources/ubiquitous-language-map.json` ; tout autre identifiant est généré.
+
 L'avertissement HA12.1 n'est pas un échec : il signale tout identifiant dont le type est une classe de bibliothèque
 brute, comme `UUID` ou `String`, afin qu'un `ProductId` ne soit pas confondu avec un `SupplierId`. Vous pouvez le
-laisser, mais c'est un bon indice d'endroit où un record aiderait.
+laisser, mais c'est un bon indice d'endroit où un record aiderait. Un record permet aussi de passer plus tard de
+l'UUID v7 au ULID sans toucher au modèle.
 
 ## 5. Lire un échec
 

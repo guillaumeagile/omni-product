@@ -5,7 +5,9 @@ import com.omniproduct.harness.Identifiers;
 import com.omniproduct.harness.Node;
 import com.omniproduct.harness.SourceFile;
 import com.omniproduct.harness.SourceSet;
+import com.omniproduct.harness.UbiquitousLanguageMap;
 import com.omniproduct.harness.Violation;
+import com.omniproduct.harness.Words;
 
 import java.util.List;
 import java.util.Map;
@@ -15,10 +17,14 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// HA12 (moteur AST) - les identifiants sont des objets riches : tout `id` / `*Id` / `*Ids` (champ, variable
-// locale, retour, paramètre, composant de record) est un UUID ou un Ulid, ou un record qui en enveloppe
-// exactement un (record ProductId(UUID value)). Jamais String / int / long. Pour une collection ou une map
+// HA12 (moteur AST) - les identifiants générés par le système sont des objets riches : tout `id` / `*Id` / `*Ids`
+// (champ, variable locale, retour, paramètre, composant de record) est un UUID ou un Ulid, ou un record qui en
+// enveloppe exactement un (record ProductId(UUID value)). Jamais String / int / long. Pour une collection ou une map
 // d'identifiants, ce sont les types d'éléments et de clés qui comptent.
+// Seule exception : un identifiant naturel (naturalIdentifiers du vocabulaire : siren, tva, sku, ean...), dont le
+// code est l'identité, attribuée hors du système ; un record court suffit, HA12.1 avertit tant qu'il est brut.
+// Généré est le défaut, naturel une exception nommée : à l'inverse, renommer productId en ownerId suffirait à
+// échapper à la règle.
 // « Au moins v7 » se vérifie par la forme : UUID.randomUUID() (v4) et new UUID(...) sont signalés là où ils
 // construisent un identifiant ; UuidCreator.getTimeOrderedEpoch() et UlidCreator.getUlid() passent.
 public final class RichIdentifierRule implements HarnessRule {
@@ -26,9 +32,15 @@ public final class RichIdentifierRule implements HarnessRule {
     private static final Set<String> RICH = Set.of("UUID", "Ulid");
 
     private final Predicate<String> packageFilter;
+    private final Set<String> naturalWords;
 
     public RichIdentifierRule(Predicate<String> packageFilter) {
+        this(packageFilter, UbiquitousLanguageMap.load().naturalIdentifiers());
+    }
+
+    public RichIdentifierRule(Predicate<String> packageFilter, List<String> naturalIdentifiers) {
         this.packageFilter = packageFilter;
+        this.naturalWords = naturalIdentifiers.stream().flatMap(name -> Words.of(name).stream()).collect(Collectors.toSet());
     }
 
     @Override
@@ -46,13 +58,15 @@ public final class RichIdentifierRule implements HarnessRule {
         Map<String, Node> declaredTypes = declaredTypes(sources);
         return sources.files().stream()
                 .filter(file -> packageFilter.test(file.packageName()))
-                .flatMap(file -> Stream.of(poorTypes(file, declaredTypes), randomIdentifiers(file)).flatMap(violations -> violations))
+                .flatMap(file -> Stream.of(poorTypes(file, declaredTypes, naturalWords), randomIdentifiers(file)).flatMap(violations -> violations))
                 .distinct()
                 .toList();
     }
 
-    private static Stream<Violation> poorTypes(SourceFile file, Map<String, Node> declaredTypes) {
-        return Identifiers.uses(file).flatMap(use -> Identifiers.leafTypes(use.type())
+    private static Stream<Violation> poorTypes(SourceFile file, Map<String, Node> declaredTypes, Set<String> naturalWords) {
+        return Identifiers.uses(file)
+                .filter(use -> generated(use.name().text(), naturalWords))
+                .flatMap(use -> Identifiers.leafTypes(use.type())
                 .map(Identifiers::simpleName)
                 .flatMap(type -> problem(type, declaredTypes)
                         .map(problem -> new Violation(file.path(), use.name().line(),
@@ -69,6 +83,12 @@ public final class RichIdentifierRule implements HarnessRule {
                 .map(declaration -> Optional.of(declaration).filter(d -> !wrapsExactlyOneRichValue(d))
                         .map(d -> "has type '" + type + "' which is not a record wrapping exactly one UUID or Ulid."))
                 .orElseGet(() -> Optional.of("is a " + type + ": use a UUID (v7) or Ulid, ideally wrapped in a record."));
+    }
+
+    // Un identifiant est généré par le système, sauf si un de ses mots nomme un identifiant naturel : tvaId,
+    // supplierSiren, skuCode, Siren.
+    static boolean generated(String name, Set<String> naturalWords) {
+        return Words.of(name).stream().noneMatch(naturalWords::contains);
     }
 
     private static boolean wrapsExactlyOneRichValue(Node declaration) {

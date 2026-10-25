@@ -141,14 +141,17 @@ class FalseNegativeProbeTest {
 
     @Test
     void ha11KnowsBusinessIdentifiersLikeSiren() {
-        // Un SIREN, un SKU, un EAN sont des identifiants métier : un String n'a rien à faire là.
-        assertThat(ha11("""
+        // Un SIREN, un SKU sont des identifiants naturels : HA12 ne leur demande pas d'UUID, mais HA12.1 les voit
+        // encore comme des identifiants bruts (un record court, Siren(String value), suffit).
+        String supplier = """
                 package demo.model;
                 public class Supplier {
                     private String siren;
                     private String sku;
                 }
-                """)).hasSize(2);
+                """;
+        assertThat(ha11(supplier)).isEmpty();
+        assertThat(new BareIdentifierIsWeakRule(pkg -> true).check(SourceSet.ofSources(java.util.Map.of("S.java", supplier), null))).hasSize(2);
     }
 
     @Test

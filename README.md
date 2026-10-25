@@ -53,9 +53,9 @@ vert.
 > vos baby steps s'enchaînent sur vos propres branches.
 
 Chaque PR passe
-devant **l'arbitre CUPID** : une GitHub Action (le check `harness-game`) qui lance le harnais sur la base de la PR, puis
-sur la PR elle-même. L'arbitre compare les deux résultats, commente la PR avec un tableau de score et met le check au
-vert ou au rouge.
+devant **l'arbitre CUPID** : une GitHub Action (le check `harness-game`) qui lance le harnais sur la branche de la
+phase, sur votre baby step précédent et sur la PR elle-même. L'arbitre compare les résultats, commente la PR avec un
+tableau de score, met à jour le classement et met le check au vert ou au rouge.
 
 ### 1. Préparer la branche
 
@@ -92,8 +92,15 @@ piège : `main` n'a pas d'arbitre, la PR est alors « hors jeu ».
 **La base est toujours la branche de la phase** : `java-bdxio-phase1` pour une règle de la phase 1,
 `java-bdxio-phase2` pour une règle de la phase 2. Jamais `main`, jamais la branche d'un autre baby step.
 
-C'est ce qui rend le score progressif : chaque PR est comparée au point de départ de la phase, et votre branche
-contient tous vos baby steps précédents. D'une PR à la suivante, vous voyez donc le chemin parcouru depuis le legacy.
+L'arbitre retrouve tout seul votre baby step précédent : la branche de votre équipe (même premier segment,
+`team-red/`) dont votre branche est partie. Il en tire deux mesures :
+
+- **le score du round** : ce que la PR ajoute à votre step précédent (règle cible, baby step, petit diff, tokens,
+  complexité, métriques). Rien n'est compté deux fois ;
+- **le chemin parcouru** depuis le départ de la phase : règles passées au vert, niveau, tokens et complexité, dans un
+  bloc « 🧭 Since the start of the phase », sans points.
+
+Le score de l'équipe au classement est la somme de ses rounds. Au premier baby step, les deux mesures se confondent.
 
 **La PR est toujours un brouillon (draft).** Sur GitHub, après le push : bouton **Compare & pull request**, choisissez
 `java-bdxio-phase1` dans la liste **base:** en haut à gauche, puis, dans la flèche à côté du bouton vert, **Create
@@ -161,16 +168,21 @@ claude "Relis pr.diff. Pour chaque ligne du verdict de l'arbitre (verdict.txt), 
 l'explique, et signale ce qui fait passer une règle sans corriger le défaut qu'elle vise."
 ```
 
-Comme la PR est comparée au départ de la phase, **Files changed** montre tous vos baby steps depuis le legacy. Pour
-ne voir que le dernier, choisissez ses commits dans le menu **Commits** de Files changed, ou en local :
+Comme la PR vise la branche de la phase, **Files changed** montre tous vos baby steps depuis le legacy, alors que le
+score du round ne porte que sur le dernier. Pour ne voir que lui, choisissez ses commits dans le menu **Commits** de
+Files changed, ou en local :
 `git diff team-red/step-1/ha8-no-jpa..team-red/step-1/ha9-identifiable`.
 
 Écrivez vos conclusions en commentaire de la PR : c'est là que se fait l'apprentissage.
 
 ### 5. Ne pas fusionner, passer au baby step suivant
 
-Ne fusionnez pas la PR : laissez-la en draft, ouverte. Pour le baby step suivant, créez une nouvelle branche à partir
-de celle que vous venez de terminer, puis une nouvelle PR draft vers la branche de la phase : retour à l'étape 1.
+Ne fusionnez pas la PR : laissez-la en draft, ouverte. Ne la fermez pas non plus : le classement ne compte que les PR
+ouvertes. Pour le baby step suivant, créez une nouvelle branche à partir de celle que vous venez de terminer, puis une
+nouvelle PR draft vers la branche de la phase : retour à l'étape 1.
+
+Après chaque round, l'issue épinglée **CUPID workshop leaderboard (java-bdxio-phase1)** (ou `phase2`) classe les
+équipes : la somme des scores de leurs PR ouvertes.
 
 ### Quand une PR est acceptée
 

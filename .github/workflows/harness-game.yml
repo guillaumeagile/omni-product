@@ -1,6 +1,11 @@
-# Arbitre de l'atelier CUPID : à chaque PR, le harnais tourne sur la base et sur la tête, l'arbitre compare les deux
-# rapports JSON, commente la PR (verdict, score, niveau, badges) et fait échouer le check si la PR n'est pas un
-# baby step (règle cible pas verte, régression, harness/ modifié, projet qui ne compile pas).
+# Arbitre de l'atelier CUPID : à chaque PR, le harnais tourne sur la base, sur le baby step précédent de l'équipe et
+# sur la tête ; l'arbitre compare les rapports JSON, commente la PR (verdict, score, niveau, badges), recalcule le
+# classement et fait échouer le check si la PR n'est pas un baby step (règle cible pas verte, régression, harness/
+# modifié, projet qui ne compile pas).
+#
+# Rien n'est jamais fusionné : chaque PR est un draft qui vise la branche de la phase, et les branches d'une équipe
+# s'enchaînent (team-red/step-1/ha9 part de team-red/step-1/ha8). Le score du round est le delta avec le step
+# précédent, retrouvé automatiquement ; le chemin parcouru depuis la phase est affiché sans points.
 #
 # Mesures du score : les tokens (coût de lecture et d'écriture pour un agent) remplacent les lignes ; la complexité
 # cyclomatique vient de PMD (règle CyclomaticComplexity). Les deux sont dans les rapports JSON du harnais.
@@ -17,6 +22,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 
 concurrency:
   group: harness-game-${{ github.event.pull_request.number }}
@@ -82,25 +88,65 @@ jobs:
             echo "(\`java-bdxio-phase1\` ou \`java-bdxio-phase2\`), ou pour la branche de votre baby step précédent."
           } > "$RUNNER_TEMP/scorecard.md"
 
+      # Le step précédent : parmi les branches de la même équipe (premier segment du nom), la plus avancée dont la PR
+      # descend, au point où elle en est partie (merge-base). Aucune : c'est le premier step, comparé à la phase.
+      - name: Previous step of the team
+        id: previous
+        if: steps.base.outputs.playable == 'true'
+        run: |
+          team=${PR_BRANCH%%/*}
+          fork=$(git merge-base "$HEAD_SHA" "$BASE_SHA")
+          best_sha=$fork best_ref="" best_n=0
+          while read -r ref; do
+            [ "$ref" = "origin/$PR_BRANCH" ] && continue
+            mb=$(git merge-base "$HEAD_SHA" "$ref") || continue
+            [ "$mb" = "$HEAD_SHA" ] && continue
+            git merge-base --is-ancestor "$fork" "$mb" || continue
+            n=$(git rev-list --count "$fork..$mb")
+            if [ "$n" -gt "$best_n" ]; then best_sha=$mb best_ref=${ref#origin/} best_n=$n; fi
+          done < <(git for-each-ref --format='%(refname:short)' "refs/remotes/origin/$team/")
+          echo "sha=$best_sha" >> "$GITHUB_OUTPUT"
+          echo "ref=$best_ref" >> "$GITHUB_OUTPUT"
+          echo "Step précédent : ${best_ref:-aucun (premier step)} @ $best_sha"
+
+      - name: Harness on the previous step
+        if: steps.base.outputs.playable == 'true' && steps.previous.outputs.ref != ''
+        env:
+          PREV_SHA: ${{ steps.previous.outputs.sha }}
+        run: |
+          git worktree add "$RUNNER_TEMP/previous" "$PREV_SHA"
+          (cd "$RUNNER_TEMP/previous" && ./harness.sh all --json "$RUNNER_TEMP/previous.json") || true
+
       - name: Harness on the pull request
         if: steps.base.outputs.playable == 'true'
         run: ./harness.sh all --json "$RUNNER_TEMP/head.json" || true
 
+      # harness/ est vérifié depuis la phase (toute la chaîne) ; le petit diff ne compte que le round.
       - name: Changed files and tokens
         if: steps.base.outputs.playable == 'true'
+        env:
+          PREV_SHA: ${{ steps.previous.outputs.sha }}
         run: |
           git diff --name-only "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/changed-files.txt"
-          git diff -U0 "$BASE_SHA...$HEAD_SHA" -- src/main/java > "$RUNNER_TEMP/changes.diff"
+          git diff -U0 "$PREV_SHA" "$HEAD_SHA" -- src/main/java > "$RUNNER_TEMP/changes.diff"
           java -cp "$RUNNER_TEMP/base/harness/build/install/harness/lib/*" com.omniproduct.harness.Tokens \
             --diff "$RUNNER_TEMP/changes.diff" > "$RUNNER_TEMP/changed-tokens.txt"
 
       - name: Arbitre
         id: referee
         if: steps.base.outputs.playable == 'true'
+        env:
+          PREV_SHA: ${{ steps.previous.outputs.sha }}
+          PREV_REF: ${{ steps.previous.outputs.ref }}
         run: |
           set +e
+          if [ -n "$PREV_REF" ]; then
+            round=(--base "$RUNNER_TEMP/previous.json" --phase "$RUNNER_TEMP/base.json" --previous "\`$PREV_REF\` (${PREV_SHA:0:7})")
+          else
+            round=(--base "$RUNNER_TEMP/base.json")
+          fi
           java -cp "$RUNNER_TEMP/base/harness/build/install/harness/lib/*" com.omniproduct.harness.referee.RefereeMain \
-            --base "$RUNNER_TEMP/base.json" --head "$RUNNER_TEMP/head.json" \
+            "${round[@]}" --head "$RUNNER_TEMP/head.json" \
             --title "$PR_TITLE" --branch "$PR_BRANCH" \
             --changed-files "$RUNNER_TEMP/changed-files.txt" \
             --changed-tokens "$(cat "$RUNNER_TEMP/changed-tokens.txt")" \
@@ -160,12 +206,34 @@ jobs:
             gh pr edit "$PR_NUMBER" --body-file "$RUNNER_TEMP/new-body.md"
           fi
 
+      # Le classement de la phase : la somme, par équipe, du dernier score de chaque PR ouverte vers cette base.
+      - name: Leaderboard
+        if: steps.referee.outcome == 'success'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          title="CUPID workshop leaderboard ($BASE_REF)"
+          gh pr list --state open --base "$BASE_REF" --limit 1000 --json number,headRefName,comments > "$RUNNER_TEMP/prs.json"
+          java -cp "$RUNNER_TEMP/base/harness/build/install/harness/lib/*" com.omniproduct.harness.referee.Leaderboard \
+            --prs "$RUNNER_TEMP/prs.json" --out "$RUNNER_TEMP/leaderboard.md"
+          number=$(gh issue list --state open --search "\"$title\" in:title" --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          if [ -z "$number" ]; then
+            url=$(gh issue create --title "$title" --body-file "$RUNNER_TEMP/leaderboard.md")
+            gh issue pin "$url" || true
+          else
+            gh issue edit "$number" --body-file "$RUNNER_TEMP/leaderboard.md"
+          fi
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: harness-reports-pr-${{ github.event.pull_request.number }}
           path: |
             ${{ runner.temp }}/base.json
+            ${{ runner.temp }}/previous.json
             ${{ runner.temp }}/head.json
             ${{ runner.temp }}/scorecard.md
           if-no-files-found: warn

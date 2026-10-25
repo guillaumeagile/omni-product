@@ -84,10 +84,13 @@ Tests : chaque contrôle et chaque ligne du barème sur des paires de rapports J
 `.github/workflows/harness-game.yml`, déclenchée sur `pull_request` :
 
 1. JDK 21 + Gradle (le `gradle-wrapper.jar` n'est pas versionné : `gradle/actions/setup-gradle` avec une version fixe) ;
-2. harnais sur la **base** de la PR, puis sur sa **tête**, chacun avec `--json` ;
-3. `harness-referee` compare et produit le commentaire Markdown (tableau de score, niveau, badges) ;
+2. harnais sur la **base** de la PR (branche de la phase), sur le **step précédent** de l'équipe (la branche du même
+   préfixe dont la PR descend, au `merge-base`) et sur la **tête**, chacun avec `--json` ;
+3. `harness-referee` note le round (step précédent → tête), montre le chemin depuis la phase sans points, et produit le
+   commentaire Markdown (tableau de score, niveau, badges) ;
 4. un nouveau commentaire à chaque round (les précédents de l'arbitre sont masqués « outdated »), statut du check selon les contrôles ;
-5. rapports JSON publiés comme artefacts du job (traçabilité).
+5. classement recalculé (voir lot 5) ;
+6. rapports JSON publiés comme artefacts du job (traçabilité).
 
 Risque à lever en premier : les bindings tree-sitter (code natif) sur le runner Linux x64.
 
@@ -98,8 +101,10 @@ ont un jeton en lecture seule (`pull_request`), et `pull_request_target` exécut
 
 ## Lot 5 : classement
 
-Une issue épinglée « Leaderboard » mise à jour par l'Action après chaque PR fusionnée : score cumulé par équipe,
-niveau, badges. Le score d'une équipe est recalculé à partir des commentaires de l'arbitre (pas d'état caché).
+Rien n'est jamais fusionné : les PR restent en draft. Une issue épinglée par phase, « CUPID workshop leaderboard
+(java-bdxio-phase1) », est mise à jour par `harness-game` après chaque round : score cumulé par équipe (somme du
+dernier score de chaque PR ouverte, chaque round notant son delta avec le step précédent), niveau, badges. Le score
+d'une équipe est recalculé à partir des commentaires de l'arbitre (pas d'état caché).
 
 ## Lot 6 : textes étudiants
 
@@ -139,7 +144,7 @@ Lot 1 -> Lot 2 -> Lot 3 -> Lot 4 -> Lot 7 -> Lot 5 -> Lot 6. Phase 3 après l'at
 | 2 rapport JSON | fait | test : le JSON reflète la sortie texte de l'étape 2 sur le legacy |
 | 3 arbitre | fait | tests sur paires de rapports ; essai local base/tête (baby step HA3 simulé : +18) |
 | 4 GitHub Action `harness-game` | écrite | étapes rejouées en local ; **pas encore jouée sur GitHub** (lot 7) |
-| 5 classement `harness-leaderboard` | écrit | tests du calcul ; **workflow pas encore joué sur GitHub** |
+| 5 classement | dans `harness-game` | tests du calcul ; recalculé à chaque round sur les PR ouvertes (l'ancien `harness-leaderboard`, déclenché à la fusion, est retiré) |
 | 6 textes étudiants | partiel | `CUPID-step-1.md` (règles du jeu) et `Workshop-CUTE DDD-full day.md` faits ; `CUPID-step1-2.md` reste à passer en Java |
 | 7 essai du principe | à faire | PR de test à ouvrir puis supprimer |
 | mesures CK au score | fait | essai sur PR #3 (+22, dont +5 CK) ; CK 0.7.0 ne voit pas les records (phase 2) |

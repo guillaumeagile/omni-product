@@ -41,14 +41,16 @@ Each baby step goes in its own pull request, so you can see how much code each r
 - **Name the rule in the title**: `HA9 green: Product and Supplier implement Identifiable`.
 - **Paste the harness output in the description**, before and after: the rule that turned green, and any rule
   that turned red because of it (that happens, say so rather than hiding it).
-- **Read the diff before merging.** Small or large? Did it touch services too? Was the class split, or only
+- **Read the diff of the step.** Small or large? Did it touch services too? Was the class split, or only
   renamed? Answering these questions is how you learn the refactoring, not just the green light.
 - **Never touch `harness/`** in a PR.
 
 ### The game
 
-Every pull request is refereed by a GitHub Action (`harness-game`). It runs the harness on the base branch and on
-your PR, then comments your PR with a scorecard: the rules that moved, your points, your level and your badges.
+Every pull request is refereed by a GitHub Action (`harness-game`). It runs the harness on the phase branch, on your
+previous step (found automatically: the branch of your team your branch started from) and on your PR, then comments
+your PR with a scorecard: the rules that moved since your previous step and the points of this round, your level, your
+badges, and the way travelled since the start of the phase (no points there). The leaderboard adds up your rounds.
 
 - **Branch** `team-<name>/step-1/ha<N>-<what>`, for example `team-red/step-1/ha9-identifiable`. The first segment is
   your team on the leaderboard.

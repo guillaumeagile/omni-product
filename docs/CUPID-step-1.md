@@ -61,7 +61,8 @@ your PR, then comments your PR with a scorecard: the rules that moved, your poin
 | turn exactly one rule green (a real baby step) | +5 |
 | keep the diff small (400 changed tokens or less in `src/main/java`) | +3 |
 | remove tokens from `model/` and `service/` | +1 per 100 tokens, up to +5 |
-| remove cyclomatic complexity from `model/` and `service/` | +1 per 5 points, up to +5 |
+| remove cyclomatic complexity from `model/` and `service/` | +1 per 2 points, up to +10 |
+| improve the CK metrics of `model/` and `service/` (coupling, cohesion, mutability, style) | up to +10 in all |
 | break a rule that was green | -5 each |
 
 The code is measured in **tokens**, not lines: tokens are what an agent reads and writes, and a long line costs
@@ -69,6 +70,11 @@ more than a short one. Tokens are counted by [JTokkit](https://github.com/knudde
 encoding (the tiktoken BPE): Claude's own tokenizer is not public, but the size of a change and its trend are faithful. Cyclomatic complexity is measured by
 [PMD](https://pmd.github.io/pmd/pmd_rules_java_design.html#cyclomaticcomplexity). A rise in complexity is shown
 in the scorecard but never penalized: an exhaustive `switch` (HA4.5) adds one branch per case.
+
+[CK](https://github.com/mauricioaniche/ck) metrics (CBO total and max, WMC max, LCOM* max, mutable fields,
+assignments, loops, lambdas, max nesting) are detailed in a collapsible block of the scorecard, with the points of
+each one. An improvement earns points, a worse metric costs nothing. The number of classes is shown but not scored.
+CK 0.7.0 does not see records: in step 2, a record is not measured.
 
 Badges: 🍼 Baby step, 🧼 No regression, 🤏 Small diff, 👑 Boss defeated, 🧠 Compiler-checked. After each merge, the
 pinned issue **CUPID workshop leaderboard** ranks the teams. Run `./harness.sh` locally before pushing: the referee

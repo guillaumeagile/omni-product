@@ -164,13 +164,32 @@ Une PR est acceptée quand :
 | ne faites passer qu'une seule règle au vert (un vrai baby step) | +5 |
 | gardez un petit diff (400 tokens modifiés au plus dans `src/main/java`) | +3 |
 | retirez des tokens de `model/` et `service/` | +1 par 100 tokens, jusqu'à +5 |
-| retirez de la complexité cyclomatique de `model/` et `service/` | +1 par 5 points, jusqu'à +5 |
+| retirez de la complexité cyclomatique de `model/` et `service/` | +1 par 2 points, jusqu'à +10 |
+| améliorez les mesures CK de `model/` et `service/` (couplage, cohésion, mutabilité, style) | jusqu'à +10 en tout, détail ci-dessous |
 | cassez une règle qui était verte | -5 par règle |
 
 Le code se mesure en **tokens**, pas en lignes : un agent lit et écrit des tokens. Ils sont comptés par
 [JTokkit](https://github.com/knuddels/jtokkit) (encodage `o200k_base`). La complexité cyclomatique est mesurée par
 [PMD](https://pmd.github.io/pmd/pmd_rules_java_design.html#cyclomaticcomplexity). Une hausse de complexité est
 affichée mais jamais pénalisée : un `switch` exhaustif ajoute une branche par cas.
+
+Les mesures [CK](https://github.com/mauricioaniche/ck) sont détaillées dans un bloc repliable du commentaire de
+l'arbitre. Une mesure qui s'améliore rapporte des points ; une mesure qui se dégrade ne coûte rien, mais regardez
+pourquoi dans **Files changed**. Le nombre de classes est affiché sans points : découper n'est pas un but en soi.
+
+| Mesure CK | Points |
+|---|---|
+| CBO total (couplage entre classes) | +1 par 5 retirés, jusqu'à +3 |
+| CBO max (la classe la plus couplée) | +1 par 2 retirés, jusqu'à +2 |
+| WMC max (la classe la plus complexe) | +1 par 3 retirés, jusqu'à +3 |
+| LCOM* max (manque de cohésion, de 0 à 1) | +1 par 0,1 retiré, jusqu'à +2 |
+| champs mutables (non `final`) | +1 par 2 retirés, jusqu'à +3 |
+| affectations | +1 par 5 retirées, jusqu'à +2 |
+| boucles | +1 par boucle retirée, jusqu'à +2 |
+| lambdas | +1 par 2 ajoutées, jusqu'à +1 |
+| imbrication max | +1 par niveau retiré, jusqu'à +2 |
+
+CK ne voit pas les records (limite de CK 0.7.0) : en phase 2, un record n'est pas mesuré.
 
 ### Niveaux et badges
 

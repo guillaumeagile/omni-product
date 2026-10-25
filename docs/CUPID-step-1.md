@@ -50,7 +50,7 @@ your PR, then comments your PR with a scorecard: the rules that moved, your poin
 - **Target**: the rule in the PR title (`HA9 green: ...`), or in the branch name (`ha9`, `ha4-3`). Without a target,
   the PR is off game.
 - **Accepted** when the target turns green, no other rule regresses, the project compiles and `harness/` is
-  untouched. Otherwise the check fails: push a fix, the scorecard updates.
+  untouched. Otherwise the check fails: push a fix, a new scorecard is posted (the previous ones are hidden as outdated).
 
 | You... | Points |
 |---|---|
@@ -61,7 +61,7 @@ your PR, then comments your PR with a scorecard: the rules that moved, your poin
 | keep the diff small (400 changed tokens or less in `src/main/java`) | +3 |
 | remove tokens from `model/` and `service/` | +1 per 100 tokens, up to +5 |
 | remove cyclomatic complexity from `model/` and `service/` | +1 per 2 points, up to +10 |
-| improve the CK metrics of `model/` and `service/` (coupling, cohesion, mutability, style) | up to +10 in all |
+| improve the CK metrics of `model/` and `service/` (coupling, cohesion, mutability, style) | bonus, no overall cap (each metric has its own cap) |
 | break a rule that was green | -5 each |
 
 The code is measured in **tokens**, not lines: tokens are what an agent reads and writes, and a long line costs

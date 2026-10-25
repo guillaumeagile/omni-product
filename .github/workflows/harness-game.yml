@@ -108,12 +108,23 @@ jobs:
             --out "$RUNNER_TEMP/scorecard.md"
           echo "exit=$?" >> "$GITHUB_OUTPUT"
 
+      # Un nouveau commentaire à chaque round, sous le dernier push : modifier l'ancien le laissait plus haut dans le
+      # fil, au-dessus des nouveaux commits, et le nouveau score passait inaperçu. Les commentaires précédents de
+      # l'arbitre sont masqués (« outdated ») mais restent consultables ; le classement lit le dernier.
       - name: Comment the pull request
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/scorecard.md" --edit-last \
-            || gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/scorecard.md"
+          url=$(gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/scorecard.md")
+          echo "$url"
+          new_id=${url##*#issuecomment-}
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and .id != $new_id
+                         and (.body | contains(\"<!-- harness-referee \") or startswith(\"## 🎮 Arbitre CUPID\"))) | .node_id" \
+            | while read -r node; do
+                gh api graphql -f query='mutation($id: ID!) { minimizeComment(input: {subjectId: $id, classifier: OUTDATED}) { clientMutationId } }' \
+                  -f id="$node" > /dev/null || echo "::warning::commentaire $node non masqué"
+              done
 
       # Le score du round en tête de la PR : une section délimitée de la description, réécrite à chaque passage.
       # Construite à partir du marqueur JSON du commentaire, pour ne dépendre d'aucune option de l'arbitre de la base.

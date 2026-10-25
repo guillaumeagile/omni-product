@@ -113,6 +113,8 @@ Score: +17 · Level: Unix Apprentice (1/8) · Badges: 🍼 Baby step, 🧼 No re
 
 L'arbitre écrit aussi le score du round en tête de la **description** de la PR (verdict, points, niveau, badges),
 dans une section qu'il réécrit à chaque passage : ne la modifiez pas, le reste de la description vous appartient.
+À chaque push, il publie un nouveau commentaire sous vos commits et masque les précédents (« outdated »), toujours
+consultables.
 
 Le check est vert si la PR est acceptée, rouge sinon. Dans ce cas, poussez un correctif sur la même branche : l'arbitre
 repasse et met son commentaire à jour. Le détail est aussi dans l'onglet **Checks** de la PR.
@@ -168,7 +170,7 @@ Une PR est acceptée quand :
 | gardez un petit diff (400 tokens modifiés au plus dans `src/main/java`) | +3 |
 | retirez des tokens de `model/` et `service/` | +1 par 100 tokens, jusqu'à +5 |
 | retirez de la complexité cyclomatique de `model/` et `service/` | +1 par 2 points, jusqu'à +10 |
-| améliorez les mesures CK de `model/` et `service/` (couplage, cohésion, mutabilité, style) | jusqu'à +10 en tout, détail ci-dessous |
+| améliorez les mesures CK de `model/` et `service/` (couplage, cohésion, mutabilité, style) | bonus sans plafond total, détail ci-dessous |
 | cassez une règle qui était verte | -5 par règle |
 
 Le code se mesure en **tokens**, pas en lignes : un agent lit et écrit des tokens. Ils sont comptés par

@@ -68,6 +68,12 @@ public final class Referee {
     public record Verdict(Outcome outcome, Optional<String> target, List<RuleChange> changes, List<String> problems,
                           List<String> notes, int score, String level, List<String> badges, List<String> measures,
                           List<Points> breakdown) {
+
+        // Le contexte du round (step précédent, chemin depuis la phase) ajouté en tête des notes et des mesures.
+        Verdict withContext(List<String> moreNotes, List<String> moreMeasures) {
+            return new Verdict(outcome, target, changes, problems, Stream.concat(moreNotes.stream(), notes.stream()).toList(),
+                    score, level, badges, Stream.concat(moreMeasures.stream(), measures.stream()).toList(), breakdown);
+        }
     }
 
     public record Points(String reason, int points) {

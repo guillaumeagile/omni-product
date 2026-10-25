@@ -14,13 +14,16 @@ import java.util.stream.IntStream;
 
 // Ligne de commande de l'arbitre, appelée par la GitHub Action :
 //   referee --base base.json --head head.json --title "HA9 green: ..." --branch step-1/ha9 \
-//           [--changed-files fichiers.txt] [--changed-tokens 120] [--small-diff 400] [--out commentaire.md]
+//           [--changed-files fichiers.txt] [--changed-tokens 120] [--small-diff 400] [--out commentaire.md] \
+//           [--phase phase.json --previous "`team-red/step-1/ha8` (abc1234)"]
+// --base est le baby step précédent de l'équipe (ou la branche de la phase au premier step) : le score du round est
+// le delta avec lui. --phase est le départ de la phase, pour montrer le chemin parcouru, sans points.
 // Un rapport absent (le projet ne compile pas) est un rapport vide, pas une erreur d'usage.
 // Code de sortie : 0 accepté ou hors jeu, 1 refusé, 2 mauvais usage.
 public final class RefereeMain {
 
     private static final List<String> KEYS =
-            List.of("--base", "--head", "--title", "--branch", "--changed-files", "--changed-tokens", "--small-diff", "--out");
+            List.of("--base", "--head", "--title", "--branch", "--changed-files", "--changed-tokens", "--small-diff", "--out", "--phase", "--previous");
 
     private RefereeMain() {
     }
@@ -32,7 +35,8 @@ public final class RefereeMain {
     public static int run(String[] args) {
         if (args.length % 2 != 0 || IntStream.range(0, args.length / 2).anyMatch(i -> !KEYS.contains(args[2 * i]))) {
             System.err.println("Usage: referee --base <json> --head <json> --title <titre> --branch <branche> "
-                    + "[--changed-files <fichier>] [--changed-tokens <n>] [--small-diff <n>] [--out <md>]");
+                    + "[--changed-files <fichier>] [--changed-tokens <n>] [--small-diff <n>] [--out <md>] "
+                    + "[--phase <json> --previous <texte>]");
             return 2;
         }
         Map<String, String> options = IntStream.range(0, args.length / 2).boxed()
@@ -45,7 +49,10 @@ public final class RefereeMain {
                 Long.parseLong(options.getOrDefault("--changed-tokens", String.valueOf(Long.MAX_VALUE))),
                 Long.parseLong(options.getOrDefault("--small-diff", "400")));
 
-        Referee.Verdict verdict = Referee.judge(report(options.get("--base")), report(options.get("--head")), pr);
+        Optional<HarnessReport> head = report(options.get("--head"));
+        Referee.Verdict verdict = Referee.judge(report(options.get("--base")), head, pr)
+                .withContext(Journey.context(options.getOrDefault("--previous", "")),
+                        head.map(report -> Journey.lines(report(options.get("--phase")), report)).orElse(List.of()));
         String markdown = Scorecard.markdown(verdict);
 
         Optional.ofNullable(options.get("--out")).map(Path::of).ifPresentOrElse(

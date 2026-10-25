@@ -1,6 +1,5 @@
 package com.omniproduct.service;
 
-import com.omniproduct.dto.ProductView;
 import com.omniproduct.model.*;
 import com.omniproduct.repository.*;
 import org.springframework.stereotype.Service;
@@ -9,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+// Le cycle de vie du produit : son identité. Les autres préoccupations sont exposées par leurs propres routes.
 @Service
 public class ProductService {
     private final ProductRepository productRepository;
@@ -29,47 +29,26 @@ public class ProductService {
         this.sourcingRepository = sourcingRepository;
     }
 
-    public List<ProductView> findAll() {
-        return productRepository.findAll().stream().map(this::view).toList();
+    public List<Product> findAll() {
+        return productRepository.findAll();
     }
 
-    public Optional<ProductView> findById(String id) {
-        return productRepository.findById(id).map(this::view);
+    public Optional<Product> findById(String id) {
+        return productRepository.findById(id);
     }
 
-    @Transactional
-    public ProductView save(ProductView product) {
-        String id = product.id();
-        productRepository.save(new Product(id, product.name()));
-        catalogRepository.save(new ProductCatalog(id, product.slug(), product.discounts(), product.images()));
-        priceRepository.save(new ProductPrice(id, product.price()));
-        stockRepository.save(new ProductStock(id, product.stock(), product.quantity(), product.warehouse()));
-        transportRepository.save(new ProductTransport(id, product.kilos(), product.volume()));
-        sourcingRepository.save(new ProductSourcing(id, product.supplierId(), product.suppliersRegions()));
-        return findById(id).orElseThrow();
+    public Product save(Product product) {
+        return productRepository.save(product);
     }
 
+    // Supprimer un produit supprime aussi ses préoccupations : elles n'ont pas de sens sans lui.
     @Transactional
     public void deleteById(String id) {
         productRepository.deleteById(id);
-        catalogRepository.deleteById(id);
-        priceRepository.deleteById(id);
-        stockRepository.deleteById(id);
-        transportRepository.deleteById(id);
-        sourcingRepository.deleteById(id);
-    }
-
-    // Un produit est toujours enregistré avec ses six parties ; un morceau absent ne laisse que des champs vides.
-    private ProductView view(Product product) {
-        String id = product.getId();
-        ProductCatalog catalog = catalogRepository.findById(id).orElseGet(ProductCatalog::new);
-        ProductStock stock = stockRepository.findById(id).orElseGet(ProductStock::new);
-        ProductTransport transport = transportRepository.findById(id).orElseGet(ProductTransport::new);
-        ProductSourcing sourcing = sourcingRepository.findById(id).orElseGet(ProductSourcing::new);
-        return new ProductView(id, product.getName(), catalog.getSlug(),
-                priceRepository.findById(id).map(ProductPrice::getPrice).orElse(null),
-                catalog.getDiscounts(), catalog.getImages(), sourcing.getSuppliersRegions(),
-                transport.getKilos(), transport.getVolume(), stock.getQuantity(), stock.getStock(),
-                stock.getWarehouse(), sourcing.getSupplierId());
+        catalogRepository.findById(id).ifPresent(catalogRepository::delete);
+        priceRepository.findById(id).ifPresent(priceRepository::delete);
+        stockRepository.findById(id).ifPresent(stockRepository::delete);
+        transportRepository.findById(id).ifPresent(transportRepository::delete);
+        sourcingRepository.findById(id).ifPresent(sourcingRepository::delete);
     }
 }

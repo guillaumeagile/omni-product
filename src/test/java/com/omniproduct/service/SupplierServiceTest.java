@@ -1,9 +1,11 @@
 package com.omniproduct.service;
 
 import com.omniproduct.model.Supplier;
-import com.omniproduct.dto.ProductView;
+import com.omniproduct.model.Product;
+import com.omniproduct.model.ProductSourcing;
 import com.omniproduct.repository.SupplierRepository;
 import com.omniproduct.repository.ProductRepository;
+import com.omniproduct.repository.ProductSourcingRepository;
 import com.omniproduct.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -31,11 +33,14 @@ class SupplierServiceTest {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private ProductSourcingRepository productSourcingRepository;
     
     @BeforeEach
     void setUp() {
         supplierRepository.deleteAll();
-        productService.findAll().forEach(product -> productService.deleteById(product.id()));
+        productService.findAll().forEach(product -> productService.deleteById(product.getId()));
     }
     
     @Test
@@ -160,8 +165,8 @@ class SupplierServiceTest {
             "+33123456789", "France", "Île-de-France"
         );
         
-        productService.save(new ProductView("prod1", "Test Product", "test-product",
-                null, null, null, null, null, null, null, null, null, "sup1"));
+        productRepository.save(new Product("prod1", "Test Product"));
+        productSourcingRepository.save(new ProductSourcing("prod1", "sup1", null));
         
         assertThat(productRepository.findById("prod1")).isPresent();
         
@@ -179,8 +184,8 @@ class SupplierServiceTest {
             "+33123456789", "France", "Île-de-France"
         );
         
-        productService.save(new ProductView("prod1", "Test Product", "test-product",
-                null, null, null, null, null, null, null, null, null, "sup1"));
+        productRepository.save(new Product("prod1", "Test Product"));
+        productSourcingRepository.save(new ProductSourcing("prod1", "sup1", null));
         
         List<Supplier> suppliers = supplierService.getSuppliersByProduct("prod1");
         

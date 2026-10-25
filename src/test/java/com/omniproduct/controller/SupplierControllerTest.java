@@ -1,9 +1,11 @@
 package com.omniproduct.controller;
 
 import com.omniproduct.model.Supplier;
-import com.omniproduct.dto.ProductView;
+import com.omniproduct.model.Product;
+import com.omniproduct.model.ProductSourcing;
 import com.omniproduct.repository.SupplierRepository;
 import com.omniproduct.repository.ProductRepository;
+import com.omniproduct.repository.ProductSourcingRepository;
 import com.omniproduct.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +37,9 @@ class SupplierControllerTest {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private ProductSourcingRepository productSourcingRepository;
     
     @Autowired
     private ObjectMapper objectMapper;
@@ -42,7 +47,7 @@ class SupplierControllerTest {
     @BeforeEach
     void setUp() {
         supplierRepository.deleteAll();
-        productService.findAll().forEach(product -> productService.deleteById(product.id()));
+        productService.findAll().forEach(product -> productService.deleteById(product.getId()));
     }
     
     @Test
@@ -174,8 +179,8 @@ class SupplierControllerTest {
                                         "+33123456789", "France", "Île-de-France");
         supplierRepository.save(supplier);
         
-        productService.save(new ProductView("prod1", "Test Product", "test-product",
-                null, null, null, null, null, null, null, null, null, "sup1"));
+        productRepository.save(new Product("prod1", "Test Product"));
+        productSourcingRepository.save(new ProductSourcing("prod1", "sup1", null));
         
         mockMvc.perform(delete("/api/suppliers/sup1"))
                 .andExpect(status().isNoContent());

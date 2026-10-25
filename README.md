@@ -48,9 +48,10 @@ rouge, et c'est voulu.
 Chaque baby step est une pull request (PR) **en brouillon** (draft) qui fait passer **une seule** règle du rouge au
 vert.
 
-> **On ne fusionne jamais.** Personne ne fusionne de PR dans `java-bdxio-phase1` ni dans `java-bdxio-phase2`, jamais :
-> ces branches restent le point de départ commun à toutes les équipes. Vos PR restent en **draft**, ouvertes, et
-> vos baby steps s'enchaînent sur vos propres branches.
+> **On ne fusionne jamais dans une branche de phase.** Personne ne fusionne de PR dans `java-bdxio-phase1` ni dans
+> `java-bdxio-phase2`, jamais : ces branches restent le point de départ commun à toutes les équipes. Vos PR restent en
+> **draft**, ouvertes, et vos baby steps s'enchaînent sur vos propres branches. Entre vos branches de baby step, en
+> revanche, vous pouvez fusionner (`git merge`) : par exemple pour reprendre dans un baby step le travail d'un autre.
 
 Chaque PR passe
 devant **l'arbitre CUPID** : une GitHub Action (le check `harness-game`) qui lance le harnais sur la branche de la
@@ -62,8 +63,8 @@ tableau de score, met à jour le classement et met le check au vert ou au rouge.
 1. **Partez de la bonne branche.**
    - Premier baby step de la phase : la branche de la phase (`java-bdxio-phase1` pour les règles HA5 à HA12.1,
      `java-bdxio-phase2` pour celles de la phase 2).
-   - Baby steps suivants : la branche de **votre baby step précédent**. Rien n'étant fusionné, c'est elle qui porte
-     votre travail.
+   - Baby steps suivants : la branche de **votre baby step précédent**. Rien n'étant fusionné dans la branche de la
+     phase, c'est elle qui porte votre travail. Vous pouvez aussi y fusionner une autre de vos branches de baby step.
 
    Travaillez dans le dépôt de l'atelier, pas dans un fork : depuis un fork, l'arbitre ne peut pas commenter, sauf si
    vous l'autorisez dans votre fork.
@@ -191,9 +192,9 @@ Files changed, ou en local :
 
 Écrivez vos conclusions en commentaire de la PR : c'est là que se fait l'apprentissage.
 
-### 5. Ne pas fusionner, passer au baby step suivant
+### 5. Ne pas fusionner la PR, passer au baby step suivant
 
-Ne fusionnez pas la PR : laissez-la en draft, ouverte. Ne la fermez pas non plus : le classement ne compte que les PR
+Ne fusionnez pas la PR dans la branche de la phase : laissez-la en draft, ouverte. Ne la fermez pas non plus : le classement ne compte que les PR
 ouvertes. Pour le baby step suivant, créez une nouvelle branche à partir de celle que vous venez de terminer, puis une
 nouvelle PR draft vers la branche de la phase : retour à l'étape 1.
 
@@ -235,20 +236,33 @@ pourquoi dans **Files changed**. Le nombre de classes est affiché sans points :
 
 | Mesure CK | Points |
 |---|---|
-| CBO total (couplage entre classes) | +1 par 5 retirés, jusqu'à +3 |
-| CBO max (la classe la plus couplée) | +1 par 2 retirés, jusqu'à +2 |
-| WMC max (la classe la plus complexe) | +1 par 3 retirés, jusqu'à +3 |
-| LCOM* max (manque de cohésion, de 0 à 1) | +1 par 0,1 retiré, jusqu'à +2 |
-| champs mutables (non `final`) | +1 par 2 retirés, jusqu'à +3 |
-| affectations | +1 par 5 retirées, jusqu'à +2 |
-| boucles | +1 par boucle retirée, jusqu'à +2 |
-| lambdas | +1 par 2 ajoutées, jusqu'à +1 |
-| imbrication max | +1 par niveau retiré, jusqu'à +2 |
+| CBO total (couplage entre classes) | +1 par 2 retirés, jusqu'à +5 |
+| CBO max (la classe la plus couplée) | +1 par 2 retirés, jusqu'à +4 |
+| WMC max (la classe la plus complexe) | +1 par 2 retirés, jusqu'à +5 |
+| LCOM* max (manque de cohésion, de 0 à 1) | +1 par 0,1 retiré, jusqu'à +4 |
+| champs mutables (non `final`) | +1 par 2 retirés, jusqu'à +5 |
+| affectations | +1 par 2 retirées, jusqu'à +4 |
+| boucles | +1 par boucle retirée, jusqu'à +4 |
+| lambdas | +2 par lambda ajoutée, jusqu'à +10 |
+| imbrication max | +1 par niveau retiré, jusqu'à +4 |
 
 CK ne voit pas les records (limite de CK 0.7.0). En phase 2, les points viennent donc de mesures **PMD**
 équivalentes, qui lisent Java 21 (records, `sealed`, `switch` à motifs) : fan-out (couplage), WMC max, TCC min
 (cohésion), champs mutables, affectations, boucles, lambdas, complexité cognitive totale et max ; plafond par mesure,
 sans plafond total. CK reste affiché pour comparaison, sans points.
+
+| Mesure PMD (phase 2) | Points |
+|---|---|
+| fan-out total (couplage) | +1 par 2 retirés, jusqu'à +5 |
+| fan-out max | +1 par 2 retirés, jusqu'à +4 |
+| WMC max (la classe la plus complexe) | +1 par 2 retirés, jusqu'à +5 |
+| TCC min (cohésion, de 0 à 1) | +1 par 0,1 gagné, jusqu'à +2 |
+| champs mutables (non `final`) | +1 par 2 retirés, jusqu'à +5 |
+| affectations | +1 par 2 retirées, jusqu'à +4 |
+| boucles | +1 par boucle retirée, jusqu'à +4 |
+| lambdas | +2 par lambda ajoutée, jusqu'à +10 |
+| complexité cognitive totale | +1 par 2 retirés, jusqu'à +4 |
+| complexité cognitive max | +1 par 2 retirés, jusqu'à +4 |
 
 ### Niveaux et badges
 
@@ -280,6 +294,7 @@ score. Le harnais n'est qu'une heuristique : l'exercice, c'est votre réflexion 
 ### Règles du jeu
 
 - **Personne ne fusionne jamais dans `java-bdxio-phase1` ni dans `java-bdxio-phase2`.** Les PR restent en draft.
+  Fusionner une branche de baby step dans une autre est permis.
 - Ne modifiez jamais `harness/` pour faire passer une règle. Si une règle vous semble fausse, notez pourquoi et
   signalez-le à l'animateur.
 - Un échec que vous provoquez en corrigeant autre chose se dit dans la PR : ne le cachez pas.

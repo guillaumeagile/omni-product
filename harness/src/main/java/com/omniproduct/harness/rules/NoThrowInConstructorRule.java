@@ -52,7 +52,7 @@ public final class NoThrowInConstructorRule implements HarnessRule {
                         .flatMap(node -> guard(node).stream()
                                 .map(what -> new Violation(file.path(), node.line(),
                                         "Constructor of '" + SourceTypes.name(type) + "' contains " + what + ". "
-                                                + "Validate in a create/build factory returning a sealed result instead (HA4.4)."))))
+                                                + "Validate in a create/build factory returning a sealed result or a Vavr Either/Validation instead (HA4.4)."))))
                 .distinct());
     }
 

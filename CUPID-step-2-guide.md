@@ -70,7 +70,8 @@ coûte le moins de réécriture : une règle en amont rend souvent la suivante p
 4. **HA4.2 : pas d'exception dans un constructeur.** Retirez les `throw`, `assert` et gardes (`requireNonNull`,
    `checkArgument`...) des constructeurs. La validation passe par une fabrique (étape 5).
 5. **HA4.4 : fabrique à résultat scellé.** Un value object a une méthode statique `create`, `build`, `of`, `from` ou
-   `make` qui renvoie un `sealed interface` dont les alternatives sont le value object et un record d'erreur.
+   `make` qui renvoie un `sealed interface` dont les alternatives sont le value object et un record d'erreur, ou une
+   ADT de Vavr (`Either`, `Validation`, `Try`, `Option`) dont le succès est le value object.
 6. **HA4.3 : ADT dans `Product` (boss).** `Product` a une propriété typée par un `sealed interface` dont toutes les
    alternatives sont des value objects, sans setter. Le choix des alternatives est le cœur de l'exercice : deux
    alternatives, les dates de péremption, pas un booléen.
@@ -124,9 +125,12 @@ propriété est refusé. Un `withX` qui renvoie une copie est permis.
 
 Au moins un value object a une fabrique (`create`, `build`, `of`, `from`, `make`, en mot dans le nom) qui renvoie :
 - soit un `sealed interface` dont une alternative est le value object et une autre un record (`PerishableCreation`),
-- soit un type générique scellé paramétré par le value object (`Validated<Perishable>`).
+- soit un type générique scellé paramétré par le value object (`Validated<Perishable>`),
+- soit une ADT de Vavr (`Either`, `Validation`, `Try`, `Option`) dont le cas de succès, le dernier argument de type,
+  est le value object (`Either<InvalidDates, Perishable>`, `Validation<Seq<String>, Price>`).
 
-Un `Either` ou un `Optional` n'est pas accepté à cette étape.
+Un `Optional` du JDK n'est pas accepté, ni un `Either` maison qui n'est pas scellé, ni un `Either<Price, String>`
+(le value object est du côté de l'erreur).
 
 ### HA4.5 - switch exhaustif sur l'ADT
 

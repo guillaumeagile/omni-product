@@ -17,7 +17,7 @@ les nôtres ne servent qu'à tester le principe et seront effacées.
 
 | Règle | Changement |
 |---|---|
-| HA4.4 | La fabrique `create`/`build`/`of`/`from`/`make` d'un value object renvoie un **type scellé** dont une alternative est le value object et une autre un record d'erreur (`sealed interface PerishableCreation permits Perishable, InvalidDates`). `Either` n'est plus attendu. |
+| HA4.4 | La fabrique `create`/`build`/`of`/`from`/`make` d'un value object renvoie un **type scellé** dont une alternative est le value object et une autre un record d'erreur (`sealed interface PerishableCreation permits Perishable, InvalidDates`), ou une ADT de Vavr (`Either`, `Validation`, `Try`, `Option`) dont le succès est le value object. |
 | HA4.5 | En plus du `instanceof` interdit et du `switch` exhaustif exigé : un **cast** vers une alternative est interdit ; un appel qui renvoie un type scellé et dont le **résultat est ignoré** (`product.canSell(today);` en simple instruction) est signalé. |
 
 Tests : contrat (bon / mauvais), évasions (cast qualifié, résultat ignoré dans un lambda), preuve par mutation sur le
@@ -123,7 +123,7 @@ Deux ou trois PR de test sur une branche d'équipe jetable (une PR verte, une PR
 - Chaînage des résultats avec `Either`/`Option` de Vavr (`map`, `flatMap`) sur des alternatives scellées.
 - Règles propres : un `Either` se consomme par `fold` ; `get()`, `getLeft()`, `isLeft()`, `isRight()`,
   `getOrElseThrow()` interdits dans le modèle.
-- HA4.4 accepte alors aussi `Either<Erreur, Self>`.
+- HA4.4 accepte déjà les ADT de Vavr (`Either<Erreur, Self>`, `Validation`, `Try`, `Option`) depuis la phase 2.
 
 ## Points ouverts (à trancher par l'animateur)
 

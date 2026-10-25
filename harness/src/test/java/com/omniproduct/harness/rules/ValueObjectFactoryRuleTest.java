@@ -87,7 +87,7 @@ class ValueObjectFactoryRuleTest {
     }
 
     @Test
-    void rejectsAnUnsealedResultAndAnErrorThatIsNotARecord() {
+    void acceptsAVavrAdtWhoseSuccessIsTheValueObject() {
         String either = """
                 package demo.model;
 
@@ -97,6 +97,87 @@ class ValueObjectFactoryRuleTest {
                     public static Either<String, Price> create(double base) { return null; }
                 }
                 """;
+        String validation = """
+                package demo.model;
+
+                import io.vavr.collection.Seq;
+                import io.vavr.control.*;
+
+                public record Price(double base) {
+                    public static Validation<Seq<String>, Price> fromRawValue(double base) { return null; }
+                }
+                """;
+        String qualifiedTry = """
+                package demo.model;
+
+                public record Price(double base) {
+                    public static io.vavr.control.Try<Price> of(double base) { return null; }
+                }
+                """;
+        String option = """
+                package demo.model;
+
+                import io.vavr.control.Option;
+
+                public record Price(double base) {
+                    public static Option<Price> make(double base) { return null; }
+                }
+                """;
+
+        assertThat(check(either)).isEmpty();
+        assertThat(check(validation)).isEmpty();
+        assertThat(check(qualifiedTry)).isEmpty();
+        assertThat(check(option)).isEmpty();
+    }
+
+    @Test
+    void rejectsAResultThatIsNeitherSealedNorAVavrAdtOfTheValueObject() {
+        String homeMadeEither = """
+                package demo.model;
+
+                public class Either<L, R> {
+                }
+
+                record Price(double base) {
+                    public static Either<String, Price> create(double base) { return null; }
+                }
+                """;
+        String valueObjectOnTheErrorSide = """
+                package demo.model;
+
+                import io.vavr.control.Either;
+
+                public record Price(double base) {
+                    public static Either<Price, String> create(double base) { return null; }
+                }
+                """;
+        String javaOptional = """
+                package demo.model;
+
+                import java.util.Optional;
+
+                public record Price(double base) {
+                    public static Optional<Price> create(double base) { return Optional.empty(); }
+                }
+                """;
+        String notAFactory = """
+                package demo.model;
+
+                import io.vavr.control.Either;
+
+                public record Price(double base) {
+                    public static Either<String, Price> parse(double base) { return null; }
+                }
+                """;
+
+        assertThat(check(homeMadeEither)).hasSize(1);
+        assertThat(check(valueObjectOnTheErrorSide)).hasSize(1);
+        assertThat(check(javaOptional)).hasSize(1);
+        assertThat(check(notAFactory)).hasSize(1);
+    }
+
+    @Test
+    void rejectsASealedResultWhoseErrorIsNotARecord() {
         String classError = """
                 package demo.model;
 
@@ -111,7 +192,6 @@ class ValueObjectFactoryRuleTest {
                 }
                 """;
 
-        assertThat(check(either)).hasSize(1);
         assertThat(check(classError)).hasSize(1);
     }
 }

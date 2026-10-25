@@ -47,4 +47,20 @@ class ProductTest {
 
         assertThat(product.getShelfLife()).isEqualTo(yoghurt);
     }
+
+    @Test
+    void aPerishableProductCanBeSoldUntilItsSellByDate() {
+        LocalDate sellBy = LocalDate.of(2026, 11, 10);
+        Product yoghurt = new Product(new ProductId(UUID_1), "Yoghurt", PRICE, Perishable.of(sellBy, sellBy.plusDays(5)).get());
+
+        assertThat(yoghurt.canSellOn(sellBy)).isTrue();
+        assertThat(yoghurt.canSellOn(sellBy.plusDays(1))).isFalse();
+    }
+
+    @Test
+    void aNonExpiringProductCanAlwaysBeSold() {
+        Product rice = new Product(new ProductId(UUID_1), "Rice", PRICE, new NonExpiring(LocalDate.of(2027, 6, 1)));
+
+        assertThat(rice.canSellOn(LocalDate.of(2099, 1, 1))).isTrue();
+    }
 }

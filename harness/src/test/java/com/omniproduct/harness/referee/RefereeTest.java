@@ -1,5 +1,6 @@
 package com.omniproduct.harness.referee;
 
+import com.omniproduct.harness.CkMetrics;
 import com.omniproduct.harness.HarnessReport;
 import com.omniproduct.harness.Metrics;
 import com.omniproduct.harness.HarnessReport.RuleResult;
@@ -148,7 +149,8 @@ class RefereeTest {
                 rule("HA7", "PASS", 0), rule("HA9", "PASS", 0)), pr("HA9 green"));
 
         assertThat(verdict.outcome()).isEqualTo(Outcome.ACCEPTED);
-        assertThat(verdict.score()).isEqualTo(Referee.GREEN + 2 + 3 + Referee.SINGLE_GREEN_BONUS);
+        // 200 tokens retirés : +2 ; 15 de complexité retirés : +7 (1 point pour 2).
+        assertThat(verdict.score()).isEqualTo(Referee.GREEN + 2 + 7 + Referee.SINGLE_GREEN_BONUS);
     }
 
     @Test
@@ -168,5 +170,48 @@ class RefereeTest {
         assertThat(verdict.outcome()).isEqualTo(Outcome.ACCEPTED);
         assertThat(verdict.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS);
         assertThat(verdict.notes()).anySatisfy(note -> assertThat(note).contains("Cyclomatic complexity of model/ and service/: 40 → 46 (+6)"));
+    }
+
+    private static CkMetrics ck(int classes, int coupling, int maxCoupling, int maxWmc, double maxLcom,
+                                int mutableFields, int assignments, int loops, int lambdas, int maxNesting) {
+        return new CkMetrics(classes, coupling, maxCoupling, maxWmc, maxLcom, mutableFields, assignments, loops, lambdas, maxNesting);
+    }
+
+    @Test
+    void ckImprovementsEarnPointsButTheNumberOfClassesDoesNot() {
+        // Les valeurs de la PR #3 (découpage HA5) : seuls CBO max, WMC max et LCOM* max s'améliorent.
+        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, ck(8, 37, 14, 28, 0.90, 27, 64, 0, 5, 0)),
+                rule("HA9", "FAIL", 2));
+        Verdict verdict = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(13, 59, 11, 13, 0.75, 32, 75, 0, 5, 0)),
+                rule("HA9", "PASS", 0)), pr("HA9 green"));
+
+        // CBO max -3 : +1 ; WMC max -15 : +3 (plafond) ; LCOM* -0.15 : +1 ; +5 classes : 0.
+        assertThat(verdict.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + 5);
+        assertThat(Scorecard.markdown(verdict)).contains("CK metrics of model/ and service/: +5",
+                "| Classes | 8 | 13 | +5 |  | not scored", "| WMC max (class complexity) | 28 | 13 | -15 | +3 |");
+    }
+
+    @Test
+    void ckPointsAreCappedAndAWorseMetricCostsNothing() {
+        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, ck(1, 500, 50, 100, 1.0, 100, 500, 50, 0, 9)),
+                rule("HA9", "FAIL", 2));
+        Verdict best = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(99, 0, 0, 0, 0, 0, 0, 0, 50, 0)),
+                rule("HA9", "PASS", 0)), pr("HA9 green"));
+        Verdict worse = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(1, 900, 90, 200, 1.0, 200, 900, 90, 0, 12)),
+                rule("HA9", "PASS", 0)), pr("HA9 green"));
+
+        assertThat(best.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + CkTable.CK_CAP);
+        assertThat(worse.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS);
+    }
+
+    @Test
+    void aRejectedPullRequestEarnsNoCkPoints() {
+        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, ck(8, 37, 14, 28, 0.90, 27, 64, 0, 5, 0)),
+                rule("HA9", "FAIL", 2));
+        Verdict verdict = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(8, 0, 0, 0, 0, 0, 0, 0, 5, 0)),
+                rule("HA9", "FAIL", 1)), pr("HA9 green"));
+
+        assertThat(verdict.outcome()).isEqualTo(Outcome.REJECTED);
+        assertThat(verdict.score()).isEqualTo(1);
     }
 }

@@ -1,12 +1,9 @@
 package com.omniproduct.model;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.omniproduct.service.ProductService;
-import com.omniproduct.service.SupplierService;
 import jakarta.persistence.*;
-import java.util.List;
 
-// Supplier garde son identité, son nom et ses produits ; ses coordonnées et sa localisation sont des objets à part.
+// Supplier garde son identité et son nom ; ses coordonnées et sa localisation sont des objets à part.
 @Entity
 @Table(name = "suppliers")
 public class Supplier {
@@ -21,9 +18,6 @@ public class Supplier {
     @Embedded
     private Address address;
 
-    @OneToMany(mappedBy = "sourcing.supplier", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Product> products;
-
     public Supplier() {}
 
     public Supplier(String id, String name, String contactEmail, String contactPhone,
@@ -32,14 +26,6 @@ public class Supplier {
         this.name = name;
         this.contact = new Contact(contactEmail, contactPhone);
         this.address = new Address(country, region);
-    }
-
-    public Supplier(String id, String name, ProductService productService, SupplierService supplierService) {
-        this.id = id;
-        this.name = name;
-        this.products = productService.findAll();
-        this.address = new Address(null, supplierService.getSupplier(id).map(Supplier::getAddress)
-                .map(Address::getRegion).orElse(null));
     }
 
     @Embeddable
@@ -112,13 +98,5 @@ public class Supplier {
 
     public void setAddress(Address address) {
         this.address = address;
-    }
-
-    public List<Product> getProducts() {
-        return products;
-    }
-
-    public void setProducts(List<Product> products) {
-        this.products = products;
     }
 }

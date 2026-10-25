@@ -1,9 +1,10 @@
 package com.omniproduct.controller;
 
 import com.omniproduct.model.Supplier;
-import com.omniproduct.model.Product;
+import com.omniproduct.dto.ProductView;
 import com.omniproduct.repository.SupplierRepository;
 import com.omniproduct.repository.ProductRepository;
+import com.omniproduct.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,9 @@ class SupplierControllerTest {
     
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private ProductService productService;
     
     @Autowired
     private ObjectMapper objectMapper;
@@ -38,7 +42,7 @@ class SupplierControllerTest {
     @BeforeEach
     void setUp() {
         supplierRepository.deleteAll();
-        productRepository.deleteAll();
+        productService.findAll().forEach(product -> productService.deleteById(product.id()));
     }
     
     @Test
@@ -170,11 +174,8 @@ class SupplierControllerTest {
                                         "+33123456789", "France", "Île-de-France");
         supplierRepository.save(supplier);
         
-        Product product = new Product();
-        product.setId("prod1");
-        product.setCatalog(new Product.Catalog("Test Product", "test-product", null, null));
-        product.setSourcing(new Product.Sourcing(supplier, null, null));
-        productRepository.save(product);
+        productService.save(new ProductView("prod1", "Test Product", "test-product",
+                null, null, null, null, null, null, null, null, null, "sup1"));
         
         mockMvc.perform(delete("/api/suppliers/sup1"))
                 .andExpect(status().isNoContent());

@@ -1,6 +1,6 @@
 package com.omniproduct.controller;
 
-import com.omniproduct.model.Product;
+import com.omniproduct.dto.ProductView;
 import com.omniproduct.service.ProductService;
 import com.omniproduct.exception.ProductNameException;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<Product> getAllProducts() {
+    public List<ProductView> getAllProducts() {
         // Useless null check: Spring injects the service, it won't be null
         if (productService == null) {
             throw new ProductNameException("The universe has collapsed: service is null");
@@ -30,24 +30,23 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable String id) {
+    public ResponseEntity<ProductView> getProductById(@PathVariable String id) {
         return productService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Product createProduct(@RequestBody Product product) {
+    public ProductView createProduct(@RequestBody ProductView product) {
         // Validation rule: Name must not be null or empty
-        if (product.getCatalog() == null || product.getCatalog().getName() == null
-                || product.getCatalog().getName().trim().isEmpty()) {
+        if (product.name() == null || product.name().trim().isEmpty()) {
             throw new ProductNameException("Product name is missing, you fucking idiot!");
         }
 
         
         // Useless nested null checks
         if (product != null) {
-            if (product.getCatalog().getName() != null) {
+            if (product.name() != null) {
                 return productService.save(product);
             }
         }
@@ -57,13 +56,12 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable String id, @RequestBody Product product) {
+    public ResponseEntity<ProductView> updateProduct(@PathVariable String id, @RequestBody ProductView product) {
         if (productService.findById(id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         // In this simple implementation, we just use the id from the path
-        product.setId(id);
-        return ResponseEntity.ok(productService.save(product));
+        return ResponseEntity.ok(productService.save(product.withId(id)));
     }
 
     @DeleteMapping("/{id}")

@@ -1,9 +1,10 @@
 package com.omniproduct.service;
 
 import com.omniproduct.model.Supplier;
-import com.omniproduct.model.Product;
+import com.omniproduct.model.ProductSourcing;
 import com.omniproduct.repository.SupplierRepository;
 import com.omniproduct.repository.ProductRepository;
+import com.omniproduct.repository.ProductSourcingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,10 +15,15 @@ import java.util.Optional;
 public class SupplierService {
     private final SupplierRepository supplierRepository;
     private final ProductRepository productRepository;
+    private final ProductSourcingRepository productSourcingRepository;
+    private final ProductService productService;
     
-    public SupplierService(SupplierRepository supplierRepository, ProductRepository productRepository) {
+    public SupplierService(SupplierRepository supplierRepository, ProductRepository productRepository,
+                           ProductSourcingRepository productSourcingRepository, ProductService productService) {
         this.supplierRepository = supplierRepository;
         this.productRepository = productRepository;
+        this.productSourcingRepository = productSourcingRepository;
+        this.productService = productService;
     }
     
     public Supplier createSupplier(String id, String name, String contactEmail, String contactPhone,
@@ -38,9 +44,10 @@ public class SupplierService {
     public List<Supplier> getSuppliersByProduct(String productId) {
         productRepository.findById(productId)
             .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
-        return supplierRepository.findAll().stream()
-            .filter(s -> s.getProducts() != null && s.getProducts().stream()
-                .anyMatch(p -> p.getId().equals(productId)))
+        return productSourcingRepository.findById(productId)
+            .map(ProductSourcing::getSupplierId)
+            .flatMap(supplierRepository::findById)
+            .stream()
             .toList();
     }
     
@@ -67,6 +74,8 @@ public class SupplierService {
     public void deleteSupplier(String id) {
         Supplier supplier = supplierRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Supplier not found: " + id));
+        // Les produits de ce fournisseur disparaissent avec lui.
+        productSourcingRepository.findProductIdsBySupplierId(id).forEach(productService::deleteById);
         supplierRepository.delete(supplier);
     }
 }

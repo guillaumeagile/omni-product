@@ -1,6 +1,7 @@
 package com.omniproduct.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.omniproduct.dto.ProductView;
 import com.omniproduct.model.Product;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +31,11 @@ public class ProductControllerTest {
         Product.Price price = new Product.Price(100.0, 20.0, 0.2);
         Product.Warehouse warehouse = new Product.Warehouse("Main Warehouse");
         Product.Supplier supplier1 = new Product.Supplier("Supplier1", "SIREN123", "TVA456");
-        Product product = new Product(
+        ProductView product = new ProductView(
                 "p1", "Test Product", "test-product",
                 price, List.of("Image 1"), Map.of("main", "image-url"),
                 Map.of("Europe", supplier1),
-                23.0, "10x10x10", 100, 50, warehouse
+                23.0, "10x10x10", 100, 50, warehouse, null
         );
 
         // Create
@@ -50,8 +51,8 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.suppliersRegions.Europe.tvaId").value("TVA456"));
 
         // Test the  validation rule
-        Product invalidProduct = new Product();
-        invalidProduct.setCatalog(new Product.Catalog("", null, null, null)); // Trigger the exception
+        ProductView invalidProduct = new ProductView(null, "", null, null, null, null, null,
+                null, null, null, null, null, null); // Trigger the exception
 
         mockMvc.perform(post("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -70,11 +71,11 @@ public class ProductControllerTest {
 
         // Update
         Product.Supplier supplier2 = new Product.Supplier("Supplier2", "SIREN789", "TVA012");
-        Product updatedProduct = new Product(
+        ProductView updatedProduct = new ProductView(
                 "p1", "Updated Product", "updated-product",
                 price, List.of("D1"), Map.of("main", "image-url"),
                 Map.of("Asia", supplier2),
-                3.0, "10x10x10", 100, 50, warehouse
+                3.0, "10x10x10", 100, 50, warehouse, null
         );
         mockMvc.perform(put("/api/products/p1")
                 .contentType(MediaType.APPLICATION_JSON)

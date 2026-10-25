@@ -47,8 +47,11 @@ class JourneyTest {
                 "| HA9 | 🔴 FAIL (5) | 🟢 PASS |",
                 "- Tokens in model/ and service/: 3000 → 2800");
         assertThat(markdown).doesNotContain("| HA10 |", "rules turned green at once");
-        // Les badges en grand : leurs emojis en titre, puis leurs noms.
-        assertThat(markdown).contains("\n# 🍼 🧼 🤏\n", "**Badges:** 🍼 Baby step · 🧼 No regression · 🤏 Small diff");
+        // Les badges en grand, en images shields.io.
+        assertThat(markdown).contains(
+                "![🍼 Baby step](https://img.shields.io/badge/%F0%9F%8D%BC%20Baby%20step-2ea44f?style=for-the-badge)",
+                "![🤏 Small diff](https://img.shields.io/badge/%F0%9F%A4%8F%20Small%20diff-8250df?style=for-the-badge)");
+        assertThat(Scorecard.shield("🧠 Compiler-checked")).contains("/badge/%F0%9F%A7%A0%20Compiler--checked-e36209?");
     }
 
     @Test

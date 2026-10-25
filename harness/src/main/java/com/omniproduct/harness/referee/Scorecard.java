@@ -6,7 +6,10 @@ import com.omniproduct.harness.referee.Referee.Outcome;
 import com.omniproduct.harness.referee.Referee.RuleChange;
 import com.omniproduct.harness.referee.Referee.Verdict;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -63,15 +66,25 @@ public final class Scorecard {
                 : Stream.concat(Stream.of("| Rule | Base | This PR | Points |", "|---|---|---|---|"), rows.stream()).toList();
     }
 
-    // Les badges en grand : leurs emojis en titre de premier niveau, puis leurs noms.
+    // Les badges en grand, en images shields.io (style for-the-badge) ; le texte alternatif garde le nom du badge.
+    // La même table de couleurs est dans le workflow (section de la description de la PR).
+    static final Map<String, String> BADGE_COLORS = Map.of(
+            "🍼 Baby step", "2ea44f",
+            "🧼 No regression", "1f6feb",
+            "🤏 Small diff", "8250df",
+            "👑 Boss defeated", "d4a017",
+            "🧠 Compiler-checked", "e36209");
+
     private static List<String> badges(Verdict verdict) {
         return verdict.outcome() == Outcome.OFF_GAME || verdict.badges().isEmpty() ? List.of()
-                : List.of("# " + verdict.badges().stream().map(Scorecard::emoji).collect(Collectors.joining(" ")),
-                        "**Badges:** " + String.join(" · ", verdict.badges()), "");
+                : List.of(verdict.badges().stream().map(Scorecard::shield).collect(Collectors.joining(" ")), "");
     }
 
-    private static String emoji(String badge) {
-        return badge.contains(" ") ? badge.substring(0, badge.indexOf(' ')) : badge;
+    // Dans un chemin shields.io, « - » s'écrit « -- » et « _ » s'écrit « __ ».
+    static String shield(String badge) {
+        String text = URLEncoder.encode(badge.replace("-", "--").replace("_", "__"), StandardCharsets.UTF_8).replace("+", "%20");
+        return "![" + badge + "](https://img.shields.io/badge/" + text + "-" + BADGE_COLORS.getOrDefault(badge, "555555")
+                + "?style=for-the-badge)";
     }
 
     // Le récapitulatif du score : une ligne par source de points, puis le total.

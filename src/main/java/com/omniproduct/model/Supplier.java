@@ -3,7 +3,7 @@ package com.omniproduct.model;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 // Supplier garde son identité et son nom ; ses coordonnées et sa localisation sont des objets à part.
-public class Supplier {
+public class Supplier implements Identifiable {
     private String id;
 
     private String name;
@@ -22,42 +22,11 @@ public class Supplier {
         this.address = new Address(country, region);
     }
 
-    public static class Contact {
-        private String contactEmail;
-        private String contactPhone;
+    public record Contact(String contactEmail, String contactPhone) {}
 
-        public Contact() {}
+    public record Address(String country, String region) {}
 
-        public Contact(String contactEmail, String contactPhone) {
-            this.contactEmail = contactEmail;
-            this.contactPhone = contactPhone;
-        }
-
-        public String getContactEmail() { return contactEmail; }
-        public void setContactEmail(String contactEmail) { this.contactEmail = contactEmail; }
-
-        public String getContactPhone() { return contactPhone; }
-        public void setContactPhone(String contactPhone) { this.contactPhone = contactPhone; }
-    }
-
-    public static class Address {
-        private String country;
-        private String region;
-
-        public Address() {}
-
-        public Address(String country, String region) {
-            this.country = country;
-            this.region = region;
-        }
-
-        public String getCountry() { return country; }
-        public void setCountry(String country) { this.country = country; }
-
-        public String getRegion() { return region; }
-        public void setRegion(String region) { this.region = region; }
-    }
-
+    @Override
     public String getId() {
         return id;
     }

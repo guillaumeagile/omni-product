@@ -1,8 +1,8 @@
 package com.omniproduct.controller;
 
+import com.omniproduct.domain.port.ProductSourcingRepository;
+import com.omniproduct.domain.port.ProductRepository;
 import com.omniproduct.model.ProductSourcing;
-import com.omniproduct.repository.ProductRepository;
-import com.omniproduct.repository.ProductSourcingRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,11 +27,11 @@ public class ProductSourcingController {
     }
 
     @PutMapping
-    public ResponseEntity<ProductSourcing> updateSourcing(@PathVariable String id, @RequestBody ProductSourcing sourcing) {
+    public ResponseEntity<ProductSourcing> updateSourcing(@PathVariable String id, @RequestBody ProductSourcing value) {
         if (!productRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(sourcingRepository.save(
-                new ProductSourcing(id, sourcing.getSupplierId(), sourcing.getSuppliersRegions())));
+        sourcingRepository.save(id, value);
+        return ResponseEntity.ok(value);
     }
 }

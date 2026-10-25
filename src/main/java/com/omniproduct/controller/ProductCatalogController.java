@@ -1,8 +1,8 @@
 package com.omniproduct.controller;
 
+import com.omniproduct.domain.port.ProductCatalogRepository;
+import com.omniproduct.domain.port.ProductRepository;
 import com.omniproduct.model.ProductCatalog;
-import com.omniproduct.repository.ProductCatalogRepository;
-import com.omniproduct.repository.ProductRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,11 +27,11 @@ public class ProductCatalogController {
     }
 
     @PutMapping
-    public ResponseEntity<ProductCatalog> updateCatalog(@PathVariable String id, @RequestBody ProductCatalog catalog) {
+    public ResponseEntity<ProductCatalog> updateCatalog(@PathVariable String id, @RequestBody ProductCatalog value) {
         if (!productRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(catalogRepository.save(
-                new ProductCatalog(id, catalog.getSlug(), catalog.getDiscounts(), catalog.getImages())));
+        catalogRepository.save(id, value);
+        return ResponseEntity.ok(value);
     }
 }

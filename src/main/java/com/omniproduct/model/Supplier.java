@@ -1,21 +1,15 @@
 package com.omniproduct.model;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import jakarta.persistence.*;
 
 // Supplier garde son identité et son nom ; ses coordonnées et sa localisation sont des objets à part.
-@Entity
-@Table(name = "suppliers")
 public class Supplier {
-    @Id
     private String id;
 
     private String name;
 
-    @Embedded
     private Contact contact;
 
-    @Embedded
     private Address address;
 
     public Supplier() {}
@@ -28,7 +22,6 @@ public class Supplier {
         this.address = new Address(country, region);
     }
 
-    @Embeddable
     public static class Contact {
         private String contactEmail;
         private String contactPhone;
@@ -47,7 +40,6 @@ public class Supplier {
         public void setContactPhone(String contactPhone) { this.contactPhone = contactPhone; }
     }
 
-    @Embeddable
     public static class Address {
         private String country;
         private String region;

@@ -3,9 +3,9 @@ package com.omniproduct.controller;
 import com.omniproduct.model.Supplier;
 import com.omniproduct.model.Product;
 import com.omniproduct.model.ProductSourcing;
-import com.omniproduct.repository.SupplierRepository;
-import com.omniproduct.repository.ProductRepository;
-import com.omniproduct.repository.ProductSourcingRepository;
+import com.omniproduct.domain.port.SupplierRepository;
+import com.omniproduct.domain.port.ProductRepository;
+import com.omniproduct.domain.port.ProductSourcingRepository;
 import com.omniproduct.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +48,7 @@ class SupplierControllerTest {
     void setUp() {
         supplierRepository.deleteAll();
         productService.findAll().forEach(product -> productService.deleteById(product.getId()));
+        productSourcingRepository.deleteAll();
     }
     
     @Test
@@ -76,7 +77,7 @@ class SupplierControllerTest {
     void shouldGetSupplierById() throws Exception {
         Supplier supplier = new Supplier("sup1", "Supplier A", "contact@suppliera.com", 
                                         "+33123456789", "France", "Île-de-France");
-        supplierRepository.save(supplier);
+        supplierRepository.save(supplier.getId(), supplier);
         
         mockMvc.perform(get("/api/suppliers/sup1"))
                 .andExpect(status().isOk())
@@ -96,8 +97,8 @@ class SupplierControllerTest {
                                          "+33123456789", "France", "Île-de-France");
         Supplier supplier2 = new Supplier("sup2", "Supplier B", "contact@supplierb.com", 
                                          "+33987654321", "Spain", "Madrid");
-        supplierRepository.save(supplier1);
-        supplierRepository.save(supplier2);
+        supplierRepository.save(supplier1.getId(), supplier1);
+        supplierRepository.save(supplier2.getId(), supplier2);
         
         mockMvc.perform(get("/api/suppliers"))
                 .andExpect(status().isOk())
@@ -112,8 +113,8 @@ class SupplierControllerTest {
                                          "+33123456789", "France", "Île-de-France");
         Supplier supplier2 = new Supplier("sup2", "Supplier B", "contact@supplierb.com", 
                                          "+33987654321", "Spain", "Madrid");
-        supplierRepository.save(supplier1);
-        supplierRepository.save(supplier2);
+        supplierRepository.save(supplier1.getId(), supplier1);
+        supplierRepository.save(supplier2.getId(), supplier2);
         
         mockMvc.perform(get("/api/suppliers/country/France"))
                 .andExpect(status().isOk())
@@ -127,8 +128,8 @@ class SupplierControllerTest {
                                          "+33123456789", "France", "Île-de-France");
         Supplier supplier2 = new Supplier("sup2", "Supplier B", "contact@supplierb.com", 
                                          "+33987654321", "France", "Provence");
-        supplierRepository.save(supplier1);
-        supplierRepository.save(supplier2);
+        supplierRepository.save(supplier1.getId(), supplier1);
+        supplierRepository.save(supplier2.getId(), supplier2);
         
         mockMvc.perform(get("/api/suppliers/region/Île-de-France"))
                 .andExpect(status().isOk())
@@ -140,7 +141,7 @@ class SupplierControllerTest {
     void shouldUpdateSupplier() throws Exception {
         Supplier supplier = new Supplier("sup1", "Supplier A", "contact@suppliera.com", 
                                         "+33123456789", "France", "Île-de-France");
-        supplierRepository.save(supplier);
+        supplierRepository.save(supplier.getId(), supplier);
         
         String updateJson = """
             {
@@ -164,7 +165,7 @@ class SupplierControllerTest {
     void shouldDeleteSupplier() throws Exception {
         Supplier supplier = new Supplier("sup1", "Supplier A", "contact@suppliera.com", 
                                         "+33123456789", "France", "Île-de-France");
-        supplierRepository.save(supplier);
+        supplierRepository.save(supplier.getId(), supplier);
         
         mockMvc.perform(delete("/api/suppliers/sup1"))
                 .andExpect(status().isNoContent());
@@ -177,10 +178,10 @@ class SupplierControllerTest {
     void shouldCascadeDeleteProductsWhenSupplierDeleted() throws Exception {
         Supplier supplier = new Supplier("sup1", "Supplier A", "contact@suppliera.com", 
                                         "+33123456789", "France", "Île-de-France");
-        supplierRepository.save(supplier);
+        supplierRepository.save(supplier.getId(), supplier);
         
-        productRepository.save(new Product("prod1", "Test Product"));
-        productSourcingRepository.save(new ProductSourcing("prod1", "sup1", null));
+        productRepository.save("prod1", new Product("prod1", "Test Product"));
+        productSourcingRepository.save("prod1", new ProductSourcing("sup1", null));
         
         mockMvc.perform(delete("/api/suppliers/sup1"))
                 .andExpect(status().isNoContent());

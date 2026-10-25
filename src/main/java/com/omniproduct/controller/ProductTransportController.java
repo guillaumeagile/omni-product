@@ -1,8 +1,8 @@
 package com.omniproduct.controller;
 
+import com.omniproduct.domain.port.ProductTransportRepository;
+import com.omniproduct.domain.port.ProductRepository;
 import com.omniproduct.model.ProductTransport;
-import com.omniproduct.repository.ProductRepository;
-import com.omniproduct.repository.ProductTransportRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,11 +27,11 @@ public class ProductTransportController {
     }
 
     @PutMapping
-    public ResponseEntity<ProductTransport> updateTransport(@PathVariable String id, @RequestBody ProductTransport transport) {
+    public ResponseEntity<ProductTransport> updateTransport(@PathVariable String id, @RequestBody ProductTransport value) {
         if (!productRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(transportRepository.save(
-                new ProductTransport(id, transport.getKilos(), transport.getVolume())));
+        transportRepository.save(id, value);
+        return ResponseEntity.ok(value);
     }
 }

@@ -24,10 +24,6 @@ repositories {
 dependencies {
     // Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-
-    // H2 Database
-    runtimeOnly("com.h2database:h2")
 
     // Vavr
     implementation("io.vavr:vavr:0.10.4")

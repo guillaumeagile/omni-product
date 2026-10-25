@@ -1,9 +1,8 @@
 package com.omniproduct.service;
 
-import com.omniproduct.model.*;
-import com.omniproduct.repository.*;
+import com.omniproduct.domain.port.*;
+import com.omniproduct.model.Product;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,17 +37,17 @@ public class ProductService {
     }
 
     public Product save(Product product) {
-        return productRepository.save(product);
+        productRepository.save(product.getId(), product);
+        return product;
     }
 
     // Supprimer un produit supprime aussi ses préoccupations : elles n'ont pas de sens sans lui.
-    @Transactional
     public void deleteById(String id) {
         productRepository.deleteById(id);
-        catalogRepository.findById(id).ifPresent(catalogRepository::delete);
-        priceRepository.findById(id).ifPresent(priceRepository::delete);
-        stockRepository.findById(id).ifPresent(stockRepository::delete);
-        transportRepository.findById(id).ifPresent(transportRepository::delete);
-        sourcingRepository.findById(id).ifPresent(sourcingRepository::delete);
+        catalogRepository.deleteById(id);
+        priceRepository.deleteById(id);
+        stockRepository.deleteById(id);
+        transportRepository.deleteById(id);
+        sourcingRepository.deleteById(id);
     }
 }

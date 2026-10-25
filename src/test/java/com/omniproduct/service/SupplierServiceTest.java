@@ -3,16 +3,14 @@ package com.omniproduct.service;
 import com.omniproduct.model.Supplier;
 import com.omniproduct.model.Product;
 import com.omniproduct.model.ProductSourcing;
-import com.omniproduct.repository.SupplierRepository;
-import com.omniproduct.repository.ProductRepository;
-import com.omniproduct.repository.ProductSourcingRepository;
+import com.omniproduct.domain.port.SupplierRepository;
+import com.omniproduct.domain.port.ProductRepository;
+import com.omniproduct.domain.port.ProductSourcingRepository;
 import com.omniproduct.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +39,7 @@ class SupplierServiceTest {
     void setUp() {
         supplierRepository.deleteAll();
         productService.findAll().forEach(product -> productService.deleteById(product.getId()));
+        productSourcingRepository.deleteAll();
     }
     
     @Test
@@ -165,8 +164,8 @@ class SupplierServiceTest {
             "+33123456789", "France", "Île-de-France"
         );
         
-        productRepository.save(new Product("prod1", "Test Product"));
-        productSourcingRepository.save(new ProductSourcing("prod1", "sup1", null));
+        productRepository.save("prod1", new Product("prod1", "Test Product"));
+        productSourcingRepository.save("prod1", new ProductSourcing("sup1", null));
         
         assertThat(productRepository.findById("prod1")).isPresent();
         
@@ -176,16 +175,14 @@ class SupplierServiceTest {
     }
     
     @Test
-    @Disabled // see LAZY_LOADING_ISSUE.md
-    @Transactional
     void shouldGetSuppliersByProduct() {
         Supplier supplier = supplierService.createSupplier(
             "sup1", "Supplier A", "contact@suppliera.com", 
             "+33123456789", "France", "Île-de-France"
         );
         
-        productRepository.save(new Product("prod1", "Test Product"));
-        productSourcingRepository.save(new ProductSourcing("prod1", "sup1", null));
+        productRepository.save("prod1", new Product("prod1", "Test Product"));
+        productSourcingRepository.save("prod1", new ProductSourcing("sup1", null));
         
         List<Supplier> suppliers = supplierService.getSuppliersByProduct("prod1");
         

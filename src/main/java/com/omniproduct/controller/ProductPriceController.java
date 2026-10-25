@@ -1,9 +1,9 @@
 package com.omniproduct.controller;
 
+import com.omniproduct.domain.port.ProductPriceRepository;
 import com.omniproduct.model.Product;
-import com.omniproduct.model.ProductPrice;
-import com.omniproduct.repository.ProductPriceRepository;
-import com.omniproduct.repository.ProductRepository;
+import com.omniproduct.domain.port.ProductRepository;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,16 +23,16 @@ public class ProductPriceController {
     @GetMapping
     public ResponseEntity<Product.Price> getPrice(@PathVariable String id) {
         return priceRepository.findById(id)
-                .map(ProductPrice::getPrice)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping
-    public ResponseEntity<Product.Price> updatePrice(@PathVariable String id, @RequestBody Product.Price price) {
+    public ResponseEntity<Product.Price> updatePrice(@PathVariable String id, @RequestBody Product.Price value) {
         if (!productRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(priceRepository.save(new ProductPrice(id, price)).getPrice());
+        priceRepository.save(id, value);
+        return ResponseEntity.ok(value);
     }
 }

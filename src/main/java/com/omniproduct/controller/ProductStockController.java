@@ -1,8 +1,8 @@
 package com.omniproduct.controller;
 
+import com.omniproduct.domain.port.ProductStockRepository;
+import com.omniproduct.domain.port.ProductRepository;
 import com.omniproduct.model.ProductStock;
-import com.omniproduct.repository.ProductRepository;
-import com.omniproduct.repository.ProductStockRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,11 +27,11 @@ public class ProductStockController {
     }
 
     @PutMapping
-    public ResponseEntity<ProductStock> updateStock(@PathVariable String id, @RequestBody ProductStock stock) {
+    public ResponseEntity<ProductStock> updateStock(@PathVariable String id, @RequestBody ProductStock value) {
         if (!productRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(stockRepository.save(
-                new ProductStock(id, stock.getStock(), stock.getQuantity(), stock.getWarehouse())));
+        stockRepository.save(id, value);
+        return ResponseEntity.ok(value);
     }
 }

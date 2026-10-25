@@ -142,7 +142,7 @@ object* here is a `record` that does not implement `Identifiable`.
 | HA4.4 | At least one value object has a static `create`/`build`/`of`/`from`/`make` returning a sealed result whose alternatives include the value object itself and an error record, or a Vavr ADT (`Either`, `Validation`, `Try`, `Option`) whose success type is the value object. | error |
 | HA4.5 | No `instanceof` or cast on a sealed type or its alternatives; no sealed result ignored as a statement; at least one `switch` covers every alternative of an ADT whose alternatives are all records. | error |
 | HA4.6 | The model never reads the clock: no `LocalDate.now()`, `Instant.now()`, `System.currentTimeMillis()`, `new Date()`, `Clock.systemUTC()`... Pass `today` or inject a `Clock`. | error |
-| HA4.7 | In a method whose name contains "sell", `canSell` is called before `withdraw`. | warning |
+| HA4.7 | A sale withdraws stock only where `canSell` allowed it: inside the branch of an `if` or `switch` on the decision, inside a `map` (or other lambda) on it, or after a guard clause that returns the refusal. Calling `canSell` and ignoring its answer does not count. | warning |
 
 An error record is a record declared in the code. A warning is printed as `[WARN]` and does not fail the harness.
 

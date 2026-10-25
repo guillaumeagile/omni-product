@@ -139,7 +139,8 @@ public final class Referee {
                                         tokensRemoved.map(removed -> Math.min(TOKEN_CAP, Math.max(0, removed) / TOKENS_PER_POINT)).orElse(0L).intValue()),
                                 new Points("Cyclomatic complexity removed (+1 per " + COMPLEXITY_PER_POINT + ", up to +" + COMPLEXITY_CAP + ")",
                                         branchesRemoved.map(removed -> Math.min(COMPLEXITY_CAP, Math.max(0, removed) / COMPLEXITY_PER_POINT)).orElse(0L).intValue()),
-                                new Points("📐 CK metrics improved (up to +" + CkTable.CK_CAP + ")", accepted ? CkTable.points(base, head.get()) : 0)))
+                                new Points("📐 PMD quality metrics improved (up to +" + MetricTables.CAP + ")",
+                                        accepted ? MetricTables.PMD.points(base, head.get()) : 0)))
                 .flatMap(lines -> lines)
                 .filter(line -> line.points() != 0)
                 .toList();
@@ -157,11 +158,22 @@ public final class Referee {
                 .toList();
 
         return new Verdict(accepted ? Outcome.ACCEPTED : Outcome.REJECTED, target, changes, problems, notes,
-                score, level(head.get()), badges, CkTable.lines(base, head.get(), accepted), breakdown);
+                score, level(head.get()), badges, measures(base, head.get(), accepted), breakdown);
     }
 
     private static Verdict rejected(Optional<String> target, List<RuleChange> changes, List<String> problems) {
         return new Verdict(Outcome.REJECTED, target, changes, problems, List.of(), 0, "-", List.of(), List.of(), List.of());
+    }
+
+    // Les blocs de mesures, séparés par une ligne vide.
+    private static List<String> measures(Optional<HarnessReport> base, HarnessReport head, boolean accepted) {
+        List<List<String>> blocks = MetricTables.TABLES.stream()
+                .map(table -> table.lines(base, head, accepted))
+                .filter(lines -> !lines.isEmpty())
+                .toList();
+        return java.util.stream.IntStream.range(0, blocks.size()).boxed()
+                .flatMap(i -> Stream.concat(i == 0 ? Stream.<String>empty() : Stream.of(""), blocks.get(i).stream()))
+                .toList();
     }
 
     private static String reason(RuleChange rule) {

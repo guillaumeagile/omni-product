@@ -3,6 +3,7 @@ package com.omniproduct.harness.referee;
 import com.omniproduct.harness.CkMetrics;
 import com.omniproduct.harness.HarnessReport;
 import com.omniproduct.harness.Metrics;
+import com.omniproduct.harness.PmdQuality;
 import com.omniproduct.harness.HarnessReport.RuleResult;
 import com.omniproduct.harness.referee.Referee.Outcome;
 import com.omniproduct.harness.referee.Referee.PullRequest;
@@ -177,42 +178,64 @@ class RefereeTest {
         return new CkMetrics(classes, coupling, maxCoupling, maxWmc, maxLcom, mutableFields, assignments, loops, lambdas, maxNesting);
     }
 
+    // types, fanOut, maxFanOut, maxWmc, minTcc, mutableFields, assignments, loops, lambdas, cognitive, maxCognitive
+    private static PmdQuality pmd(int types, int fanOut, int maxFanOut, int maxWmc, double minTcc, int mutableFields,
+                                  int assignments, int loops, int lambdas, int cognitive, int maxCognitive) {
+        return new PmdQuality(types, fanOut, maxFanOut, maxWmc, minTcc, mutableFields, assignments, loops, lambdas, cognitive, maxCognitive);
+    }
+
+    private static final CkMetrics SOME_CK = ck(8, 37, 14, 28, 0.90, 27, 64, 0, 5, 0);
+
     @Test
-    void ckImprovementsEarnPointsButTheNumberOfClassesDoesNot() {
-        // Les valeurs de la PR #3 (découpage HA5) : seuls CBO max, WMC max et LCOM* max s'améliorent.
-        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, ck(8, 37, 14, 28, 0.90, 27, 64, 0, 5, 0)),
+    void pmdImprovementsEarnPointsButTheNumberOfTypesDoesNot() {
+        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, SOME_CK, pmd(10, 59, 18, 28, 0.0, 27, 63, 0, 5, 2, 1)),
                 rule("HA9", "FAIL", 2));
-        Verdict verdict = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(13, 59, 11, 13, 0.75, 32, 75, 0, 5, 0)),
+        Verdict verdict = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, SOME_CK, pmd(16, 70, 14, 13, 0.25, 20, 63, 0, 5, 2, 1)),
                 rule("HA9", "PASS", 0)), pr("HA9 green"));
 
-        // CBO max -3 : +1 ; WMC max -15 : +3 (plafond) ; LCOM* -0.15 : +1 ; +5 classes : 0.
-        assertThat(verdict.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + 5);
-        assertThat(Scorecard.markdown(verdict)).contains("CK metrics of model/ and service/: +5",
-                "| Classes | 8 | 13 | +5 |  | not scored", "| WMC max (class complexity) | 28 | 13 | -15 | +3 |");
+        // Fan-out max -4 : +2 ; WMC max -15 : +3 (plafond) ; TCC +0.25 : +2 (plafond) ; champs mutables -7 : +3 (plafond).
+        // +6 types et +11 de fan-out total : 0.
+        assertThat(verdict.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + MetricTables.CAP);
+        assertThat(Scorecard.markdown(verdict)).contains("PMD quality metrics of model/ and service/: +10 (up to +10)",
+                "| Types (classes, records, enums) | 10 | 16 | +6 |  | not scored",
+                "| WMC max (class complexity) | 28 | 13 | -15 | +3 |",
+                "| TCC min (cohesion, 0..1) | 0 | 0.25 | +0.25 | +2 |");
     }
 
     @Test
-    void ckPointsAreCappedAndAWorseMetricCostsNothing() {
-        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, ck(1, 500, 50, 100, 1.0, 100, 500, 50, 0, 9)),
-                rule("HA9", "FAIL", 2));
-        Verdict best = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(99, 0, 0, 0, 0, 0, 0, 0, 50, 0)),
-                rule("HA9", "PASS", 0)), pr("HA9 green"));
-        Verdict worse = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(1, 900, 90, 200, 1.0, 200, 900, 90, 0, 12)),
+    void ckIsShownForComparisonButEarnsNothing() {
+        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, SOME_CK), rule("HA9", "FAIL", 2));
+        Verdict verdict = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(1, 0, 0, 0, 0, 0, 0, 0, 50, 0)),
                 rule("HA9", "PASS", 0)), pr("HA9 green"));
 
-        assertThat(best.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + CkTable.CK_CAP);
+        assertThat(verdict.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS);
+        assertThat(Scorecard.markdown(verdict)).contains("CK metrics of model/ and service/: shown for comparison, no points",
+                "| CBO total (coupling) | 37 | 0 | -37 |");
+    }
+
+    @Test
+    void pmdPointsAreCappedAndAWorseMetricCostsNothing() {
+        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, null, pmd(1, 500, 50, 100, 0, 100, 500, 50, 0, 90, 30)),
+                rule("HA9", "FAIL", 2));
+        Verdict best = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, null, pmd(99, 0, 0, 0, 1, 0, 0, 0, 50, 0, 0)),
+                rule("HA9", "PASS", 0)), pr("HA9 green"));
+        Verdict worse = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, null, pmd(1, 900, 90, 200, 0, 200, 900, 90, 0, 99, 40)),
+                rule("HA9", "PASS", 0)), pr("HA9 green"));
+
+        assertThat(best.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + MetricTables.CAP);
         assertThat(worse.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS);
     }
 
     @Test
-    void aRejectedPullRequestEarnsNoCkPoints() {
-        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, ck(8, 37, 14, 28, 0.90, 27, 64, 0, 5, 0)),
+    void aRejectedPullRequestEarnsNoPmdPoints() {
+        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, null, pmd(10, 59, 18, 28, 0.0, 27, 63, 0, 5, 2, 1)),
                 rule("HA9", "FAIL", 2));
-        Verdict verdict = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(8, 0, 0, 0, 0, 0, 0, 0, 5, 0)),
+        Verdict verdict = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, null, pmd(10, 0, 0, 0, 1, 0, 0, 0, 5, 0, 0)),
                 rule("HA9", "FAIL", 1)), pr("HA9 green"));
 
         assertThat(verdict.outcome()).isEqualTo(Outcome.REJECTED);
         assertThat(verdict.score()).isEqualTo(1);
+        assertThat(Scorecard.markdown(verdict)).contains("PMD quality metrics of model/ and service/: +10, not counted: the PR is not accepted");
     }
 
     @Test
@@ -235,8 +258,8 @@ class RefereeTest {
                 "| Tokens removed (+1 per 100, up to +5) | +2 |",
                 "| Cyclomatic complexity removed (+1 per 2, up to +10) | +5 |",
                 "| **Total** | **" + "+" + verdict.score() + "** |");
-        // Refusée (régression de HA7) : ni bonus de baby step ou de petit diff, ni points CK.
-        assertThat(markdown).doesNotContain("Baby step: exactly one", "Small diff:", "CK metrics improved");
-        assertThat(markdown).contains("CK metrics of model/ and service/: +5, not counted: the PR is not accepted");
+        // Refusée (régression de HA7) : ni bonus de baby step ou de petit diff, ni points de mesures.
+        assertThat(markdown).doesNotContain("Baby step: exactly one", "Small diff:", "quality metrics improved");
+        assertThat(markdown).contains("CK metrics of model/ and service/: shown for comparison, no points");
     }
 }

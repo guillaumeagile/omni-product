@@ -192,7 +192,10 @@ pourquoi dans **Files changed**. Le nombre de classes est affiché sans points :
 | lambdas | +1 par 2 ajoutées, jusqu'à +1 |
 | imbrication max | +1 par niveau retiré, jusqu'à +2 |
 
-CK ne voit pas les records (limite de CK 0.7.0) : en phase 2, un record n'est pas mesuré.
+CK ne voit pas les records (limite de CK 0.7.0). En phase 2, les points viennent donc de mesures **PMD**
+équivalentes, qui lisent Java 21 (records, `sealed`, `switch` à motifs) : fan-out (couplage), WMC max, TCC min
+(cohésion), champs mutables, affectations, boucles, lambdas, complexité cognitive totale et max ; jusqu'à +10. CK
+reste affiché pour comparaison, sans points.
 
 ### Niveaux et badges
 

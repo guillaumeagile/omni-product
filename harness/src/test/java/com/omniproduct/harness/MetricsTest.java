@@ -53,7 +53,7 @@ class MetricsTest {
         SourceSet sources = SourceSet.ofSources(Map.of(
                 "src/main/java/com/omniproduct/infrastructure/Shop.java", SHOP.replace("com.omniproduct.model", "com.omniproduct.infrastructure")), null);
 
-        assertThat(Metrics.of(sources)).isEqualTo(new Metrics(0, 0, 0, new CkMetrics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)));
+        assertThat(Metrics.of(sources)).isEqualTo(new Metrics(0, 0, 0, new CkMetrics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0), new PmdQuality(0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0)));
     }
 
     @Test

@@ -43,6 +43,8 @@ public final class Scorecard {
                         table.stream(),
                         table.isEmpty() ? Stream.<String>empty() : Stream.of(""),
                         score.isEmpty() ? Stream.<String>empty() : Stream.of(score, ""),
+                        verdict.measures().stream(),
+                        verdict.measures().isEmpty() ? Stream.<String>empty() : Stream.of(""),
                         Stream.of(marker(verdict)))
                 .flatMap(lines -> lines)
                 .collect(Collectors.joining("\n", "", "\n"));

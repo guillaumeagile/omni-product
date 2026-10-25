@@ -53,7 +53,27 @@ class MetricsTest {
         SourceSet sources = SourceSet.ofSources(Map.of(
                 "src/main/java/com/omniproduct/infrastructure/Shop.java", SHOP.replace("com.omniproduct.model", "com.omniproduct.infrastructure")), null);
 
-        assertThat(Metrics.of(sources)).isEqualTo(new Metrics(0, 0, 0));
+        assertThat(Metrics.of(sources)).isEqualTo(new Metrics(0, 0, 0, new CkMetrics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)));
+    }
+
+    @Test
+    void measuresStyleAndCouplingWithCk() {
+        SourceSet sources = SourceSet.ofSources(Map.of("src/main/java/com/omniproduct/model/Shop.java", SHOP), null);
+
+        CkMetrics ck = Metrics.of(sources).ck();
+
+        assertThat(ck.classes()).isEqualTo(1);
+        assertThat(ck.mutableFields()).isEqualTo(1);
+        assertThat(ck.loops()).isEqualTo(1);
+        assertThat(ck.lambdas()).isZero();
+    }
+
+    @Test
+    void ckStaysInsideItsWorkingDirectoryWhatever_thePathGiven() {
+        // Le harnais peut recevoir des sources en "../autre-dossier/src/main/java" : CK doit les mesurer quand même.
+        SourceSet sources = SourceSet.ofSources(Map.of("../elsewhere/src/main/java/com/omniproduct/model/Shop.java", SHOP), null);
+
+        assertThat(Metrics.of(sources).ck().classes()).isEqualTo(1);
     }
 
     @Test

@@ -279,6 +279,15 @@ regionalSupplier.quoteResellerPrice(regionalMarginPolicy, vatRate);
 | 5 | Slug strategy, read models, projections | Idiomatic, Unix Philosophy |
 | 6+ | Continuous refinement (Whirlpool cycles) | All properties |
 
+### 🎮 Code probe as a game: one pull request per baby step
+
+The refactoring step (`docs/CUPID-step-1.md`) is played in pull requests. Each PR turns
+one harness rule (`HAx`) green, and the diff of each PR shows what that rule costs in code. A GitHub Action referees
+every PR (`.github/workflows/harness-game.yml`): it runs the deterministic harness on the base and on the PR, accepts
+the PR only if the target rule turns green without regression, and comments a scorecard (points, level, badges).
+After each merge, the pinned issue *CUPID workshop leaderboard* ranks the teams (`harness-leaderboard.yml`).
+Teams work on branches of the workshop repository (`team-<name>/step-1/ha9-...`), not on forks.
+
 ---
 
 ## 📋 Part 6: Legacy Analysis — Current Codebase Mapping

@@ -25,6 +25,54 @@ The code you work on lives in `src/main/java/com/omniproduct/model` (the entitie
 `src/main/java/com/omniproduct/service` (the services). The `domain/` package (carbon port) and
 `infrastructure/` are not part of the exercise.
 
+## How to work: one pull request per baby step
+
+Each baby step goes in its own pull request, so you can see how much code each rule really costs:
+
+- **One PR = one rule turned green.** Run `./harness.sh`, pick one `[FAIL]` line, fix only that and open a PR. If
+  you are tempted to fix two rules at once, split the work into two PRs.
+- **Stack the PRs.** Branch each step from the previous one (`step-1/ha9-identifiable` from `step-1/ha8-no-jpa`), and
+  target the previous branch, so that each diff shows one step and nothing else.
+- **Name the rule in the title**: `HA9 green: Product and Supplier implement Identifiable`.
+- **Paste the harness output in the description**, before and after: the rule that turned green, and any rule
+  that turned red because of it (that happens, say so rather than hiding it).
+- **Read the diff before merging.** Small or large? Did it touch services too? Was the class split, or only
+  renamed? Answering these questions is how you learn the refactoring, not just the green light.
+- **Never touch `harness/`** in a PR.
+
+### The game
+
+Every pull request is refereed by a GitHub Action (`harness-game`). It runs the harness on the base branch and on
+your PR, then comments your PR with a scorecard: the rules that moved, your points, your level and your badges.
+
+- **Branch** `team-<name>/step-1/ha<N>-<what>`, for example `team-red/step-1/ha9-identifiable`. The first segment is
+  your team on the leaderboard.
+- **Target**: the rule in the PR title (`HA9 green: ...`), or in the branch name (`ha9`, `ha4-3`). Without a target,
+  the PR is off game.
+- **Accepted** when the target turns green, no other rule regresses, the project compiles and `harness/` is
+  untouched. Otherwise the check fails: push a fix, the scorecard updates.
+
+| You... | Points |
+|---|---|
+| turn the target green | +10 |
+| resolve a warning (`[WARN]`) | +3 |
+| remove violations on a rule that is still red | +1 each, up to +5 |
+| turn exactly one rule green (a real baby step) | +5 |
+| keep the diff small (400 changed tokens or less in `src/main/java`) | +3 |
+| remove tokens from `model/` and `service/` | +1 per 100 tokens, up to +5 |
+| remove cyclomatic complexity from `model/` and `service/` | +1 per 5 points, up to +5 |
+| break a rule that was green | -5 each |
+
+The code is measured in **tokens**, not lines: tokens are what an agent reads and writes, and a long line costs
+more than a short one. Tokens are counted by [JTokkit](https://github.com/knuddels/jtokkit) with the `o200k_base`
+encoding (the tiktoken BPE): Claude's own tokenizer is not public, but the size of a change and its trend are faithful. Cyclomatic complexity is measured by
+[PMD](https://pmd.github.io/pmd/pmd_rules_java_design.html#cyclomaticcomplexity). A rise in complexity is shown
+in the scorecard but never penalized: splitting a class sometimes moves a branch rather than removing it.
+
+Badges: 🍼 Baby step, 🧼 No regression, 🤏 Small diff. After each merge, the
+pinned issue **CUPID workshop leaderboard** ranks the teams. Run `./harness.sh` locally before pushing: the referee
+uses the same harness.
+
 ## Assessment
 
 run your code through our harness to verify you succeed this part:

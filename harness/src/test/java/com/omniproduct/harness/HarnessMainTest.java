@@ -43,6 +43,30 @@ class HarnessMainTest {
         assertThat(result.out()).contains("HARNESS RESULT: FAIL");
     }
 
+    // Le rapport JSON reflète la sortie texte : mêmes règles, dans l'ordre de l'étape, mêmes statuts.
+    @Test
+    void writesAMachineReadableReport(@TempDir Path dir) {
+        Path json = dir.resolve("report.json");
+
+        Run result = run("--step", "1", "--json", json.toString(), "--classes", "../build/classes/java/main", "../src/main/java");
+        HarnessReport report = HarnessReport.read(json);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(report.step()).isEqualTo("1");
+        assertThat(report.result()).isEqualTo("FAIL");
+        assertThat(report.rules()).extracting(HarnessReport.RuleResult::id)
+                .isEqualTo(Steps.rules("1").stream().map(HarnessRule::id).toList());
+        assertThat(report.rule("HA5")).hasValueSatisfying(rule -> {
+            assertThat(rule.status()).isEqualTo("FAIL");
+            assertThat(rule.violations()).isPositive();
+            assertThat(result.out()).contains("[FAIL] HA5");
+        });
+        assertThat(report.rule("HA12.1")).hasValueSatisfying(rule -> {
+            assertThat(rule.status()).isEqualTo("WARN");
+            assertThat(rule.severity()).isEqualTo("WARNING");
+        });
+    }
+
     @Test
     void refusesToPassWhenNothingIsCompiled(@TempDir Path empty) throws Exception {
         Path sources = Files.createDirectory(empty.resolve("src"));

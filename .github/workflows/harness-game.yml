@@ -1,0 +1,101 @@
+# Arbitre de l'atelier CUPID : à chaque PR, le harnais tourne sur la base et sur la tête, l'arbitre compare les deux
+# rapports JSON, commente la PR (verdict, score, niveau, badges) et fait échouer le check si la PR n'est pas un
+# baby step (règle cible pas verte, régression, harness/ modifié, projet qui ne compile pas).
+#
+# Mesures du score : les tokens (coût de lecture et d'écriture pour un agent) remplacent les lignes ; la complexité
+# cyclomatique vient de PMD (règle CyclomaticComplexity). Les deux sont dans les rapports JSON du harnais.
+#
+# Les PR doivent être internes au dépôt (une équipe = un préfixe de branche, team-red/step-1/ha9-...) : depuis un
+# fork, le jeton est en lecture seule et le commentaire est impossible. On n'utilise pas pull_request_target, qui
+# exécuterait le code des étudiants avec des droits en écriture.
+name: harness-game
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: harness-game-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  referee:
+    runs-on: ubuntu-latest
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_TITLE: ${{ github.event.pull_request.title }}
+      PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+      # Petit diff : tokens ajoutés ou retirés dans src/main/java (tests et Markdown exclus).
+      SMALL_DIFF_TOKENS: "400"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      # gradle-wrapper.jar n'est pas versionné : harness.sh utilise alors le Gradle installé.
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.5.0"
+
+      # L'arbitre et le harnais de la base font foi : le code de la PR ne juge pas la PR.
+      - name: Harness on the base
+        run: |
+          git worktree add "$RUNNER_TEMP/base" "$BASE_SHA"
+          (cd "$RUNNER_TEMP/base" && ./harness.sh all --json "$RUNNER_TEMP/base.json") || true
+
+      - name: Harness on the pull request
+        run: ./harness.sh all --json "$RUNNER_TEMP/head.json" || true
+
+      - name: Changed files and tokens
+        run: |
+          git diff --name-only "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/changed-files.txt"
+          git diff -U0 "$BASE_SHA...$HEAD_SHA" -- src/main/java > "$RUNNER_TEMP/changes.diff"
+          java -cp "$RUNNER_TEMP/base/harness/build/install/harness/lib/*" com.omniproduct.harness.Tokens \
+            --diff "$RUNNER_TEMP/changes.diff" > "$RUNNER_TEMP/changed-tokens.txt"
+
+      - name: Referee
+        id: referee
+        run: |
+          set +e
+          java -cp "$RUNNER_TEMP/base/harness/build/install/harness/lib/*" com.omniproduct.harness.referee.RefereeMain \
+            --base "$RUNNER_TEMP/base.json" --head "$RUNNER_TEMP/head.json" \
+            --title "$PR_TITLE" --branch "$PR_BRANCH" \
+            --changed-files "$RUNNER_TEMP/changed-files.txt" \
+            --changed-tokens "$(cat "$RUNNER_TEMP/changed-tokens.txt")" \
+            --small-diff "$SMALL_DIFF_TOKENS" \
+            --out "$RUNNER_TEMP/scorecard.md"
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Comment the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/scorecard.md" --edit-last \
+            || gh pr comment "$PR_NUMBER" --body-file "$RUNNER_TEMP/scorecard.md"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: harness-reports-pr-${{ github.event.pull_request.number }}
+          path: |
+            ${{ runner.temp }}/base.json
+            ${{ runner.temp }}/head.json
+            ${{ runner.temp }}/scorecard.md
+          if-no-files-found: warn
+
+      - name: Verdict
+        run: |
+          cat "$RUNNER_TEMP/scorecard.md" >> "$GITHUB_STEP_SUMMARY"
+          test "${{ steps.referee.outputs.exit }}" = "0"

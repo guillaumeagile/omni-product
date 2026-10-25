@@ -140,6 +140,48 @@ class IdentifierRulesTest {
         assertThat(new BareIdentifierIsWeakRule(pkg -> true).severity()).isEqualTo(HarnessSeverity.WARNING);
     }
 
+    // Un identifiant naturel (son code est l'identité) n'a pas besoin d'un UUID ; tous les autres sont générés.
+    @Test
+    void naturalIdentifiersNeedNoUuidButGeneratedOnesDo() {
+        String supplier = """
+                package demo.model;
+
+                public class Supplier {
+                    private String siren;
+                    private String tvaId;
+                    private String supplierSiret;
+                    private String skuCode;
+                    private String id;
+                    private String productId;
+                    private String ownerId;
+                    private java.util.List<String> supplierIds;
+                }
+                """;
+
+        assertThat(rich(supplier)).extracting(Violation::line).containsExactlyInAnyOrder(8, 9, 10, 11);
+        // HA12.1 avertit toujours un identifiant naturel brut : un record court (record Siren(String value)) suffit.
+        assertThat(bare(supplier)).extracting(Violation::line).contains(4, 5);
+        assertThat(rich("package demo.model;\npublic record Siren(String value) { }\n",
+                "package demo.model;\npublic class Supplier {\n    private Siren siren;\n    private TvaId tvaId;\n}\n")).isEmpty();
+        assertThat(new RichIdentifierRule(pkg -> true, List.of("Ean")).check(sources(supplier)))
+                .extracting(Violation::line).contains(4, 5);
+    }
+
+    // HA6 : typer l'identité (ProductId) ne fait pas entrer l'entité dans un contexte de plus.
+    @Test
+    void aTypedIdentifierBelongsToNoConcern() {
+        SourceSet product = sources("""
+                package demo.model;
+
+                public class Product {
+                    public ProductId getId() { return null; }
+                    public Price getPrice() { return null; }
+                }
+                """);
+
+        assertThat(new SingleConcernRule(com.omniproduct.harness.UbiquitousLanguageMap.load(), 1, pkg -> true).check(product)).isEmpty();
+    }
+
     @Test
     void ignoresPackagesOutsideTheFilter() {
         assertThat(rich(STRING_ID.replace("demo.model", "demo.service"))).isEmpty();

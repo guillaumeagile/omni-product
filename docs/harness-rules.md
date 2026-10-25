@@ -16,7 +16,7 @@ sur le Java en phase 3.
 | HA9 | Entités implémentent `Identifiable` | Une seule réponse à « est-ce une entité ? » | Tout type du package `...model..` implémente `Identifiable` | BYTECODE | Error |
 | HA10 | Pas de service dans le constructeur d'une entité | Les services dépendent des entités, jamais l'inverse | Constructeur d'une entité avec un paramètre du package `..service..` ou nommé `*Service` | BYTECODE | Error |
 | HA11 | Concept du domaine non primitif | Un membre du modèle dont le nom désigne un concept du vocabulaire porte un type du domaine (record), pas une valeur brute | Champ, paramètre, composant ou retour nommé par le vocabulaire (contexte fort, pas `Lifecycle`) et typé `String`/`int`/`long`/`BigDecimal`… ; identifiants exclus (HA12) | AST | Error |
-| HA12 | Identifiants riches | `Id`/`*Id`/`*Ids` : UUID ou ULID, ou record qui en enveloppe un ; jamais `String`/`int`/`long` ; v7 minimum | Voir « UUID v7 » ci-dessous ; interdire `UUID.randomUUID()` (v4) et valeurs nulles/vides en contexte d'id | AST | Error |
+| HA12 | Identifiants riches | `Id`/`*Id`/`*Ids` générés par le système : UUID ou ULID, ou record qui en enveloppe un ; jamais `String`/`int`/`long` ; v7 minimum. Un identifiant naturel (`naturalIdentifiers` : siren, siret, tva, vat, sku, ean, gtin, isbn) en est exempté | Voir « UUID v7 » ci-dessous ; interdire `UUID.randomUUID()` (v4) et valeurs nulles/vides en contexte d'id | AST | Error |
 | HA12.1 | Identifiant nu = faible | Primitive obsession sur les ids | Tout `Id`/`*Id`/`*Ids` dont le type n'est pas déclaré dans le source (String, int, UUID…) | AST | Warning |
 
 ## Adaptations propres à Java
@@ -76,11 +76,11 @@ trivial est un défaut de la règle.
 | Règle | Avant (exact) | Maintenant (heuristique) |
 |---|---|---|
 | HA5 | `getX` / `isX` publics | tout accesseur sans paramètre qui renvoie une valeur (`getX`, `fetchX`, `x()`), les setters, les champs publics ; lire + écrire une propriété compte une fois ; ids exclus par mot |
-| HA6 | préfixe du nom après un verbe connu | mot ou suite de mots **n'importe où** dans le nom ; le mot-clé le plus spécifique gagne ; contexte « faible » (Lifecycle) seulement en dernier recours ; si le nom est générique, on lit les types de retour/paramètres ; API = tout sauf `private` (+ champs publics) |
+| HA6 | préfixe du nom après un verbe connu | mot ou suite de mots **n'importe où** dans le nom ; le mot-clé le plus spécifique gagne ; contexte « faible » (Lifecycle) seulement en dernier recours ; si le nom est générique, on lit les types de retour/paramètres, sauf les types d'identifiant (`ProductId` n'est d'aucun contexte) ; API = tout sauf `private` (+ champs publics) |
 | HA8 | `jakarta.persistence`, Spring Data | + javax, Hibernate, JDBC, `java.sql`, jOOQ, MyBatis, MongoDB ; + forme stockée (`xxxJson`, `yyy_csv`) et `sync*`/`hydrate*` |
 | HA9 | interface nommée `Identifiable` | inchangé : c'est le contrat explicite de l'exercice |
 | HA10 | type du package `..service` ou nom en `Service` | package (`service`, `repository`, `application`, `infrastructure`…), suffixe (`Manager`, `Handler`, `Client`, `Gateway`, `Facade`, `Factory`…), annotation Spring, types dans les génériques ; entité = champ `id`, `<classe>Id` ou `@Id` |
-| HA12 | noms `id`/`*Id`/`*Ids`, liste de types interdits, `randomUUID()` d'un identifiant | un mot `id`/`identifier`/`uuid`/`guid`/`uid` dans le nom (casse et séparateur libres) ; **tout** type autre qu'UUID/Ulid ou record qui en enveloppe un ; tout UUID non v7 construit dans le modèle (`randomUUID`, import statique, `UUID::randomUUID`, `nameUUIDFromBytes`, `new UUID`, `UuidCreator.get*` hors `getTimeOrderedEpoch`) |
+| HA12 | noms `id`/`*Id`/`*Ids`, liste de types interdits, `randomUUID()` d'un identifiant | un mot `id`/`identifier`/`uuid`/`guid`/`uid` dans le nom (casse et séparateur libres) ; généré par défaut, naturel seulement si un mot du nom est dans `naturalIdentifiers` (`tvaId`, `supplierSiren`) : renommer `productId` en `ownerId` n'échappe pas à la règle, mais renommer un id en `tvaId` oui (limite connue, visible en revue) ; **tout** type autre qu'UUID/Ulid ou record qui en enveloppe un ; tout UUID non v7 construit dans le modèle (`randomUUID`, import statique, `UUID::randomUUID`, `nameUUIDFromBytes`, `new UUID`, `UuidCreator.get*` hors `getTimeOrderedEpoch`) |
 
 Chaque contournement est écrit dans `HeuristicEvasionTest` (et son pendant `SingleConcernRuleTest`) : si une règle
 régresse vers l'égalité de chaînes, un test échoue.

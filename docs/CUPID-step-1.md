@@ -65,8 +65,8 @@ your PR, then comments your PR with a scorecard: the rules that moved, your poin
 | break a rule that was green | -5 each |
 
 The code is measured in **tokens**, not lines: tokens are what an agent reads and writes, and a long line costs
-more than a short one. Identifiers are split at capitals (`getSellByDate` is 4 tokens) and each symbol counts; it
-is a deterministic proxy, not the tokenizer of one model. Cyclomatic complexity is measured by
+more than a short one. Tokens are counted by [JTokkit](https://github.com/knuddels/jtokkit) with the `o200k_base`
+encoding (the tiktoken BPE): Claude's own tokenizer is not public, but the size of a change and its trend are faithful. Cyclomatic complexity is measured by
 [PMD](https://pmd.github.io/pmd/pmd_rules_java_design.html#cyclomaticcomplexity). A rise in complexity is shown
 in the scorecard but never penalized: an exhaustive `switch` (HA4.5) adds one branch per case.
 

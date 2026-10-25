@@ -57,9 +57,12 @@ class MetricsTest {
     }
 
     @Test
-    void countsTokensBySplittingIdentifiersAndPunctuation() {
-        assertThat(Tokens.count("getSellByDate();")).isEqualTo(7);
-        assertThat(Tokens.count("HTTPServer id")).isEqualTo(3);
-        assertThat(Tokens.countChanged(List.of("--- a/X.java", "+++ b/X.java", "@@ -1 +1 @@", "-int a;", "+long a;"))).isEqualTo(6);
+    void countsTokensWithJTokkitO200k() {
+        // Valeur de référence connue de l'encodage o200k_base.
+        assertThat(Tokens.count("hello world")).isEqualTo(2);
+        assertThat(Tokens.count("getSellByDate();")).isEqualTo(5);
+        // Seules les lignes ajoutées ou retirées comptent, pas les en-têtes du diff.
+        assertThat(Tokens.countChanged(List.of("--- a/X.java", "+++ b/X.java", "@@ -1 +1 @@", "-int a;", "+long a;")))
+                .isEqualTo(Tokens.count("int a;\nlong a;"));
     }
 }

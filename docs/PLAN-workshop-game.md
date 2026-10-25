@@ -141,4 +141,4 @@ Lot 1 -> Lot 2 -> Lot 3 -> Lot 4 -> Lot 7 -> Lot 5 -> Lot 6. Phase 3 après l'at
 | 5 classement `harness-leaderboard` | écrit | tests du calcul ; **workflow pas encore joué sur GitHub** |
 | 6 textes étudiants | partiel | `CUPID-step-1.md` (règles du jeu) et `Workshop.md` faits ; `CUPID-step1-2.md` reste à passer en Java |
 | 7 essai du principe | à faire | PR de test à ouvrir puis supprimer |
-| mesures tokens + PMD | fait | rapport JSON (`metrics`), arbitre et Action ; test PMD sur valeurs McCabe calculées à la main |
+| mesures tokens + PMD | fait | tokens par JTokkit (o200k_base), complexité par PMD ; rapport JSON (`metrics`), arbitre et Action ; tests sur valeurs de référence |

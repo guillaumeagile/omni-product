@@ -24,6 +24,9 @@ dependencies {
     // Complexité cyclomatique : la règle CyclomaticComplexity de PMD, outil éprouvé, plutôt qu'un calcul maison
     implementation("net.sourceforge.pmd:pmd-java:7.7.0")
 
+    // Tokens : JTokkit (BPE de tiktoken, encodage o200k_base), plutôt qu'un découpage maison
+    implementation("com.knuddels:jtokkit:1.1.0")
+
     // Lecture de ubiquitous-language-map.json
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
 

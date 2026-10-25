@@ -1,7 +1,5 @@
 package com.omniproduct.model;
 
-// Product garde son identité, son nom et son prix. Les autres préoccupations (catalogue, stock, transport,
-// approvisionnement) sont des valeurs à part, reliées au produit par son identifiant.
 public class Product implements Identifiable {
 
     private String id;

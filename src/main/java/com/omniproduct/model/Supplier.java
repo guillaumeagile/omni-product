@@ -2,7 +2,6 @@ package com.omniproduct.model;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
-// Supplier garde son identité et son nom ; ses coordonnées et sa localisation sont des objets à part.
 public class Supplier implements Identifiable {
     private String id;
 

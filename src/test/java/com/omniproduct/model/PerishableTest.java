@@ -39,15 +39,13 @@ class PerishableTest {
         assertThat(Perishable.of(USE_BY, SELL_BY).isEmpty()).isTrue();
     }
 
-    // Non déterministe, volontairement : isPastSellBy lit l'horloge (LocalDate.now()), le test ne peut que s'y caler.
-    // Autour de minuit, le jour de ce test et celui du modèle peuvent différer. HA4.6 demande de sortir l'horloge du
-    // modèle ; alors ce test pourra fixer la date du jour au lieu de la deviner.
     @Test
-    void isPastSellByOnlyOnceTheSellByDateIsBehindToday() {
-        LocalDate today = LocalDate.now();
+    void isPastSellByOnlyOnceTheSellByDateIsBehindTheProvidedToday() {
+        LocalDate today = LocalDate.of(2026, 11, 10);
+        TimeServiceProvider fakeToday = () -> today;
 
-        assertThat(Perishable.of(today.minusDays(1), today.plusDays(3)).get().isPastSellBy()).isTrue();
-        assertThat(Perishable.of(today, today.plusDays(3)).get().isPastSellBy()).isFalse();
-        assertThat(Perishable.of(today.plusDays(1), today.plusDays(3)).get().isPastSellBy()).isFalse();
+        assertThat(Perishable.of(today.minusDays(1), today.plusDays(3)).get().isPastSellBy(fakeToday)).isTrue();
+        assertThat(Perishable.of(today, today.plusDays(3)).get().isPastSellBy(fakeToday)).isFalse();
+        assertThat(Perishable.of(today.plusDays(1), today.plusDays(3)).get().isPastSellBy(fakeToday)).isFalse();
     }
 }

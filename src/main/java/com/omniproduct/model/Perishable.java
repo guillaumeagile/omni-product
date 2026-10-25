@@ -13,6 +13,5 @@ public record Perishable(LocalDate sellByDate, LocalDate useByDate) implements S
         return Option.of(new Perishable(sellByDate, useByDate));
     }
 
-    // Dérive l'état du jour : pratique, mais le modèle ne doit pas lire l'horloge (HA4.6).
-    public boolean isPastSellBy() { return LocalDate.now().isAfter(sellByDate); }
+    public boolean isPastSellBy(TimeServiceProvider time) { return time.today().isAfter(sellByDate); }
 }

@@ -1,25 +1,25 @@
 package com.omniproduct.model;
 
-// Product ne garde que son identité. Chaque préoccupation (catalogue, prix, stock, transport, approvisionnement)
-// est une valeur à part, reliée au produit par son identifiant.
+// Product garde son identité, son nom et son prix. Les autres préoccupations (catalogue, stock, transport,
+// approvisionnement) sont des valeurs à part, reliées au produit par son identifiant.
 public class Product implements Identifiable {
 
     private String id;
     private String name;
+    private Price price;
 
-    public Product() {}
-
-    public Product(String id, String name) {
+    public Product(String id, String name, Price price) {
         this.id = id;
         this.name = name;
+        this.price = price;
     }
 
     @Override
     public String getId() { return id; }
 
-
     public String getName() { return name; }
 
+    public Price getPrice() { return price; }
 
     public record Price(Double base, Double tax, Double taxRate) {}
 

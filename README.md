@@ -7,10 +7,9 @@ une big ball of mud.
 
 Objectif : refactoriser du legacy vers du moderne, from SOLID to Cute DDD.
 
-1. faire émerger le Ubiquitous Language et l'appliquer au code
-2. faire émerger des tests qui permettent de refactoriser
-3. séparer les Bounded Context
-4. voulez-vous moderniser le code ? CUPID is the way !
+1. respecter le Ubiquitous Language et qu'il s'applique au code
+3. séparer les Bounded Context (phase 1)
+4. voulez-vous moderniser le code ? CUPID is the way ! (phase 1 & 2)
 
 ## Les deux phases
 
@@ -53,12 +52,12 @@ avec un tableau de score.
 ### Mode d'emploi
 
 1. **Partez de la branche de la phase** (`java-bdxio-phase1` ou `java-bdxio-phase2`). Travaillez dans le dépôt de
-   l'atelier, pas dans un fork : depuis un fork, l'arbitre ne peut pas commenter.
+   l'atelier, pas dans un fork : depuis un fork, l'arbitre ne peut pas commenter, sauf si vous l'autorisez dans votre fork.
 2. **Nommez la branche** `team-<équipe>/step-<N>/ha<règle>-<quoi>`. Le premier segment est le nom de votre équipe au
    classement.
    - phase 1 : `team-red/step-1/ha9-identifiable`
    - phase 2 : `team-red/step-2/ha4-3-shelf-life`
-3. **Choisissez une ligne `[FAIL]`** du harnais. Corrigez cette règle, et seulement elle.
+3. **Choisissez une ligne `[FAIL]`** du harnais. Corrigez cette règle, et seulement elle. A priori, faites dans l'ordre de numérotation des règles.
 4. **Lancez `./harness.sh all`** en local avant de pousser. L'arbitre utilise le même harnais.
 5. **Ouvrez la PR** avec la règle cible dans le titre : `HA9 green: Product and Supplier implement Identifiable`. Sans
    cible dans le titre ou dans la branche, la PR est hors jeu.

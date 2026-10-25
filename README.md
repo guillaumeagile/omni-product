@@ -235,20 +235,33 @@ pourquoi dans **Files changed**. Le nombre de classes est affiché sans points :
 
 | Mesure CK | Points |
 |---|---|
-| CBO total (couplage entre classes) | +1 par 5 retirés, jusqu'à +3 |
-| CBO max (la classe la plus couplée) | +1 par 2 retirés, jusqu'à +2 |
-| WMC max (la classe la plus complexe) | +1 par 3 retirés, jusqu'à +3 |
-| LCOM* max (manque de cohésion, de 0 à 1) | +1 par 0,1 retiré, jusqu'à +2 |
-| champs mutables (non `final`) | +1 par 2 retirés, jusqu'à +3 |
-| affectations | +1 par 5 retirées, jusqu'à +2 |
-| boucles | +1 par boucle retirée, jusqu'à +2 |
-| lambdas | +1 par 2 ajoutées, jusqu'à +1 |
-| imbrication max | +1 par niveau retiré, jusqu'à +2 |
+| CBO total (couplage entre classes) | +1 par 2 retirés, jusqu'à +5 |
+| CBO max (la classe la plus couplée) | +1 par 2 retirés, jusqu'à +4 |
+| WMC max (la classe la plus complexe) | +1 par 2 retirés, jusqu'à +5 |
+| LCOM* max (manque de cohésion, de 0 à 1) | +1 par 0,1 retiré, jusqu'à +4 |
+| champs mutables (non `final`) | +1 par 2 retirés, jusqu'à +5 |
+| affectations | +1 par 2 retirées, jusqu'à +4 |
+| boucles | +1 par boucle retirée, jusqu'à +4 |
+| lambdas | +2 par lambda ajoutée, jusqu'à +10 |
+| imbrication max | +1 par niveau retiré, jusqu'à +4 |
 
 CK ne voit pas les records (limite de CK 0.7.0). En phase 2, les points viennent donc de mesures **PMD**
 équivalentes, qui lisent Java 21 (records, `sealed`, `switch` à motifs) : fan-out (couplage), WMC max, TCC min
 (cohésion), champs mutables, affectations, boucles, lambdas, complexité cognitive totale et max ; plafond par mesure,
 sans plafond total. CK reste affiché pour comparaison, sans points.
+
+| Mesure PMD (phase 2) | Points |
+|---|---|
+| fan-out total (couplage) | +1 par 2 retirés, jusqu'à +5 |
+| fan-out max | +1 par 2 retirés, jusqu'à +4 |
+| WMC max (la classe la plus complexe) | +1 par 2 retirés, jusqu'à +5 |
+| TCC min (cohésion, de 0 à 1) | +1 par 0,1 gagné, jusqu'à +2 |
+| champs mutables (non `final`) | +1 par 2 retirés, jusqu'à +5 |
+| affectations | +1 par 2 retirées, jusqu'à +4 |
+| boucles | +1 par boucle retirée, jusqu'à +4 |
+| lambdas | +2 par lambda ajoutée, jusqu'à +10 |
+| complexité cognitive totale | +1 par 2 retirés, jusqu'à +4 |
+| complexité cognitive max | +1 par 2 retirés, jusqu'à +4 |
 
 ### Niveaux et badges
 

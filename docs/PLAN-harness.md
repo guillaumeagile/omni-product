@@ -63,7 +63,7 @@ Une règle à la fois, chacune avec ses tests de pinning (fixtures Java valides 
 
 ## Phase 5 : matériel d'atelier
 
-- `CUPID-step-1-1.md` et `CUPID-step-1-2.md` en version Java ; mettre à jour `docs/Workshop.md`.
+- `CUPID-step-1-1.md` et `CUPID-step-1-2.md` en version Java ; mettre à jour `Workshop-CUTE DDD-full day.md`.
 - Scripts `cupid-step-1-1.harness.sh` / `.ps1` (build puis harnais).
 - `AGENTS.md` (ne pas relâcher les règles pour faire passer l'exercice), `README.md`.
 - Slides : alignement avec la version C#.

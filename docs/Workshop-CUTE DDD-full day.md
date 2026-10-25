@@ -4,7 +4,7 @@
 
 ---
 
-## 🎯 Workshop Objectives
+## 🎯 Workshop Objectives - full day length
 
 This workshop provides a **holistic approach** to domain-driven design by integrating three complementary frameworks:
 

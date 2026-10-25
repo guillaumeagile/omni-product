@@ -97,21 +97,21 @@ jobs:
             echo "(\`java-bdxio-phase1\` ou \`java-bdxio-phase2\`), ou pour la branche de votre baby step précédent."
           } > "$RUNNER_TEMP/scorecard.md"
 
-      # Le step précédent : parmi les branches de la même équipe (premier segment du nom), la plus avancée dont la PR
-      # descend, au point où elle en est partie (merge-base). Aucune : c'est le premier step, comparé à la phase.
+      # Le step précédent : parmi les branches de la même équipe (premier segment du nom), celle dont la PR est partie
+      # (merge-base) et qui porte le plus de commits de l'équipe, hors phase. La phase a pu être fusionnée dans la PR
+      # depuis : on ne demande pas que le step précédent la contienne. Aucune : premier step, comparé à la phase.
       - name: Previous step of the team
         id: previous
         if: steps.base.outputs.playable == 'true'
         run: |
           team=${PR_BRANCH%%/*}
-          fork=$(git merge-base "$HEAD_SHA" "$BASE_SHA")
-          best_sha=$fork best_ref="" best_n=0
+          best_sha=$(git merge-base "$HEAD_SHA" "$BASE_SHA") best_ref="" best_n=0
           while read -r ref; do
             [ "$ref" = "origin/$PR_BRANCH" ] && continue
             mb=$(git merge-base "$HEAD_SHA" "$ref") || continue
             [ "$mb" = "$HEAD_SHA" ] && continue
-            git merge-base --is-ancestor "$fork" "$mb" || continue
-            n=$(git rev-list --count "$fork..$mb")
+            git merge-base --is-ancestor "$mb" "$BASE_SHA" && continue
+            n=$(git rev-list --count "$mb" --not "$BASE_SHA")
             if [ "$n" -gt "$best_n" ]; then best_sha=$mb best_ref=${ref#origin/} best_n=$n; fi
           done < <(git for-each-ref --format='%(refname:short)' "refs/remotes/origin/$team/")
           echo "sha=$best_sha" >> "$GITHUB_OUTPUT"

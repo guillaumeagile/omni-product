@@ -52,7 +52,8 @@ branche et la branche de base.
 ## 3. Travailler dans cet ordre
 
 Un baby step = une PR = une règle qui passe de rouge à vert (voir la section « The game » de
-[CUPID-step-1.md](CUPID-step-1.md), et « How to work » : chaque PR part de `java-bdxio-phase2` à jour et la vise). L'ordre ci-dessous est celui qui
+[CUPID-step-1.md](CUPID-step-1.md), et « How to work » : chaque PR est un draft qui vise `java-bdxio-phase2` et n'est jamais fusionné ; chaque
+branche part du baby step précédent). L'ordre ci-dessous est celui qui
 coûte le moins de réécriture : une règle en amont rend souvent la suivante plus facile.
 
 1. **HA2 : données immuables.** Transformez les classes de données en `record`, retirez les setters et les champs

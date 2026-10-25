@@ -31,10 +31,13 @@ Each baby step goes in its own pull request, so you can see how much code each r
 
 - **One PR = one rule turned green.** Run `./harness.sh`, pick one `[FAIL]` line, fix only that and open a PR. If
   you are tempted to fix two rules at once, split the work into two PRs.
-- **Always target the phase branch** (`java-bdxio-phase1`, or `java-bdxio-phase2` for a phase 2 rule), never
-  `main` nor the branch of another step. Branch each step from the up-to-date phase branch (`git switch
-  java-bdxio-phase1 && git pull`), which holds the steps already merged: each PR is then scored only on what it adds,
-  and its diff shows one step and nothing else.
+- **Never merge.** Nobody ever merges into `java-bdxio-phase1` or `java-bdxio-phase2`: open every PR as a
+  **draft** (`gh pr create --draft`) and leave it open.
+- **Chain the branches, always target the phase branch.** Branch the first step from the phase branch, and each next
+  step from your previous step (`step-1/ha9-identifiable` from `step-1/ha8-no-jpa`). The PR always targets the phase
+  branch (`java-bdxio-phase1`, or `java-bdxio-phase2` for a phase 2 rule), never `main` nor another step: each PR is
+  scored against the start of the phase, so the score shows the whole way from the legacy. To see one step only,
+  pick its commits in Files changed.
 - **Name the rule in the title**: `HA9 green: Product and Supplier implement Identifiable`.
 - **Paste the harness output in the description**, before and after: the rule that turned green, and any rule
   that turned red because of it (that happens, say so rather than hiding it).
@@ -78,9 +81,8 @@ assignments, loops, lambdas, max nesting) are detailed in a collapsible block of
 each one. An improvement earns points, a worse metric costs nothing. The number of classes is shown but not scored.
 CK 0.7.0 does not see records: in step 2, a record is not measured.
 
-Badges: 🍼 Baby step, 🧼 No regression, 🤏 Small diff, 👑 Boss defeated, 🧠 Compiler-checked. After each merge, the
-pinned issue **CUPID workshop leaderboard** ranks the teams. Run `./harness.sh` locally before pushing: the referee
-uses the same harness.
+Badges: 🍼 Baby step, 🧼 No regression, 🤏 Small diff, 👑 Boss defeated, 🧠 Compiler-checked. Run `./harness.sh` locally
+before pushing: the referee uses the same harness.
 
 ## Assessment
 

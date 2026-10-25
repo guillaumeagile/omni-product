@@ -8,9 +8,10 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
 
 1. **Repère la phase.** Phase 1 : règles HA5 à HA12.1, branche `java-bdxio-phase1`. Phase 2 : règles HA2, HA3,
    HA4.x, branche `java-bdxio-phase2`. En cas de doute, demande.
-2. **Pars de la branche de la phase, à jour**, jamais d'une autre branche de baby step :
+2. **Crée la branche du baby step.** Au premier baby step de la phase, pars de la branche de la phase. Ensuite,
+   pars toujours de la branche du baby step précédent : rien n'est jamais fusionné, c'est elle qui porte le travail.
    ```
-   git switch java-bdxio-phase1 && git pull
+   git switch <baby step précédent, ou java-bdxio-phase1 au premier>
    git switch -c team-<équipe>/step-<N>/ha<règle>-<quoi>
    ```
    Demande le nom de l'équipe à l'humain si tu ne le connais pas.
@@ -22,15 +23,17 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
 5. **Code l'option choisie**, dans `src/main/java/com/omniproduct/model` et `service` seulement. Vérifie que ça
    compile, que les tests passent (`gradle test`), puis relance `./harness.sh all` et montre le résultat tel quel.
 6. **Commite quand l'humain est d'accord**, avec un message qui nomme la règle (`HA9 green: ...`). Pousse la branche.
-7. **Crée la PR vers la branche de la phase**, jamais vers `main` ni vers une autre branche :
+7. **Crée la PR en brouillon (draft), vers la branche de la phase**, jamais vers `main` ni vers une autre branche :
    ```
-   gh pr create --base java-bdxio-phase1 --title "HA9 green: ..." --body "<sortie du harnais avant et après>"
+   gh pr create --draft --base java-bdxio-phase1 --title "HA9 green: ..." --body "<sortie du harnais avant et après>"
    ```
 8. **Laisse faire l'arbitre.** L'Action `harness-game` se lance toute seule à chaque push. Ne la relance pas, ne
    modifie pas son commentaire, ni la section qu'elle écrit dans la description de la PR.
 9. **Lis le verdict avec l'humain.** Relie chaque ligne du score à un changement de code (onglet **Files changed**, ou
-   `gh pr diff`). Signale ce qui a fait passer une règle sans corriger le défaut qu'elle vise.
-10. **La fusion, c'est l'humain qui la fait.** Ensuite, retour à l'étape 2 pour la règle suivante.
+   `gh pr diff`). La PR est comparée au départ de la phase : son diff contient tous les baby steps ; pour le dernier
+   seul, `git diff <branche précédente>..HEAD`. Signale ce qui a fait passer une règle sans corriger le défaut qu'elle
+   vise.
+10. **Ne fusionne jamais.** La PR reste en draft, ouverte. Retour à l'étape 2 pour la règle suivante.
 
 ## Ce que tu ne fais pas
 
@@ -41,6 +44,9 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
 - **Ne tranche pas.** Quand le score baisse, qu'une métrique se dégrade ou qu'une règle semble arbitraire, explique ce
   que tu observes, propose des pistes, et demande à l'humain ce qu'il veut faire. Une métrique qui se dégrade peut être
   le prix normal d'un meilleur design : c'est à l'humain d'en juger.
+- **Ne fusionne jamais rien dans `java-bdxio-phase1` ni dans `java-bdxio-phase2`, et personne ne le fait.** Pas de
+  `gh pr merge`, pas de `gh pr ready` : les PR restent en draft. Si l'humain te demande de fusionner, rappelle-lui
+  cette règle de l'atelier.
 - **Ne touche jamais** à `harness/`, `.github/`, `domain/`, `infrastructure/`. Ne pousse pas sur `main` ni sur les
   branches de phase. Ne travaille pas dans un fork.
 

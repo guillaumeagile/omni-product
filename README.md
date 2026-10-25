@@ -235,15 +235,15 @@ pourquoi dans **Files changed**. Le nombre de classes est affiché sans points :
 
 | Mesure CK | Points |
 |---|---|
-| CBO total (couplage entre classes) | +1 par 5 retirés, jusqu'à +3 |
-| CBO max (la classe la plus couplée) | +1 par 2 retirés, jusqu'à +2 |
-| WMC max (la classe la plus complexe) | +1 par 3 retirés, jusqu'à +3 |
-| LCOM* max (manque de cohésion, de 0 à 1) | +1 par 0,1 retiré, jusqu'à +2 |
-| champs mutables (non `final`) | +1 par 2 retirés, jusqu'à +3 |
-| affectations | +1 par 5 retirées, jusqu'à +2 |
-| boucles | +1 par boucle retirée, jusqu'à +2 |
-| lambdas | +1 par 2 ajoutées, jusqu'à +1 |
-| imbrication max | +1 par niveau retiré, jusqu'à +2 |
+| CBO total (couplage entre classes) | +1 par 2 retirés, jusqu'à +5 |
+| CBO max (la classe la plus couplée) | +1 par 2 retirés, jusqu'à +4 |
+| WMC max (la classe la plus complexe) | +1 par 2 retirés, jusqu'à +5 |
+| LCOM* max (manque de cohésion, de 0 à 1) | +1 par 0,1 retiré, jusqu'à +4 |
+| champs mutables (non `final`) | +1 par 2 retirés, jusqu'à +5 |
+| affectations | +1 par 2 retirées, jusqu'à +4 |
+| boucles | +1 par boucle retirée, jusqu'à +4 |
+| lambdas | +2 par lambda ajoutée, jusqu'à +3 |
+| imbrication max | +1 par niveau retiré, jusqu'à +4 |
 
 CK ne voit pas les records (limite de CK 0.7.0) : en phase 2, un record n'est pas mesuré.
 

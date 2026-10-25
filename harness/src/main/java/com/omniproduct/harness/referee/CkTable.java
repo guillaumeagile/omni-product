@@ -32,15 +32,15 @@ final class CkTable {
 
     static final List<Row> ROWS = List.of(
             new Row("Classes", "not scored: splitting is not a goal in itself", CkMetrics::classes, 0, 0, true),
-            new Row("CBO total (coupling)", "+1 per 5 removed, up to +3", CkMetrics::coupling, 5, 3, true),
-            new Row("CBO max", "+1 per 2 removed, up to +2", CkMetrics::maxCoupling, 2, 2, true),
-            new Row("WMC max (class complexity)", "+1 per 3 removed, up to +3", CkMetrics::maxWmc, 3, 3, true),
-            new Row("LCOM* max (lack of cohesion, 0..1)", "+1 per 0.1 removed, up to +2", CkMetrics::maxLcom, 0.1, 2, true),
-            new Row("Mutable fields (non final)", "+1 per 2 removed, up to +3", CkMetrics::mutableFields, 2, 3, true),
-            new Row("Assignments", "+1 per 5 removed, up to +2", CkMetrics::assignments, 5, 2, true),
-            new Row("Loops", "+1 per loop removed, up to +2", CkMetrics::loops, 1, 2, true),
-            new Row("Lambdas", "+1 per 2 added, up to +1", CkMetrics::lambdas, 2, 1, false),
-            new Row("Max nesting", "+1 per level removed, up to +2", CkMetrics::maxNesting, 1, 2, true));
+            new Row("CBO total (coupling)", "+1 per 2 removed, up to +5", CkMetrics::coupling, 2, 5, true),
+            new Row("CBO max", "+1 per 2 removed, up to +4", CkMetrics::maxCoupling, 2, 4, true),
+            new Row("WMC max (class complexity)", "+1 per 2 removed, up to +5", CkMetrics::maxWmc, 2, 5, true),
+            new Row("LCOM* max (lack of cohesion, 0..1)", "+1 per 0.1 removed, up to +4", CkMetrics::maxLcom, 0.1, 4, true),
+            new Row("Mutable fields (non final)", "+1 per 2 removed, up to +5", CkMetrics::mutableFields, 2, 5, true),
+            new Row("Assignments", "+1 per 2 removed, up to +4", CkMetrics::assignments, 2, 4, true),
+            new Row("Loops", "+1 per loop removed, up to +4", CkMetrics::loops, 1, 4, true),
+            new Row("Lambdas", "+2 per lambda added, up to +3", CkMetrics::lambdas, 0.5, 3, false),
+            new Row("Max nesting", "+1 per level removed, up to +4", CkMetrics::maxNesting, 1, 4, true));
 
     private CkTable() {
     }

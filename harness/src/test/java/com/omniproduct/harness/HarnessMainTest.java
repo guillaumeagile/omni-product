@@ -68,6 +68,8 @@ class HarnessMainTest {
             assertThat(rule.status()).isEqualTo("FAIL");
             assertThat(rule.severity()).isEqualTo("ERROR");
         });
+        // Exercice volontaire (CatalogService.catalogLabels remplit une liste dans une boucle) : HA4.8 est rouge.
+        assertThat(report.rule("HA4.8")).hasValueSatisfying(rule -> assertThat(rule.status()).isEqualTo("FAIL"));
     }
 
     @Test

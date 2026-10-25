@@ -16,6 +16,7 @@ sur le Java en phase 3.
 | HA4.5 | Match exhaustif sur l'ADT | Les alternatives, et les résultats scellés, sont traités par un `switch` qui les couvre toutes | `instanceof` ou cast vers une ADT ou une alternative ; résultat scellé ignoré (appel en simple instruction) ; aucun `switch` exhaustif | AST | Error |
 | HA4.6 | Le modèle ne lit pas l'horloge | Le modèle reçoit `today`, ou un `Clock` injecté | `LocalDate.now()`, `Instant.now()`, `System.currentTimeMillis()`, `new Date()`, `Clock.systemUTC()`… dans `model` | BYTECODE (appels, imports statiques compris) | Error |
 | HA4.7 | La vente dépend de `canSell` | Une vente ne retire du stock que si le domaine l'a permise | Le retrait doit se trouver dans une branche (`if`, ternaire, `switch`) ou une lambda (`map`, `Option.when`) qui dépend de la décision, ou après une clause de garde qui renvoie le refus ; un `canSell` ignoré ne garde rien | AST | Error |
+| HA4.8 | Collections en pipeline | Une collection se transforme par un Stream, pas en remplissant un accumulateur | Boucle (`for`, for-each, `while`, `do`) ou `forEach`/`peek` qui modifie une variable déclarée hors d'elle | AST | Error |
 | HA5 | Pas de god class | Au plus 4 propriétés publiques par type (hors `*Id`) | Compter les composants de `record`, les getters publics et les champs publics, hors noms finissant par `Id` | AST | Error |
 | HA6 | Single concern | Les méthodes publiques d'une classe couvrent au plus 1 contexte borné ; restrictions de vocabulaire par type | Même `ubiquitous-language-map.json` ; préfixe du nom de méthode comparé aux mots-clés par contexte | AST | Error |
 | HA7 | Fan-out | Une entité ne référence aucune autre entité, seulement des ids | Champs, paramètres, retours, locaux, arguments génériques (`List<Supplier>`, `Supplier[]`, `Optional<Supplier>`) | BYTECODE (dépendances de type) + AST pour la ligne | Error |
@@ -58,7 +59,7 @@ HA5 → HA4, HA2 → HA6 → HA8 → HA7 → HA9, HA10 → HA12, HA12.1.
 
 ## État d'implémentation et étapes
 
-L'**étape 1** (`./harness.sh`, `docs/CUPID-step-1.md`) couvre **HA5 à HA12.1** uniquement. L'**étape 2** (`./harness.sh 2`) ajoute HA2, HA3 et HA4.1 à HA4.7 ; `all` lance les deux étapes. Les règles se règlent
+L'**étape 1** (`./harness.sh`, `docs/CUPID-step-1.md`) couvre **HA5 à HA12.1** uniquement. L'**étape 2** (`./harness.sh 2`) ajoute HA2, HA3 et HA4.1 à HA4.8 ; `all` lance les deux étapes. Les règles se règlent
 dans `Steps.java`.
 
 | Règle | Implémentée | Étape | Notes |
@@ -82,8 +83,9 @@ dans `Steps.java`.
 | HA4.5 switch exhaustif | oui | 2 | pas de `instanceof`, de cast ni de résultat scellé ignoré ; un `switch` couvre les alternatives ; model et service |
 | HA4.6 pas d'horloge | oui | 2 | BYTECODE |
 | HA4.7 la vente dépend de `canSell` | oui | 2 | erreur ; vérifie la dépendance au résultat, plus l'ordre du texte |
+| HA4.8 collections en pipeline | oui | 2 | échoue sur `CatalogService.catalogLabels` (exercice ajouté) |
 
-Périmètre : `com.omniproduct.model` (et `com.omniproduct.service` pour HA4.1, HA4.7, HA6, HA12.1). Le port carbone
+Périmètre : `com.omniproduct.model` (et `com.omniproduct.service` pour HA4.1, HA4.7, HA4.8, HA6, HA12.1). Le port carbone
 (`domain/`) et l'infrastructure ne font pas partie de l'exercice.
 
 ## Heuristiques, pas correspondances exactes
@@ -107,6 +109,7 @@ trivial est un défaut de la règle.
 | HA4.5 | `if` ou `switch` au hasard | `instanceof` et cast (qualifiés compris) vers une alternative ; appel à une méthode du code qui renvoie une ADT, laissé en simple instruction ; `switch` exhaustif = un `case` (type ou record) par alternative d'une ADT dont toutes les alternatives sont des records |
 | HA4.6 | `LocalDate.now()` seulement | appel du JDK (`java.time`, `Calendar`, `System`, `new Date()`) dont un mot est `now`, `today`, `clock`, `utc`, `system`, `instance`, ou `currentTimeMillis`/`nanoTime` ; `Duration.toMillis()` n'est pas une horloge |
 | HA4.7 | l'ordre des lignes, `sell` et `withdraw` nommés | vente = méthode non privée qui retire, sauf nom d'opération de stock (`restock`, `discard`, `adjust`, `transfer`, `withdraw`…) ; un mot de vente (`sell`, `sale`, `sold`, `buy`, `purchase`, `checkout`, `order`) force le contrôle. Retrait = appel ou référence de méthode `withdraw`/`decrement`/`deduct`/`destock`/`unstock`, ou construction/appel qui parle de `stock`/`inventory` avec une soustraction (`-`, `minus`, `subtract`), ou appel d'une méthode du fichier qui retire (transitivement). Décision = appel `can` + `sell`/`sale`, `sellable`/`saleable`, `sell`/`sale` + `decide`/`decision`/`allowed`/`permitted`, ou variable locale qui en porte une. Gardé = dans la branche d'un `if`/ternaire/`switch` dont la condition porte la décision, dans une lambda ou référence de méthode passée à un appel dont le receveur ou un autre argument la porte, ou après une clause de garde `if (décision) return/throw`. Limites : un nom d'opération de stock (`withdrawOne`) échappe au contrôle ; la branche `else` d'un `if (canSell)` compte comme gardée ; les variables ne sont suivies que dans la méthode |
+| HA4.8 | `for` seulement, `List.add` seulement | boucles `for`, for-each, `while`, `do` et `forEach`/`forEachOrdered`/`peek` (lambda ou référence de méthode, `result::add`) ; modifier = affectation (`=`, `+=`, `++`) ou appel d'un verbe de remplissage (`add`, `put`, `append`, `push`, `offer`, `insert`, `set`, `remove`, `merge`, `compute`, `increment`, `accumulate`, `accept`, `clear`) sur une variable, un champ (`this.x`), une constante ou un tableau non déclarés dans l'itération ; `Collections.addAll(result, …)` vise son premier argument. Limites : une boucle qui ne remplit rien (recherche avec `return` anticipé, simple affichage) n'est pas visée ; un remplissage délégué à une méthode d'un autre nom (`register(p)`) n'est pas suivi |
 | HA12 | noms `id`/`*Id`/`*Ids`, liste de types interdits, `randomUUID()` d'un identifiant | un mot `id`/`identifier`/`uuid`/`guid`/`uid` dans le nom (casse et séparateur libres) ; généré par défaut, naturel seulement si un mot du nom est dans `naturalIdentifiers` (`tvaId`, `supplierSiren`) : renommer `productId` en `ownerId` n'échappe pas à la règle, mais renommer un id en `tvaId` oui (limite connue, visible en revue) ; **tout** type autre qu'UUID/Ulid ou record qui en enveloppe un ; tout UUID non v7 construit dans le modèle (`randomUUID`, import statique, `UUID::randomUUID`, `nameUUIDFromBytes`, `new UUID`, `UuidCreator.get*` hors `getTimeOrderedEpoch`) |
 
 Chaque contournement est écrit dans `HeuristicEvasionTest` (et son pendant `SingleConcernRuleTest`) : si une règle

@@ -120,9 +120,13 @@ Products now have a shelf life, and the two kinds differ in their dates, not in 
 6. **Do not read the clock inside the model.** Pass `today` (or inject a `Clock`) so each date case can be tested
    without waiting. `LocalDate.now()`, `Instant.now()`, `System.currentTimeMillis()`, `new Date()` and
    `Clock.systemUTC()` are all refused in the model (HA4.6).
-7. **Wire the services.** `SellProduct` calls `canSell` before `withdraw`; `AddProduct` receives a `ShelfLife`; the
-   catalog label matches on it to show "[BEST BEFORE PASSED]" for a `NonExpiring` past its date. Do not add a
-   `default` branch to these `switch`es: without it, the compiler reports every missing case.
+7. **Wire the services.** The sale withdraws stock only when `canSell` allows it (HA4.7); `AddProduct` receives a
+   `ShelfLife`; the catalog labels (`CatalogService`) match on it to show "[BEST BEFORE PASSED]" for a `NonExpiring`
+   past its date. Do not add a `default` branch to these `switch`es: without it, the compiler reports every missing
+   case.
+8. **Transform collections with pipelines.** The catalog labels are built in a loop that fills a list. A `Stream`
+   says what you want instead of how to fill it: `products.stream().filter(...).map(product -> switch (...) {...})
+   .toList()`. Each step is a small pure function you can name and test (HA4.8).
 
 **Self-check:** adding a third kind (say `Frozen`) must only require a new record, one more type in the `permits`
 clause of `ShelfLife`, and the compiler pointing at every `switch` that now needs a case. If you had to edit an
@@ -130,7 +134,7 @@ existing class hierarchy, you extended by modification instead of composition.
 
 #### What the harness checks
 
-HA4 is verified by seven small rules, `HA4.1` to `HA4.7`. They never pin a type name (except `Product`, `canSell`,
+HA4 is verified by eight small rules, `HA4.1` to `HA4.8`. They never pin a type name (except `Product`, `canSell`,
 `withdraw`, and the factory names `create`, `build`, `of`, `from`, `make`), so you are free to choose yours. A *value
 object* here is a `record` that does not implement `Identifiable`.
 
@@ -143,6 +147,7 @@ object* here is a `record` that does not implement `Identifiable`.
 | HA4.5 | No `instanceof` or cast on a sealed type or its alternatives; no sealed result ignored as a statement; at least one `switch` covers every alternative of an ADT whose alternatives are all records. | error |
 | HA4.6 | The model never reads the clock: no `LocalDate.now()`, `Instant.now()`, `System.currentTimeMillis()`, `new Date()`, `Clock.systemUTC()`... Pass `today` or inject a `Clock`. | error |
 | HA4.7 | A sale withdraws stock only where `canSell` allowed it: inside the branch of an `if` or `switch` on the decision, inside a `map` (or other lambda) on it, or after a guard clause that returns the refusal. Calling `canSell` and ignoring its answer does not count. | error |
+| HA4.8 | A collection is transformed by a Stream pipeline (`stream().filter(...).map(...).toList()`, `Collectors.groupingBy`, `reduce`), never by a loop (`for`, `while`, `forEach`) that fills a list, a map, a builder or a counter declared outside it. | error |
 
 An error record is a record declared in the code. A warning is printed as `[WARN]` and does not fail the harness.
 

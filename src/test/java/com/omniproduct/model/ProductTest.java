@@ -1,5 +1,7 @@
 package com.omniproduct.model;
 
+import com.omniproduct.model.valueobject.Price;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -10,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProductTest {
 
     private static final UUID UUID_1 = UUID.fromString("0190a6e2-7b3c-7d4e-8f00-000000000001");
-    private static final Product.Price PRICE = new Product.Price(new Amount(10.0), new Amount(2.0), new TaxRate(0.2));
+    private static final Price PRICE = new Price(new Amount(10.0), new Amount(2.0), new TaxRate(0.2));
 
     @Test
     void identifiersAreEqualWhenTheirValuesAre() {
@@ -22,8 +24,8 @@ class ProductTest {
 
     @Test
     void conceptsAreValuesComparedByContent() {
-        assertThat(PRICE).isEqualTo(new Product.Price(new Amount(10.0), new Amount(2.0), new TaxRate(0.2)));
-        assertThat(PRICE).isNotEqualTo(new Product.Price(new Amount(10.0), new Amount(2.0), new TaxRate(0.055)));
+        assertThat(PRICE).isEqualTo(new Price(new Amount(10.0), new Amount(2.0), new TaxRate(0.2)));
+        assertThat(PRICE).isNotEqualTo(new Price(new Amount(10.0), new Amount(2.0), new TaxRate(0.055)));
         assertThat(new Product.Supplier("Danone", new Siren("552032534"), new TvaId("FR27552032534")))
                 .isEqualTo(new Product.Supplier("Danone", new Siren("552032534"), new TvaId("FR27552032534")));
     }

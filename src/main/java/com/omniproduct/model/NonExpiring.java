@@ -1,5 +1,7 @@
 package com.omniproduct.model;
 
+import com.omniproduct.model.valueobject.Price;
+
 import java.time.LocalDate;
 
 // Exercice étape 2 (HA4.1) : hiérarchie d'héritage volontaire, à remplacer par une ADT (sealed interface + records).

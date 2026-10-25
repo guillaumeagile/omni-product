@@ -73,6 +73,10 @@ tableau de score, met à jour le classement et met le check au vert ou au rouge.
    - phase 2 : `team-red/step-2/ha4-3-shelf-life`
 3. **Choisissez une ligne `[FAIL]`** du harnais. Corrigez cette règle, et seulement elle. A priori, faites dans l'ordre
    de numérotation des règles.
+   **Régler de la dette est permis.** Une règle plus ancienne, sautée ou cassée en route, qui est encore `[FAIL]` à un
+   step ultérieur (par exemple une règle de la phase 1 pendant la phase 2) peut faire l'objet d'un baby step. La PR ne
+   traite que cette règle, nommée dans la branche et le titre (`team-red/step-2/ha9-dette-identifiable`,
+   `HA9 green: ...`) : l'arbitre la note comme n'importe quelle règle cible.
 4. **Lancez `./harness.sh all`** en local avant de pousser. L'arbitre utilise le même harnais.
 
 ```
@@ -144,8 +148,18 @@ dans une section qu'il réécrit à chaque passage : ne la modifiez pas, le rest
 À chaque push, il publie un nouveau commentaire sous vos commits et masque les précédents (« outdated »), toujours
 consultables.
 
-Le check est vert si la PR est acceptée, rouge sinon. Dans ce cas, poussez un correctif sur la même branche : l'arbitre
-repasse tout seul et publie un nouveau commentaire. Le détail est aussi dans l'onglet **Checks** de la PR.
+Le check est vert si la PR est acceptée, rouge sinon. **Un check `harness-game` rouge n'est pas une panne de la CI** :
+c'est le verdict **❌ Not accepted**, le plus souvent parce qu'une règle verte a rougi (une régression). Le score est
+quand même calculé, le commentaire publié et le classement mis à jour ; l'onglet **Checks** affiche la raison. Il n'y
+a une panne que si le commentaire dit « Arbitre CUPID : en panne » : prévenez alors l'animateur.
+
+Une régression est acceptable si elle est temporaire. Faire passer une règle peut en casser une autre : c'est souvent
+le signe d'une tension entre deux règles, à discuter. Vous avez le choix :
+
+- pousser un correctif sur la même branche : l'arbitre repasse tout seul et publie un nouveau commentaire ;
+- ou garder ce round tel quel et réparer la règle cassée dans un baby step suivant. Le round refusé coûte -5 par
+  règle cassée et perd les bonus réservés aux PR acceptées (baby step, petit diff, mesures CK ou PMD), mais la règle réparée rapporte à nouveau ses points dans le
+  round qui la remet au vert.
 
 ### 4. Relire le code : Files changed
 
@@ -191,7 +205,7 @@ Après chaque round, l'issue épinglée **CUPID workshop leaderboard (java-bdxio
 Une PR est acceptée quand :
 
 - la règle cible passe au vert ;
-- aucune autre règle ne régresse ;
+- aucune autre règle ne régresse (sinon elle est refusée, mais notée : voir plus haut) ;
 - le projet compile ;
 - `harness/` n'est pas modifié. Une PR qui le modifie est rejetée avec 0 point.
 

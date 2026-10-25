@@ -24,10 +24,6 @@ public class Product implements Identifiable {
 
     public ShelfLife getShelfLife() { return shelfLife; }
 
-    public Product withName(String name) { return new Product(id, name, price, shelfLife); }
-
-    public Product withPrice(Price price) { return new Product(id, name, price, shelfLife); }
-
     public record Warehouse(Location location) {}
 
     public record Supplier(String name, Siren siren, TvaId tvaId) {}

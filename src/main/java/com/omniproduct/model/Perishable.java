@@ -1,16 +1,16 @@
 package com.omniproduct.model;
 
+import io.vavr.control.Option;
+
 import java.time.LocalDate;
-import java.util.Objects;
 
 public record Perishable(LocalDate sellByDate, LocalDate useByDate) implements ShelfLife {
 
-    public Perishable {
-        Objects.requireNonNull(sellByDate, "sellByDate must not be null");
-        Objects.requireNonNull(useByDate, "useByDate must not be null");
-        if (useByDate.isBefore(sellByDate)) {
-            throw new IllegalArgumentException("useByDate must not be before sellByDate");
+    public static Option<Perishable> of(LocalDate sellByDate, LocalDate useByDate) {
+        if (sellByDate == null || useByDate == null || useByDate.isBefore(sellByDate)) {
+            return Option.none();
         }
+        return Option.of(new Perishable(sellByDate, useByDate));
     }
 
     // Dérive l'état du jour : pratique, mais le modèle ne doit pas lire l'horloge (HA4.6).

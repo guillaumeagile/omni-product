@@ -42,7 +42,7 @@ class ProductTest {
 
     @Test
     void aPerishableProductKeepsItsDates() {
-        Perishable yoghurt = new Perishable(LocalDate.of(2026, 11, 10), LocalDate.of(2026, 11, 15));
+        Perishable yoghurt = Perishable.of(LocalDate.of(2026, 11, 10), LocalDate.of(2026, 11, 15)).get();
         Product product = new Product(new ProductId(UUID_1), "Yoghurt", PRICE, yoghurt);
 
         assertThat(product.getShelfLife()).isEqualTo(yoghurt);

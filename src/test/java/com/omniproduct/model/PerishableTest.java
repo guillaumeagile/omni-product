@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PerishableTest {
 
@@ -14,7 +13,7 @@ class PerishableTest {
 
     @Test
     void keepsItsDates() {
-        Perishable yoghurt = new Perishable(SELL_BY, USE_BY);
+        Perishable yoghurt = Perishable.of(SELL_BY, USE_BY).get();
 
         assertThat(yoghurt.sellByDate()).isEqualTo(SELL_BY);
         assertThat(yoghurt.useByDate()).isEqualTo(USE_BY);
@@ -22,28 +21,22 @@ class PerishableTest {
 
     @Test
     void acceptsAUseByDateEqualToTheSellByDate() {
-        assertThat(new Perishable(SELL_BY, SELL_BY).useByDate()).isEqualTo(SELL_BY);
+        assertThat(Perishable.of(SELL_BY, SELL_BY).get().useByDate()).isEqualTo(SELL_BY);
     }
 
     @Test
     void refusesAMissingSellByDate() {
-        assertThatThrownBy(() -> new Perishable(null, USE_BY))
-                .isInstanceOf(NullPointerException.class)
-                .hasMessageContaining("sellByDate");
+        assertThat(Perishable.of(null, USE_BY).isEmpty()).isTrue();
     }
 
     @Test
     void refusesAMissingUseByDate() {
-        assertThatThrownBy(() -> new Perishable(SELL_BY, null))
-                .isInstanceOf(NullPointerException.class)
-                .hasMessageContaining("useByDate");
+        assertThat(Perishable.of(SELL_BY, null).isEmpty()).isTrue();
     }
 
     @Test
     void refusesAUseByDateBeforeTheSellByDate() {
-        assertThatThrownBy(() -> new Perishable(USE_BY, SELL_BY))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("useByDate must not be before sellByDate");
+        assertThat(Perishable.of(USE_BY, SELL_BY).isEmpty()).isTrue();
     }
 
     // Non déterministe, volontairement : isPastSellBy lit l'horloge (LocalDate.now()), le test ne peut que s'y caler.
@@ -53,8 +46,8 @@ class PerishableTest {
     void isPastSellByOnlyOnceTheSellByDateIsBehindToday() {
         LocalDate today = LocalDate.now();
 
-        assertThat(new Perishable(today.minusDays(1), today.plusDays(3)).isPastSellBy()).isTrue();
-        assertThat(new Perishable(today, today.plusDays(3)).isPastSellBy()).isFalse();
-        assertThat(new Perishable(today.plusDays(1), today.plusDays(3)).isPastSellBy()).isFalse();
+        assertThat(Perishable.of(today.minusDays(1), today.plusDays(3)).get().isPastSellBy()).isTrue();
+        assertThat(Perishable.of(today, today.plusDays(3)).get().isPastSellBy()).isFalse();
+        assertThat(Perishable.of(today.plusDays(1), today.plusDays(3)).get().isPastSellBy()).isFalse();
     }
 }

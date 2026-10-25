@@ -32,8 +32,7 @@ public final class Scorecard {
         List<String> notes = verdict.notes().stream().map(note -> "- ℹ️ " + note).toList();
         List<String> table = table(verdict.changes());
         String score = verdict.outcome() == Outcome.OFF_GAME ? ""
-                : "**Score: " + signed(verdict.score()) + "** · Level: " + verdict.level()
-                + (verdict.badges().isEmpty() ? "" : " · Badges: " + String.join(", ", verdict.badges()));
+                : "**Score: " + signed(verdict.score()) + "** · Level: " + verdict.level();
 
         return Stream.of(
                         Stream.of(title, "", outcome, ""),
@@ -44,6 +43,7 @@ public final class Scorecard {
                         table.isEmpty() ? Stream.<String>empty() : Stream.of(""),
                         breakdown(verdict).stream(),
                         score.isEmpty() ? Stream.<String>empty() : Stream.of(score, ""),
+                        badges(verdict).stream(),
                         verdict.measures().stream(),
                         verdict.measures().isEmpty() ? Stream.<String>empty() : Stream.of(""),
                         Stream.of(marker(verdict)))
@@ -61,6 +61,17 @@ public final class Scorecard {
                 .toList();
         return rows.isEmpty() ? List.of()
                 : Stream.concat(Stream.of("| Rule | Base | This PR | Points |", "|---|---|---|---|"), rows.stream()).toList();
+    }
+
+    // Les badges en grand : leurs emojis en titre de premier niveau, puis leurs noms.
+    private static List<String> badges(Verdict verdict) {
+        return verdict.outcome() == Outcome.OFF_GAME || verdict.badges().isEmpty() ? List.of()
+                : List.of("# " + verdict.badges().stream().map(Scorecard::emoji).collect(Collectors.joining(" ")),
+                        "**Badges:** " + String.join(" · ", verdict.badges()), "");
+    }
+
+    private static String emoji(String badge) {
+        return badge.contains(" ") ? badge.substring(0, badge.indexOf(' ')) : badge;
     }
 
     // Le récapitulatif du score : une ligne par source de points, puis le total.

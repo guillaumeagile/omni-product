@@ -134,7 +134,10 @@ Une minute ou deux après l'ouverture de la PR, l'arbitre commente la PR :
 | HA6     | 🔴 FAIL (8)  | 🔴 FAIL (6)  |        |
 | HA8     | 🔴 FAIL (30) | 🔴 FAIL (40) |        |
 | HA9     | 🔴 FAIL (5)  | 🔴 FAIL (10) |        |
-Score: +17 · Level: Unix Apprentice (1/8) · Badges: 🍼 Baby step, 🧼 No regression
+Score: +17 · Level: Unix Apprentice (1/8)
+
+# 🍼 🧼
+Badges: 🍼 Baby step · 🧼 No regression
 ```
 
 L'arbitre écrit aussi le score du round en tête de la **description** de la PR (verdict, points, niveau, badges),

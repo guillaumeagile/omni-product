@@ -14,7 +14,7 @@ class LeaderboardTest {
     private static final Author BOT = new Author("github-actions");
 
     private static Comment referee(String target, String outcome, int score, String level, String badges) {
-        return new Comment(BOT, "## 🎮 CUPID referee\n\n" + Scorecard.MARKER
+        return new Comment(BOT, "## 🎮 Arbitre CUPID\n\n" + Scorecard.MARKER
                 + "{\"target\":\"" + target + "\",\"outcome\":\"" + outcome + "\",\"score\":" + score
                 + ",\"level\":\"" + level + "\",\"badges\":[" + badges + "]} -->\n");
     }

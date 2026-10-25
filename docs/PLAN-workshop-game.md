@@ -68,7 +68,8 @@ du baby step, et rend un verdict et un score.
 | Une seule règle au vert dans la PR (vrai baby step) | +5 |
 | Petit diff (400 tokens modifiés au plus dans `src/main/java`) | +3 |
 | Tokens retirés de `model/` et `service/` | +1 par 100 tokens, plafonné à +5 |
-| Complexité cyclomatique retirée (PMD) | +1 par 5 points, plafonné à +5 ; une hausse est affichée, pas pénalisée |
+| Complexité cyclomatique retirée (PMD) | +1 par 2 points, plafonné à +10 ; une hausse est affichée, pas pénalisée |
+| Mesures CK améliorées (CBO, WMC, LCOM*, champs mutables, affectations, boucles, lambdas, imbrication ; pas le nombre de classes) | plafond par mesure, +10 au total ; une dégradation est affichée, pas pénalisée |
 | Régression (PASS -> FAIL) | -5 par règle |
 | `harness/` modifié | PR rejetée, 0 point |
 
@@ -141,4 +142,5 @@ Lot 1 -> Lot 2 -> Lot 3 -> Lot 4 -> Lot 7 -> Lot 5 -> Lot 6. Phase 3 après l'at
 | 5 classement `harness-leaderboard` | écrit | tests du calcul ; **workflow pas encore joué sur GitHub** |
 | 6 textes étudiants | partiel | `CUPID-step-1.md` (règles du jeu) et `Workshop-CUTE DDD-full day.md` faits ; `CUPID-step1-2.md` reste à passer en Java |
 | 7 essai du principe | à faire | PR de test à ouvrir puis supprimer |
+| mesures CK au score | fait | essai sur PR #3 (+22, dont +5 CK) ; CK 0.7.0 ne voit pas les records (phase 2) |
 | mesures tokens + PMD | fait | tokens par JTokkit (o200k_base), complexité par PMD ; rapport JSON (`metrics`), arbitre et Action ; tests sur valeurs de référence |

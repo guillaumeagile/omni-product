@@ -44,7 +44,7 @@ class SupplierServiceTest {
         assertThat(supplier).isNotNull();
         assertThat(supplier.getId()).isEqualTo("sup1");
         assertThat(supplier.getName()).isEqualTo("Supplier A");
-        assertThat(supplier.getCountry()).isEqualTo("France");
+        assertThat(supplier.getAddress().getCountry()).isEqualTo("France");
     }
     
     @Test
@@ -118,8 +118,8 @@ class SupplierServiceTest {
         );
         
         assertThat(updated.getName()).isEqualTo("Updated Supplier A");
-        assertThat(updated.getCountry()).isEqualTo("Germany");
-        assertThat(updated.getRegion()).isEqualTo("Berlin");
+        assertThat(updated.getAddress().getCountry()).isEqualTo("Germany");
+        assertThat(updated.getAddress().getRegion()).isEqualTo("Berlin");
     }
     
     @Test
@@ -158,9 +158,8 @@ class SupplierServiceTest {
         
         Product product = new Product();
         product.setId("prod1");
-        product.setName("Test Product");
-        product.setSlug("test-product");
-        product.setSupplier(supplier);
+        product.setCatalog(new Product.Catalog("Test Product", "test-product", null, null));
+        product.setSourcing(new Product.Sourcing(supplier, null, null));
         productRepository.save(product);
         
         assertThat(productRepository.findById("prod1")).isPresent();
@@ -181,9 +180,8 @@ class SupplierServiceTest {
         
         Product product = new Product();
         product.setId("prod1");
-        product.setName("Test Product");
-        product.setSlug("test-product");
-        product.setSupplier(supplier);
+        product.setCatalog(new Product.Catalog("Test Product", "test-product", null, null));
+        product.setSourcing(new Product.Sourcing(supplier, null, null));
         productRepository.save(product);
         
         List<Supplier> suppliers = supplierService.getSuppliersByProduct("prod1");

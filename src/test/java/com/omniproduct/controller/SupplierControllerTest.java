@@ -172,9 +172,8 @@ class SupplierControllerTest {
         
         Product product = new Product();
         product.setId("prod1");
-        product.setName("Test Product");
-        product.setSlug("test-product");
-        product.setSupplier(supplier);
+        product.setCatalog(new Product.Catalog("Test Product", "test-product", null, null));
+        product.setSourcing(new Product.Sourcing(supplier, null, null));
         productRepository.save(product);
         
         mockMvc.perform(delete("/api/suppliers/sup1"))

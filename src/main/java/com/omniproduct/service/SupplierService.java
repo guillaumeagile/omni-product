@@ -45,11 +45,11 @@ public class SupplierService {
     }
     
     public List<Supplier> getSuppliersByCountry(String country) {
-        return supplierRepository.findByCountry(country);
+        return supplierRepository.findByAddressCountry(country);
     }
     
     public List<Supplier> getSuppliersByRegion(String region) {
-        return supplierRepository.findByRegion(region);
+        return supplierRepository.findByAddressRegion(region);
     }
     
     public Supplier updateSupplier(String id, String name, String contactEmail, String contactPhone,
@@ -58,10 +58,8 @@ public class SupplierService {
             .orElseThrow(() -> new IllegalArgumentException("Supplier not found: " + id));
         
         supplier.setName(name);
-        supplier.setContactEmail(contactEmail);
-        supplier.setContactPhone(contactPhone);
-        supplier.setCountry(country);
-        supplier.setRegion(region);
+        supplier.setContact(new Supplier.Contact(contactEmail, contactPhone));
+        supplier.setAddress(new Supplier.Address(country, region));
         
         return supplierRepository.save(supplier);
     }

@@ -64,7 +64,7 @@ public final class Referee {
     public enum Outcome { ACCEPTED, REJECTED, OFF_GAME }
 
     public record Verdict(Outcome outcome, Optional<String> target, List<RuleChange> changes, List<String> problems,
-                          List<String> notes, int score, String level, List<String> badges) {
+                          List<String> notes, int score, String level, List<String> badges, List<String> measures) {
     }
 
     public static Optional<String> target(PullRequest pr) {
@@ -88,7 +88,7 @@ public final class Referee {
         if (target.isEmpty()) {
             return new Verdict(Outcome.OFF_GAME, target, List.of(), List.of(),
                     List.of("No baby step target found: put the rule in the PR title (`HA9 green: ...`) or in the branch name (`step-1/ha9-...`)."),
-                    0, level(head.get()), List.of());
+                    0, level(head.get()), List.of(), List.of());
         }
 
         List<RuleChange> changes = changes(base, head.get(), target.get());
@@ -142,11 +142,11 @@ public final class Referee {
                 .toList();
 
         return new Verdict(accepted ? Outcome.ACCEPTED : Outcome.REJECTED, target, changes, problems, notes,
-                score, level(head.get()), badges);
+                score, level(head.get()), badges, CkTable.lines(base, head.get()));
     }
 
     private static Verdict rejected(Optional<String> target, List<RuleChange> changes, List<String> problems) {
-        return new Verdict(Outcome.REJECTED, target, changes, problems, List.of(), 0, "-", List.of());
+        return new Verdict(Outcome.REJECTED, target, changes, problems, List.of(), 0, "-", List.of(), List.of());
     }
 
     private static List<RuleChange> changes(Optional<HarnessReport> base, HarnessReport head, String target) {

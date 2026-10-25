@@ -17,6 +17,10 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
    Demande le nom de l'équipe à l'humain si tu ne le connais pas.
 3. **Lance le harnais** (`./harness.sh all`) et montre les lignes `[FAIL]`. Laisse l'humain choisir la règle à
    traiter : une seule par PR.
+   **Régler de la dette est permis.** Une règle plus ancienne, sautée ou cassée en route, qui est encore `[FAIL]` à un
+   step ultérieur (par exemple une règle de la phase 1 pendant la phase 2) peut faire l'objet d'un baby step. Tu peux
+   le signaler à l'humain et la lui proposer parmi les choix ; c'est lui qui décide, et la PR ne traite que cette
+   règle, nommée dans la branche et le titre (`team-<équipe>/step-<N>/ha9-dette-identifiable`, `HA9 green: ...`).
 4. **Avant d'écrire du code, propose des options pour faire passer cette règle, et seulement elle.** Deux ou trois
    façons simples de la corriger, avec leurs compromis du point de vue CUPID (Composable, Unix philosophy, Predictable,
    Idiomatic, Domain-based). Ne parle pas des autres règles ni des tensions possibles entre elles : au premier

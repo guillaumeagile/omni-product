@@ -17,9 +17,11 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
    Demande le nom de l'équipe à l'humain si tu ne le connais pas.
 3. **Lance le harnais** (`./harness.sh all`) et montre les lignes `[FAIL]`. Laisse l'humain choisir la règle à
    traiter : une seule par PR.
-4. **Avant d'écrire du code, propose des options.** Deux ou trois façons de corriger la règle, avec leurs compromis du
-   point de vue CUPID (Composable, Unix philosophy, Predictable, Idiomatic, Domain-based). Puis **demande à l'humain de
-   choisir**. Ne choisis jamais à sa place, même si une option te semble évidente.
+4. **Avant d'écrire du code, propose des options pour faire passer cette règle, et seulement elle.** Deux ou trois
+   façons simples de la corriger, avec leurs compromis du point de vue CUPID (Composable, Unix philosophy, Predictable,
+   Idiomatic, Domain-based). Ne parle pas des autres règles ni des tensions possibles entre elles : au premier
+   refactoring, on fait juste passer la règle. Puis **demande à l'humain de choisir**. Ne choisis jamais à sa place,
+   même si une option te semble évidente.
 5. **Code l'option choisie**, dans `src/main/java/com/omniproduct/model` et `service` seulement. Vérifie que ça
    compile, que les tests passent (`gradle test`), puis relance `./harness.sh all` et montre le résultat tel quel.
 6. **Commite quand l'humain est d'accord**, avec un message qui nomme la règle (`HA9 green: ...`). Pousse la branche.
@@ -32,7 +34,9 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
 9. **Lis le verdict avec l'humain.** Relie chaque ligne du score à un changement de code (onglet **Files changed**, ou
    `gh pr diff`). La PR est comparée au départ de la phase : son diff contient tous les baby steps ; pour le dernier
    seul, `git diff <branche précédente>..HEAD`. Signale ce qui a fait passer une règle sans corriger le défaut qu'elle
-   vise.
+   vise. C'est maintenant, et pas avant, qu'on peut parler des autres règles, à partir de ce que montrent le harnais et
+   les points de la CI : une autre règle passée au vert en passant (tant mieux), une règle qui a rougi, une métrique qui
+   se dégrade.
 10. **Ne fusionne jamais.** La PR reste en draft, ouverte. Retour à l'étape 2 pour la règle suivante.
 
 ## Ce que tu ne fais pas
@@ -41,6 +45,9 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
   (tokens, complexité, CK, PMD). Fais de ton mieux pour un code clair et correct ; l'arbitre notera.
 - **Ne devance pas les règles.** Ne traite pas la règle suivante dans la même PR. Ne lis pas le code de `harness/`
   pour trouver comment passer une règle : lis la sortie du harnais et l'énoncé (`docs/CUPID-step-*.md`).
+- **Ne réfléchis pas au-delà de la règle en cours.** Tu sais qu'il y a d'autres règles et qu'elles peuvent tirer dans
+  des sens opposés : n'en parle pas avant le premier refactoring, et ne cherche pas une solution qui les satisfasse
+  toutes. Si un changement simple en fait passer plusieurs par chance, tant mieux, mais ce n'est pas un but.
 - **Ne tranche pas.** Quand le score baisse, qu'une métrique se dégrade ou qu'une règle semble arbitraire, explique ce
   que tu observes, propose des pistes, et demande à l'humain ce qu'il veut faire. Une métrique qui se dégrade peut être
   le prix normal d'un meilleur design : c'est à l'humain d'en juger.

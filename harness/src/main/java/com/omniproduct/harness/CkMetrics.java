@@ -15,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 // Mesures CK (Maurício Aniche, github.com/mauricioaniche/ck), outil éprouvé, sur model/ et service/ : couplage (CBO),
 // complexité par classe (WMC), cohésion (LCOM*), et des signaux de style fonctionnel (champs mutables, affectations,
-// boucles, lambdas, imbrication). Affichées par l'arbitre, sans points : c'est un essai (branche testCK).
+// boucles, lambdas, imbrication). L'arbitre les note (referee/CkTable), sauf le nombre de classes.
 // Limite connue : CK 0.7.0 lit mal Java 16+ (records absents, switch expressions mal comptées) ; fiable en phase 1.
 public record CkMetrics(int classes, int coupling, int maxCoupling, int maxWmc, double maxLcom,
                         int mutableFields, int assignments, int loops, int lambdas, int maxNesting) {

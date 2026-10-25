@@ -168,7 +168,7 @@ Une PR est acceptée quand :
 | gardez un petit diff (400 tokens modifiés au plus dans `src/main/java`) | +3 |
 | retirez des tokens de `model/` et `service/` | +1 par 100 tokens, jusqu'à +5 |
 | retirez de la complexité cyclomatique de `model/` et `service/` | +1 par 2 points, jusqu'à +10 |
-| améliorez les mesures CK de `model/` et `service/` (couplage, cohésion, mutabilité, style) | jusqu'à +10 en tout, détail ci-dessous |
+| améliorez les mesures CK de `model/` et `service/` (couplage, cohésion, mutabilité, style) | bonus sans plafond total, détail ci-dessous |
 | cassez une règle qui était verte | -5 par règle |
 
 Le code se mesure en **tokens**, pas en lignes : un agent lit et écrit des tokens. Ils sont comptés par

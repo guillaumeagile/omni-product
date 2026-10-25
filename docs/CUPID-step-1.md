@@ -61,7 +61,7 @@ your PR, then comments your PR with a scorecard: the rules that moved, your poin
 | keep the diff small (400 changed tokens or less in `src/main/java`) | +3 |
 | remove tokens from `model/` and `service/` | +1 per 100 tokens, up to +5 |
 | remove cyclomatic complexity from `model/` and `service/` | +1 per 2 points, up to +10 |
-| improve the CK metrics of `model/` and `service/` (coupling, cohesion, mutability, style) | up to +10 in all |
+| improve the CK metrics of `model/` and `service/` (coupling, cohesion, mutability, style) | bonus, no overall cap (each metric has its own cap) |
 | break a rule that was green | -5 each |
 
 The code is measured in **tokens**, not lines: tokens are what an agent reads and writes, and a long line costs

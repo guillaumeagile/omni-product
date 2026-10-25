@@ -24,6 +24,7 @@ concurrency:
 
 jobs:
   referee:
+    name: Score the baby step (harness on base and PR)
     runs-on: ubuntu-latest
     env:
       BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -50,15 +51,43 @@ jobs:
           gradle-version: "9.5.0"
 
       # L'arbitre et le harnais de la base font foi : le code de la PR ne juge pas la PR.
+      # Une base sans harnais (par exemple main) ne peut pas arbitrer : la PR doit viser la branche de la phase
+      # (java-bdxio-phase1, java-bdxio-phase2) ou la branche du baby step précédent.
       - name: Harness on the base
+        id: base
         run: |
           git worktree add "$RUNNER_TEMP/base" "$BASE_SHA"
+          if [ ! -x "$RUNNER_TEMP/base/harness.sh" ]; then
+            echo "playable=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           (cd "$RUNNER_TEMP/base" && ./harness.sh all --json "$RUNNER_TEMP/base.json") || true
+          if ls "$RUNNER_TEMP"/base/harness/build/install/harness/lib/*.jar > /dev/null 2>&1 \
+              && java -cp "$RUNNER_TEMP/base/harness/build/install/harness/lib/*" com.omniproduct.harness.Tokens --diff /dev/null > /dev/null 2>&1; then
+            echo "playable=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "playable=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Base without referee
+        if: steps.base.outputs.playable != 'true'
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          {
+            echo "## Harness game: off game"
+            echo
+            echo "The base branch \`$BASE_REF\` has no harness referee, so this PR cannot be scored."
+            echo "Target the branch of your phase (\`java-bdxio-phase1\` or \`java-bdxio-phase2\`) or the branch of your previous baby step,"
+            echo "then push again or reopen the PR."
+          } > "$RUNNER_TEMP/scorecard.md"
 
       - name: Harness on the pull request
+        if: steps.base.outputs.playable == 'true'
         run: ./harness.sh all --json "$RUNNER_TEMP/head.json" || true
 
       - name: Changed files and tokens
+        if: steps.base.outputs.playable == 'true'
         run: |
           git diff --name-only "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/changed-files.txt"
           git diff -U0 "$BASE_SHA...$HEAD_SHA" -- src/main/java > "$RUNNER_TEMP/changes.diff"
@@ -67,6 +96,7 @@ jobs:
 
       - name: Referee
         id: referee
+        if: steps.base.outputs.playable == 'true'
         run: |
           set +e
           java -cp "$RUNNER_TEMP/base/harness/build/install/harness/lib/*" com.omniproduct.harness.referee.RefereeMain \

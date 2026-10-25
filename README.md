@@ -113,6 +113,8 @@ Score: +17 · Level: Unix Apprentice (1/8) · Badges: 🍼 Baby step, 🧼 No re
 
 L'arbitre écrit aussi le score du round en tête de la **description** de la PR (verdict, points, niveau, badges),
 dans une section qu'il réécrit à chaque passage : ne la modifiez pas, le reste de la description vous appartient.
+À chaque push, il publie un nouveau commentaire sous vos commits et masque les précédents (« outdated »), toujours
+consultables.
 
 Le check est vert si la PR est acceptée, rouge sinon. Dans ce cas, poussez un correctif sur la même branche : l'arbitre
 repasse et met son commentaire à jour. Le détail est aussi dans l'onglet **Checks** de la PR.

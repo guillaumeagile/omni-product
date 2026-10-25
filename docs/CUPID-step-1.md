@@ -50,7 +50,7 @@ your PR, then comments your PR with a scorecard: the rules that moved, your poin
 - **Target**: the rule in the PR title (`HA9 green: ...`), or in the branch name (`ha9`, `ha4-3`). Without a target,
   the PR is off game.
 - **Accepted** when the target turns green, no other rule regresses, the project compiles and `harness/` is
-  untouched. Otherwise the check fails: push a fix, the scorecard updates.
+  untouched. Otherwise the check fails: push a fix, a new scorecard is posted (the previous ones are hidden as outdated).
 
 | You... | Points |
 |---|---|

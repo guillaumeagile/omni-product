@@ -68,7 +68,8 @@ du baby step, et rend un verdict et un score.
 | Une seule règle au vert dans la PR (vrai baby step) | +5 |
 | Petit diff (400 tokens modifiés au plus dans `src/main/java`) | +3 |
 | Tokens retirés de `model/` et `service/` | +1 par 100 tokens, plafonné à +5 |
-| Complexité cyclomatique retirée (PMD) | +1 par 5 points, plafonné à +5 ; une hausse est affichée, pas pénalisée |
+| Complexité cyclomatique retirée (PMD) | +1 par 2 points, plafonné à +10 ; une hausse est affichée, pas pénalisée |
+| Mesures CK améliorées (CBO, WMC, LCOM*, champs mutables, affectations, boucles, lambdas, imbrication ; pas le nombre de classes) | plafond par mesure, pas de plafond total (bonus) ; une dégradation est affichée, pas pénalisée |
 | Régression (PASS -> FAIL) | -5 par règle |
 | `harness/` modifié | PR rejetée, 0 point |
 
@@ -85,7 +86,7 @@ Tests : chaque contrôle et chaque ligne du barème sur des paires de rapports J
 1. JDK 21 + Gradle (le `gradle-wrapper.jar` n'est pas versionné : `gradle/actions/setup-gradle` avec une version fixe) ;
 2. harnais sur la **base** de la PR, puis sur sa **tête**, chacun avec `--json` ;
 3. `harness-referee` compare et produit le commentaire Markdown (tableau de score, niveau, badges) ;
-4. commentaire posté ou mis à jour sur la PR (`gh pr comment --edit-last`), statut du check selon les contrôles ;
+4. un nouveau commentaire à chaque round (les précédents de l'arbitre sont masqués « outdated »), statut du check selon les contrôles ;
 5. rapports JSON publiés comme artefacts du job (traçabilité).
 
 Risque à lever en premier : les bindings tree-sitter (code natif) sur le runner Linux x64.

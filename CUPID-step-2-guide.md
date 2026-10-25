@@ -61,6 +61,8 @@ coûte le moins de réécriture : une règle en amont rend souvent la suivante p
    VAT. Aucun record ne doit implémenter `Identifiable`, et le package `valueobject` ne contient que des records.
 3. **HA4.1 : pas d'héritage.** Aucune classe ni aucun record ne doit étendre une autre classe. Les interfaces et
    `implements` sont permis. Composez au lieu d'étendre.
+   Le code de départ contient une hiérarchie volontaire : `Perishable` et `NonExpiring` étendent `Product`. Supprimez
+   ces deux classes et remplacez-les par une ADT (`sealed interface` + records), comme décrit à l'étape 6 (HA4.3).
 4. **HA4.2 : pas d'exception dans un constructeur.** Retirez les `throw`, `assert` et gardes (`requireNonNull`,
    `checkArgument`...) des constructeurs. La validation passe par une fabrique (étape 5).
 5. **HA4.4 : fabrique à résultat scellé.** Un value object a une méthode statique `create`, `build`, `of`, `from` ou

@@ -33,10 +33,18 @@ class ProductTest {
     @Test
     void aNonExpiringProductKeepsItsBestBeforeDate() {
         LocalDate bestBefore = LocalDate.of(2027, 6, 1);
-        NonExpiring rice = new NonExpiring(new ProductId(UUID_1), "Rice", PRICE, bestBefore);
+        Product rice = new Product(new ProductId(UUID_1), "Rice", PRICE, new NonExpiring(bestBefore));
 
         assertThat(rice.getName()).isEqualTo("Rice");
         assertThat(rice.getPrice()).isEqualTo(PRICE);
-        assertThat(rice.getBestBeforeDate()).isEqualTo(bestBefore);
+        assertThat(rice.getShelfLife()).isEqualTo(new NonExpiring(bestBefore));
+    }
+
+    @Test
+    void aPerishableProductKeepsItsDates() {
+        Perishable yoghurt = new Perishable(LocalDate.of(2026, 11, 10), LocalDate.of(2026, 11, 15));
+        Product product = new Product(new ProductId(UUID_1), "Yoghurt", PRICE, yoghurt);
+
+        assertThat(product.getShelfLife()).isEqualTo(yoghurt);
     }
 }

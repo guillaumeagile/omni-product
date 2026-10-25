@@ -7,11 +7,13 @@ public class Product implements Identifiable {
     private final ProductId id;
     private final String name;
     private final Price price;
+    private final ShelfLife shelfLife;
 
-    public Product(ProductId id, String name, Price price) {
+    public Product(ProductId id, String name, Price price, ShelfLife shelfLife) {
         this.id = id;
         this.name = name;
         this.price = price;
+        this.shelfLife = shelfLife;
     }
 
     public ProductId getId() { return id; }
@@ -20,9 +22,11 @@ public class Product implements Identifiable {
 
     public Price getPrice() { return price; }
 
-    public Product withName(String name) { return new Product(id, name, price); }
+    public ShelfLife getShelfLife() { return shelfLife; }
 
-    public Product withPrice(Price price) { return new Product(id, name, price); }
+    public Product withName(String name) { return new Product(id, name, price, shelfLife); }
+
+    public Product withPrice(Price price) { return new Product(id, name, price, shelfLife); }
 
     public record Warehouse(Location location) {}
 

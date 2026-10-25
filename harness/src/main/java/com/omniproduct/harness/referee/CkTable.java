@@ -11,12 +11,11 @@ import java.util.function.ToDoubleFunction;
 import java.util.stream.Stream;
 
 // Les mesures CK dans le score et dans le commentaire de l'arbitre. Chaque mesure rapporte des points quand elle
-// s'améliore (plafond par mesure, et plafond total CK_CAP), jamais de pénalité quand elle se dégrade : c'est affiché.
+// s'améliore (plafond par mesure, pas de plafond total : c'est du bonus), jamais de pénalité quand elle se dégrade :
+// c'est affiché.
 // Le nombre de classes est affiché sans points : découper ne vaut rien en soi, c'est le couplage et la cohésion qui
 // disent si le découpage est bon. Vide si l'un des deux rapports n'a pas de mesures CK.
 final class CkTable {
-
-    static final int CK_CAP = 10;
 
     // step : amélioration qui vaut 1 point ; cap : points maximum ; lowerIsBetter : sens de l'amélioration.
     // step = 0 : affiché sans points.
@@ -48,7 +47,7 @@ final class CkTable {
 
     static int points(Optional<HarnessReport> base, HarnessReport head) {
         return pair(base, head)
-                .map(pair -> Math.min(CK_CAP, ROWS.stream().mapToInt(row -> row.points(pair.before(), pair.after())).sum()))
+                .map(pair -> ROWS.stream().mapToInt(row -> row.points(pair.before(), pair.after())).sum())
                 .orElse(0);
     }
 
@@ -71,7 +70,7 @@ final class CkTable {
     private static List<String> table(CkMetrics before, CkMetrics after, int total, boolean counted) {
         return Stream.of(
                         Stream.of("<details><summary>📐 CK metrics of model/ and service/: " + signed(total)
-                                        + (counted ? " (up to +" + CK_CAP + ")" : ", not counted: the PR is not accepted") + "</summary>", "",
+                                        + (counted ? "" : ", not counted: the PR is not accepted") + "</summary>", "",
                                 "| Metric | Base | This PR | Δ | Points | Rule |", "|---|---|---|---|---|---|"),
                         ROWS.stream().map(row -> row(row, before, after)),
                         Stream.of("", "Measured by [CK](https://github.com/mauricioaniche/ck) 0.7.0. "

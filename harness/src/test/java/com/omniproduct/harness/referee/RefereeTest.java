@@ -192,7 +192,7 @@ class RefereeTest {
     }
 
     @Test
-    void ckPointsAreCappedAndAWorseMetricCostsNothing() {
+    void ckPointsAreCappedPerMetricOnlyAndAWorseMetricCostsNothing() {
         Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, ck(1, 500, 50, 100, 1.0, 100, 500, 50, 0, 9)),
                 rule("HA9", "FAIL", 2));
         Verdict best = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(99, 0, 0, 0, 0, 0, 0, 0, 50, 0)),
@@ -200,7 +200,8 @@ class RefereeTest {
         Verdict worse = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(1, 900, 90, 200, 1.0, 200, 900, 90, 0, 12)),
                 rule("HA9", "PASS", 0)), pr("HA9 green"));
 
-        assertThat(best.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + CkTable.CK_CAP);
+        // Pas de plafond total : la somme des plafonds par mesure (3+2+3+2+3+2+2+1+2).
+        assertThat(best.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + 20);
         assertThat(worse.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS);
     }
 

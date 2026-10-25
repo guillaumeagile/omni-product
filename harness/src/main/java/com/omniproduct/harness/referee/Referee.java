@@ -68,6 +68,12 @@ public final class Referee {
     public record Verdict(Outcome outcome, Optional<String> target, List<RuleChange> changes, List<String> problems,
                           List<String> notes, int score, String level, List<String> badges, List<String> measures,
                           List<Points> breakdown) {
+
+        // Le contexte du round (step précédent, chemin depuis la phase) ajouté en tête des notes et des mesures.
+        Verdict withContext(List<String> moreNotes, List<String> moreMeasures) {
+            return new Verdict(outcome, target, changes, problems, Stream.concat(moreNotes.stream(), notes.stream()).toList(),
+                    score, level, badges, Stream.concat(moreMeasures.stream(), measures.stream()).toList(), breakdown);
+        }
     }
 
     public record Points(String reason, int points) {
@@ -139,7 +145,7 @@ public final class Referee {
                                         tokensRemoved.map(removed -> Math.min(TOKEN_CAP, Math.max(0, removed) / TOKENS_PER_POINT)).orElse(0L).intValue()),
                                 new Points("Cyclomatic complexity removed (+1 per " + COMPLEXITY_PER_POINT + ", up to +" + COMPLEXITY_CAP + ")",
                                         branchesRemoved.map(removed -> Math.min(COMPLEXITY_CAP, Math.max(0, removed) / COMPLEXITY_PER_POINT)).orElse(0L).intValue()),
-                                new Points("📐 CK metrics improved (up to +" + CkTable.CK_CAP + ")", accepted ? CkTable.points(base, head.get()) : 0)))
+                                new Points("📐 CK metrics improved", accepted ? CkTable.points(base, head.get()) : 0)))
                 .flatMap(lines -> lines)
                 .filter(line -> line.points() != 0)
                 .toList();

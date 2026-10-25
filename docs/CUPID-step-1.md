@@ -31,26 +31,33 @@ Each baby step goes in its own pull request, so you can see how much code each r
 
 - **One PR = one rule turned green.** Run `./harness.sh`, pick one `[FAIL]` line, fix only that and open a PR. If
   you are tempted to fix two rules at once, split the work into two PRs.
-- **Stack the PRs.** Branch each step from the previous one (`step-1/ha9-identifiable` from `step-1/ha8-no-jpa`), and
-  target the previous branch, so that each diff shows one step and nothing else.
+- **Never merge.** Nobody ever merges into `java-bdxio-phase1` or `java-bdxio-phase2`: open every PR as a
+  **draft** (`gh pr create --draft`) and leave it open.
+- **Chain the branches, always target the phase branch.** Branch the first step from the phase branch, and each next
+  step from your previous step (`step-1/ha9-identifiable` from `step-1/ha8-no-jpa`). The PR always targets the phase
+  branch (`java-bdxio-phase1`, or `java-bdxio-phase2` for a phase 2 rule), never `main` nor another step: each PR is
+  scored against the start of the phase, so the score shows the whole way from the legacy. To see one step only,
+  pick its commits in Files changed.
 - **Name the rule in the title**: `HA9 green: Product and Supplier implement Identifiable`.
 - **Paste the harness output in the description**, before and after: the rule that turned green, and any rule
   that turned red because of it (that happens, say so rather than hiding it).
-- **Read the diff before merging.** Small or large? Did it touch services too? Was the class split, or only
+- **Read the diff of the step.** Small or large? Did it touch services too? Was the class split, or only
   renamed? Answering these questions is how you learn the refactoring, not just the green light.
 - **Never touch `harness/`** in a PR.
 
 ### The game
 
-Every pull request is refereed by a GitHub Action (`harness-game`). It runs the harness on the base branch and on
-your PR, then comments your PR with a scorecard: the rules that moved, your points, your level and your badges.
+Every pull request is refereed by a GitHub Action (`harness-game`). It runs the harness on the phase branch, on your
+previous step (found automatically: the branch of your team your branch started from) and on your PR, then comments
+your PR with a scorecard: the rules that moved since your previous step and the points of this round, your level, your
+badges, and the way travelled since the start of the phase (no points there). The leaderboard adds up your rounds.
 
 - **Branch** `team-<name>/step-1/ha<N>-<what>`, for example `team-red/step-1/ha9-identifiable`. The first segment is
   your team on the leaderboard.
 - **Target**: the rule in the PR title (`HA9 green: ...`), or in the branch name (`ha9`, `ha4-3`). Without a target,
   the PR is off game.
 - **Accepted** when the target turns green, no other rule regresses, the project compiles and `harness/` is
-  untouched. Otherwise the check fails: push a fix, the scorecard updates.
+  untouched. Otherwise the check fails: push a fix, a new scorecard is posted (the previous ones are hidden as outdated).
 
 | You... | Points |
 |---|---|
@@ -61,7 +68,7 @@ your PR, then comments your PR with a scorecard: the rules that moved, your poin
 | keep the diff small (400 changed tokens or less in `src/main/java`) | +3 |
 | remove tokens from `model/` and `service/` | +1 per 100 tokens, up to +5 |
 | remove cyclomatic complexity from `model/` and `service/` | +1 per 2 points, up to +10 |
-| improve the CK metrics of `model/` and `service/` (coupling, cohesion, mutability, style) | up to +10 in all |
+| improve the CK metrics of `model/` and `service/` (coupling, cohesion, mutability, style) | bonus, no overall cap (each metric has its own cap) |
 | break a rule that was green | -5 each |
 
 The code is measured in **tokens**, not lines: tokens are what an agent reads and writes, and a long line costs
@@ -74,9 +81,8 @@ in the scorecard but never penalized: splitting a class sometimes moves a branch
 assignments, loops, lambdas, max nesting) are detailed in a collapsible block of the scorecard, with the points of
 each one. An improvement earns points, a worse metric costs nothing. The number of classes is shown but not scored.
 
-Badges: 🍼 Baby step, 🧼 No regression, 🤏 Small diff. After each merge, the
-pinned issue **CUPID workshop leaderboard** ranks the teams. Run `./harness.sh` locally before pushing: the referee
-uses the same harness.
+Badges: 🍼 Baby step, 🧼 No regression, 🤏 Small diff. Run `./harness.sh` locally before pushing: the referee uses
+the same harness.
 
 ## Assessment
 

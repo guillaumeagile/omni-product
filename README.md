@@ -168,7 +168,7 @@ Une PR est acceptée quand :
 | gardez un petit diff (400 tokens modifiés au plus dans `src/main/java`) | +3 |
 | retirez des tokens de `model/` et `service/` | +1 par 100 tokens, jusqu'à +5 |
 | retirez de la complexité cyclomatique de `model/` et `service/` | +1 par 2 points, jusqu'à +10 |
-| améliorez les mesures CK de `model/` et `service/` (couplage, cohésion, mutabilité, style) | jusqu'à +10 en tout, détail ci-dessous |
+| améliorez les mesures CK de `model/` et `service/` (couplage, cohésion, mutabilité, style) | bonus sans plafond total, détail ci-dessous |
 | cassez une règle qui était verte | -5 par règle |
 
 Le code se mesure en **tokens**, pas en lignes : un agent lit et écrit des tokens. Ils sont comptés par
@@ -194,7 +194,7 @@ pourquoi dans **Files changed**. Le nombre de classes est affiché sans points :
 
 CK ne voit pas les records (limite de CK 0.7.0). En phase 2, les points viennent donc de mesures **PMD**
 équivalentes, qui lisent Java 21 (records, `sealed`, `switch` à motifs) : fan-out (couplage), WMC max, TCC min
-(cohésion), champs mutables, affectations, boucles, lambdas, complexité cognitive totale et max ; jusqu'à +10. CK
+(cohésion), champs mutables, affectations, boucles, lambdas, complexité cognitive totale et max ; plafond par mesure, sans plafond total. CK
 reste affiché pour comparaison, sans points.
 
 ### Niveaux et badges

@@ -11,9 +11,10 @@ import java.util.function.ToDoubleFunction;
 import java.util.stream.Stream;
 
 // Un bloc de mesures du commentaire de l'arbitre (CK, PMD) : base, PR, écart et points de chaque mesure. Une mesure qui
-// s'améliore rapporte des points (plafond par mesure, et plafond total), une mesure qui se dégrade ne coûte rien.
+// s'améliore rapporte des points (plafond par mesure, pas de plafond total : c'est du bonus), une mesure qui se dégrade
+// ne coûte rien.
 // Un bloc non noté (scored = false) est affiché pour comparaison. Vide si l'un des deux rapports n'a pas ces mesures.
-record MetricTable<M>(String name, String source, Function<Metrics, M> extract, List<Row<M>> rows, int cap, boolean scored) {
+record MetricTable<M>(String name, String source, Function<Metrics, M> extract, List<Row<M>> rows, boolean scored) {
 
     // step : amélioration qui vaut 1 point ; cap : points maximum ; lowerIsBetter : sens de l'amélioration.
     // step = 0 : affiché sans points.
@@ -38,7 +39,7 @@ record MetricTable<M>(String name, String source, Function<Metrics, M> extract, 
 
     private int raw(Optional<HarnessReport> base, HarnessReport head) {
         return pair(base, head)
-                .map(pair -> Math.min(cap, rows.stream().mapToInt(row -> row.points(pair.before(), pair.after())).sum()))
+                .map(pair -> rows.stream().mapToInt(row -> row.points(pair.before(), pair.after())).sum())
                 .orElse(0);
     }
 
@@ -57,7 +58,7 @@ record MetricTable<M>(String name, String source, Function<Metrics, M> extract, 
 
     private List<String> table(Pair<M> pair, int total, boolean counted) {
         String summary = !scored ? "shown for comparison, no points"
-                : signed(total) + (counted ? " (up to +" + cap + ")" : ", not counted: the PR is not accepted");
+                : signed(total) + (counted ? "" : ", not counted: the PR is not accepted");
         return Stream.of(
                         Stream.of("<details><summary>📐 " + name + " of model/ and service/: " + summary + "</summary>", "",
                                 "| Metric | Base | This PR | Δ |" + (scored ? " Points | Rule |" : ""),

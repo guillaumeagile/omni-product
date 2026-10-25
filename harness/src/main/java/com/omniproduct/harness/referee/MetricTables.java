@@ -12,8 +12,6 @@ import java.util.List;
 // mesures (points gagnés sans rien améliorer). Le nombre de types est affiché sans points : découper n'est pas un but.
 final class MetricTables {
 
-    static final int CAP = 10;
-
     static final MetricTable<PmdQuality> PMD = new MetricTable<>("PMD quality metrics",
             "[PMD](https://pmd.github.io/) 7.7.0 metrics (WMC, TCC, FAN_OUT, cognitive complexity)", Metrics::quality, List.of(
             new Row<>("Types (classes, records, enums)", "not scored: splitting is not a goal in itself", PmdQuality::types, 0, 0, true),
@@ -27,7 +25,7 @@ final class MetricTables {
             new Row<>("Lambdas", "+1 per 2 added, up to +1", PmdQuality::lambdas, 2, 1, false),
             new Row<>("Cognitive complexity total", "+1 per 3 removed, up to +2", PmdQuality::cognitive, 3, 2, true),
             new Row<>("Cognitive complexity max", "+1 per 2 removed, up to +2", PmdQuality::maxCognitive, 2, 2, true)),
-            CAP, true);
+            true);
 
     static final MetricTable<CkMetrics> CK = new MetricTable<>("CK metrics",
             "[CK](https://github.com/mauricioaniche/ck) 0.7.0, which does not see records", Metrics::ck, List.of(
@@ -41,7 +39,7 @@ final class MetricTables {
             new Row<>("Loops", "", CkMetrics::loops, 0, 0, true),
             new Row<>("Lambdas", "", CkMetrics::lambdas, 0, 0, true),
             new Row<>("Max nesting", "", CkMetrics::maxNesting, 0, 0, true)),
-            0, false);
+            false);
 
     static final List<MetricTable<?>> TABLES = List.of(PMD, CK);
 

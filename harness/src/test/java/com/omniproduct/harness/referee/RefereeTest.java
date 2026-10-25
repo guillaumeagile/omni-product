@@ -195,8 +195,8 @@ class RefereeTest {
 
         // Fan-out max -4 : +2 ; WMC max -15 : +3 (plafond) ; TCC +0.25 : +2 (plafond) ; champs mutables -7 : +3 (plafond).
         // +6 types et +11 de fan-out total : 0.
-        assertThat(verdict.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + MetricTables.CAP);
-        assertThat(Scorecard.markdown(verdict)).contains("PMD quality metrics of model/ and service/: +10 (up to +10)",
+        assertThat(verdict.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + 10);
+        assertThat(Scorecard.markdown(verdict)).contains("PMD quality metrics of model/ and service/: +10</summary>",
                 "| Types (classes, records, enums) | 10 | 16 | +6 |  | not scored",
                 "| WMC max (class complexity) | 28 | 13 | -15 | +3 |",
                 "| TCC min (cohesion, 0..1) | 0 | 0.25 | +0.25 | +2 |");
@@ -214,7 +214,7 @@ class RefereeTest {
     }
 
     @Test
-    void pmdPointsAreCappedAndAWorseMetricCostsNothing() {
+    void pmdPointsAreCappedPerMetricOnlyAndAWorseMetricCostsNothing() {
         Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, null, pmd(1, 500, 50, 100, 0, 100, 500, 50, 0, 90, 30)),
                 rule("HA9", "FAIL", 2));
         Verdict best = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, null, pmd(99, 0, 0, 0, 1, 0, 0, 0, 50, 0, 0)),
@@ -222,7 +222,8 @@ class RefereeTest {
         Verdict worse = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, null, pmd(1, 900, 90, 200, 0, 200, 900, 90, 0, 99, 40)),
                 rule("HA9", "PASS", 0)), pr("HA9 green"));
 
-        assertThat(best.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + MetricTables.CAP);
+        // Pas de plafond total : la somme des plafonds par mesure (3+2+3+2+3+2+2+1+2+2).
+        assertThat(best.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + 22);
         assertThat(worse.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS);
     }
 
@@ -235,7 +236,7 @@ class RefereeTest {
 
         assertThat(verdict.outcome()).isEqualTo(Outcome.REJECTED);
         assertThat(verdict.score()).isEqualTo(1);
-        assertThat(Scorecard.markdown(verdict)).contains("PMD quality metrics of model/ and service/: +10, not counted: the PR is not accepted");
+        assertThat(Scorecard.markdown(verdict)).contains("PMD quality metrics of model/ and service/: +15, not counted: the PR is not accepted");
     }
 
     @Test

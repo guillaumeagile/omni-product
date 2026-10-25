@@ -69,7 +69,7 @@ du baby step, et rend un verdict et un score.
 | Petit diff (400 tokens modifiés au plus dans `src/main/java`) | +3 |
 | Tokens retirés de `model/` et `service/` | +1 par 100 tokens, plafonné à +5 |
 | Complexité cyclomatique retirée (PMD) | +1 par 2 points, plafonné à +10 ; une hausse est affichée, pas pénalisée |
-| Mesures CK améliorées (CBO, WMC, LCOM*, champs mutables, affectations, boucles, lambdas, imbrication ; pas le nombre de classes) | plafond par mesure, +10 au total ; une dégradation est affichée, pas pénalisée |
+| Mesures CK améliorées (CBO, WMC, LCOM*, champs mutables, affectations, boucles, lambdas, imbrication ; pas le nombre de classes) | plafond par mesure, pas de plafond total (bonus) ; une dégradation est affichée, pas pénalisée |
 | Régression (PASS -> FAIL) | -5 par règle |
 | `harness/` modifié | PR rejetée, 0 point |
 

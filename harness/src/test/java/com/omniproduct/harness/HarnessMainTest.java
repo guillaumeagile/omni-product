@@ -26,20 +26,20 @@ class HarnessMainTest {
         }
     }
 
-    // Dry run : le harnais DOIT trouver de vrais problèmes dans le code legacy de l'atelier.
+    // Dry run : le harnais DOIT trouver de vrais problèmes dans le code de départ de l'étape 2.
     // S'il est vert ici, c'est lui qui est cassé, pas le code.
     @Test
     void failsOnTheLegacyWorkshopCode() {
         Run result = run("--step", "1", "--classes", "../build/classes/java/main", "../src/main/java");
 
         assertThat(result.exitCode()).isEqualTo(1);
-        // Chaque règle de l'étape 1 qui doit trouver un problème dans le legacy le trouve.
-        assertThat(result.out()).contains("[FAIL] HA5", "[FAIL] HA6", "[FAIL] HA7", "[FAIL] HA8", "[FAIL] HA9", "[FAIL] HA10");
-        assertThat(result.out()).contains("'Product' has");
-        assertThat(result.out()).contains("Supplier.java:", "which looks like a service");
+        // Le code de départ de l'étape 2 a fait une partie de l'étape 1 (HA5, HA6, HA8, HA9, HA10 verts) ; ce qui reste
+        // rouge est trouvé : la hiérarchie Perishable/NonExpiring référence l'entité Product (HA7), les montants sont
+        // des Double bruts (HA11), les identifiants des String (HA12, et l'avertissement HA12.1).
+        assertThat(result.out()).contains("[PASS] HA5", "[FAIL] HA7", "[FAIL] HA11", "[FAIL] HA12 ", "[WARN] HA12.1");
+        assertThat(result.out()).contains("Perishable.java:", "Product.java:", "is a raw Double");
         // HA4 (héritage) est une règle de l'étape 2 : elle n'apparaît pas dans la sortie de l'étape 1. HA2 non plus.
         assertThat(result.out()).doesNotContain("HA4", "HA2");
-        assertThat(result.out()).contains("Product.java:");
         assertThat(result.out()).contains("HARNESS RESULT: FAIL");
     }
 
@@ -56,10 +56,11 @@ class HarnessMainTest {
         assertThat(report.result()).isEqualTo("FAIL");
         assertThat(report.rules()).extracting(HarnessReport.RuleResult::id)
                 .isEqualTo(Steps.rules("2").stream().map(HarnessRule::id).toList());
-        assertThat(report.rule("HA5")).hasValueSatisfying(rule -> {
+        // HA2 (immuabilité) est rouge sur le code de départ de l'étape 2 : Product et Supplier ont des champs mutables.
+        assertThat(report.rule("HA2")).hasValueSatisfying(rule -> {
             assertThat(rule.status()).isEqualTo("FAIL");
             assertThat(rule.violations()).isPositive();
-            assertThat(result.out()).contains("[FAIL] HA5");
+            assertThat(result.out()).contains("[FAIL] HA2");
         });
         // Exercice volontaire (Perishable.isPastSellBy lit LocalDate.now()) : HA4.6 est rouge sur le legacy de l'étape 2.
         assertThat(report.rule("HA4.6")).hasValueSatisfying(rule -> assertThat(rule.status()).isEqualTo("FAIL"));

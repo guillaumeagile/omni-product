@@ -7,7 +7,8 @@ public class NonExpiring extends Product {
 
     private final LocalDate bestBeforeDate;
 
-    public NonExpiring(LocalDate bestBeforeDate) {
+    public NonExpiring(String id, String name, Price price, LocalDate bestBeforeDate) {
+        super(id, name, price);
         this.bestBeforeDate = bestBeforeDate;
     }
 

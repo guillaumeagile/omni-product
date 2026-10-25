@@ -32,8 +32,9 @@ in `CUPID-step-1.md`). The diff of each PR is the lesson: you see what each rule
 
 ### HA2 - immutable data structures
 
-Model data with `record`s and never expose a setter. Fields are `final`, and no mutable collection (`ArrayList`,
-`HashMap`, `HashSet`...) is used as a field or in a public type. Use `List.of`, `Map.of` or the immutable collections
+Model values with `record`s. An entity stays a class (it implements `Identifiable`, HA9), and every one of its fields
+is `final`. Never expose a setter. No mutable `java.util` collection (`List`, `Map`, `ArrayList`, `HashMap`...) and no
+array is used as a field or in a type. Use `List.of`, `Map.of` or the immutable collections
 of vavr (phase 3) instead.
 
 ### HA3 - Records are Value Objects, never entities

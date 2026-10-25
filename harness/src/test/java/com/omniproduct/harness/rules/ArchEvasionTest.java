@@ -33,6 +33,9 @@ class ArchEvasionTest {
     void ha9SeesARecordThatCarriesAnIdentity() {
         List<Violation> violations = new EntityMustImplementIdentifiableRule("..model..").check(Fixtures.load("ha9.evasion"));
         assertThat(violations).anyMatch(v -> v.message().contains("Line"));
+        // HA3 interdit à un record d'implémenter Identifiable : le message montre la seule sortie, une classe.
+        assertThat(violations).filteredOn(v -> v.message().contains("Line"))
+                .allMatch(v -> v.message().contains("an entity is a class that implements <Identifiable>"));
     }
 
     @Test

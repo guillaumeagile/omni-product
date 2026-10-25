@@ -7,7 +7,7 @@ sur le Java en phase 3.
 | Id | Règle | Intention | Équivalent Java | Moteur | Sévérité |
 |---|---|---|---|---|---|
 | HA1 | Idiomes | Style idiomatique imposé au build | Error Prone ou Checkstyle, warnings promus en erreurs (voir décision ci-dessous) | build Gradle | Error |
-| HA2 | Immutable data structures | Records uniquement, pas de setter, pas de collection mutable | `record` ou classe à champs `final` sans `set*` ; interdire `ArrayList`, `HashMap`, `HashSet`… en champ et type public ; collections vavr/`List.of` acceptées | AST (classes, setters, types déclarés, imports) | Error |
+| HA2 | Immutable data structures | Records, ou classes dont tous les champs sont `final` ; pas de setter, pas de collection mutable, pas de tableau | Champ non `final` dans une classe (statiques et classes imbriquées compris, chaque déclarateur de `String a, b;`) ; setter public `set*` ; collection de `java.util` (`List`, `Map`, `ArrayList`…, résolue par les imports) ; tableau (`String[]`), même dans un champ `final` ou un composant de record ; collections vavr/`List.of` acceptées | AST (champs, setters, types déclarés, imports) | Error |
 | HA3 | Records are value objects | Un record n'est jamais une entité ; le package de value objects ne contient que des records ; `Price` existe | Record qui implémente `Identifiable` ; `class` dans un package `valueobject` ; record `Price` absent | AST | Error |
 | HA4.1 | Composable : pas d'héritage | Composition plutôt qu'héritage de classe | Toute classe ou record avec `extends` autre que `Object`/`Exception` est signalée ; `implements` autorisé | BYTECODE (`superclass`) avec ligne via AST | Error |
 | HA4.2 | Pas d'exception dans un constructeur | Une entrée invalide est un résultat, pas une exception levée par `new` | `throw`, `assert`, appel de garde (`requireNonNull`, `checkArgument`…) dans un constructeur ou un constructeur compact | AST | Error |
@@ -68,12 +68,12 @@ dans `Steps.java`.
 | HA6 single concern | oui | 1 | `ubiquitous-language-map.json` adapté au vocabulaire Java |
 | HA7 fan-out | oui | 1 | entité = implémente `Identifiable` ou déclare un champ `id` |
 | HA8 pas de persistance | oui | 1 | dépendance vers une techno de stockage (jakarta/javax.persistence, Hibernate, Spring Data/JDBC, java.sql, jOOQ, MyBatis, MongoDB) + champs fantômes `*Json`/`*Csv`/`*Xml`/`*Blob`/`*Row` + méthodes `sync*`/`hydrate*`/`persist*`/`serialize*` |
-| HA9 `Identifiable` | oui | 1 | records, interfaces et enums exemptés |
+| HA9 `Identifiable` | oui | 1 | records sans identifiant, interfaces et enums exemptés ; un record qui porte un identifiant est signalé, le message dit d'en faire une classe (HA3 lui interdit `Identifiable`) |
 | HA10 pas de service au constructeur | oui | 1 | échoue sur `Supplier` (constructeur ajouté à l'exercice) |
 | HA11 concept non primitif | oui | 1 | étroite : nom du vocabulaire (contexte fort) + type brut ; identifiants exclus |
 | HA12 identifiants riches | oui | 1 | UUID/Ulid ou record qui en enveloppe un ; UUID v4 détecté |
 | HA12.1 identifiant nu | oui | 1 | avertissement seulement |
-| HA2 données immuables | oui | 2 | AST, sur `model` |
+| HA2 données immuables | oui | 2 | AST, sur `model` ; une entité reste une classe (HA9) : elle passe si ses champs sont `final` |
 | HA3 value objects | oui | 2 | record non entité, package `valueobject` ne contient que des records, `Price` exigé |
 | HA4.1 pas d'héritage | oui | 2 | BYTECODE, sur `model` et `service` |
 | HA4.2 pas d'exception en constructeur | oui | 2 | AST |
@@ -140,6 +140,8 @@ Restent des faux négatifs, assumés (par conception ou faute de moyen sûr de l
   un constructeur (`new Product("ABC")`) n'est pas un paramètre nommé ; un identifiant nommé `key`, `code` ou
   `reference` n'est pas reconnu.
 - HA5 : un accesseur qui prend un paramètre n'est pas une propriété ; `protected` n'est pas compté.
+- HA2 : un champ `final` d'un type mutable autre qu'une collection ou un tableau (`Date`, `StringBuilder`, une classe
+  du code) n'est pas vu ; les paramètres varargs (`String...`) ne sont pas signalés.
 - HA3 : une classe immuable écrite à la main (sans `record`) n'est pas un value object pour la règle ; `Price` est
   un nom imposé par l'exercice, pas une heuristique.
 - HA4.3 : une ADT sans `permits` n'est pas reconnue ; le type de la propriété doit être déclaré dans le code.

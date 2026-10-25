@@ -4,6 +4,7 @@ import com.omniproduct.harness.HarnessRule;
 import com.omniproduct.harness.Node;
 import com.omniproduct.harness.SourceFile;
 import com.omniproduct.harness.SourceSet;
+import com.omniproduct.harness.SourceTypes;
 import com.omniproduct.harness.Violation;
 
 import java.util.List;
@@ -13,9 +14,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// HA2 (moteur AST) - structures de données immuables : des records, aucun setter public, aucune
-// collection mutable de java.util. Les collections se résolvent d'après les imports du fichier :
-// `List` importé de java.util est mutable, `List` importé de io.vavr.collection ne l'est pas.
+// HA2 (moteur AST) - structures de données immuables : des records, ou des classes dont tous les champs sont
+// `final` (statiques compris), aucun setter public, aucune collection mutable de java.util, aucun tableau.
+// Une classe reste permise : une entité (HA9) est une classe qui implémente Identifiable, un record est une valeur
+// (HA3). Les collections se résolvent d'après les imports du fichier : `List` importé de java.util est mutable,
+// `List` importé de io.vavr.collection ne l'est pas. Un tableau est mutable même dans un champ `final`.
 public final class ImmutableDataStructuresRule implements HarnessRule {
 
     private static final Pattern SETTER = Pattern.compile("^set[A-Z]\\w*$");
@@ -37,7 +40,7 @@ public final class ImmutableDataStructuresRule implements HarnessRule {
 
     @Override
     public String name() {
-        return "Immutable data structures (records only, no setters, no mutable collections)";
+        return "Immutable data structures (records or classes with final fields only, no setters, no mutable collections)";
     }
 
     @Override
@@ -52,16 +55,28 @@ public final class ImmutableDataStructuresRule implements HarnessRule {
     private static Stream<Violation> violations(SourceFile file) {
         Set<String> imports = imports(file);
         return file.descendants().flatMap(node -> switch (node.type()) {
-            case "class_declaration" -> node.field("name").stream()
-                    .map(name -> violation(file, name, "'" + name.text() + "' is a class: model data structures must be records."));
+            case "class_declaration" -> nonFinalFields(node)
+                    .map(name -> violation(file, name, "'" + name.text() + "' in '" + SourceTypes.name(node)
+                            + "' is not final: an immutable class has final fields only (or make it a record)."));
+            case "array_type" -> Stream.of(violation(file, node, "'" + node.text()
+                    + "' is an array: arrays are mutable, use an immutable collection (vavr, List.of, ...)."));
             case "method_declaration" -> setter(node)
-                    .map(name -> violation(file, name, "'" + name.text() + "' is a setter: records have no setters, return a new value instead."))
+                    .map(name -> violation(file, name, "'" + name.text() + "' is a setter: an immutable type has no setters, return a new value instead."))
                     .stream();
             case "type_identifier", "scoped_type_identifier" -> mutableCollection(node, imports)
                     .map(collection -> violation(file, node, "'" + collection + "' is a mutable java.util collection: use an immutable one (vavr, List.copyOf, ...)."))
                     .stream();
             default -> Stream.empty();
         });
+    }
+
+    // Les noms des champs non `final` déclarés directement dans la classe : `private String a, b;` -> a, b.
+    private static Stream<Node> nonFinalFields(Node type) {
+        return SourceTypes.members(type)
+                .filter(member -> member.is("field_declaration") && !member.hasModifier("final"))
+                .flatMap(Node::children)
+                .filter(child -> child.is("variable_declarator"))
+                .flatMap(declarator -> declarator.field("name").stream());
     }
 
     private static java.util.Optional<Node> setter(Node method) {

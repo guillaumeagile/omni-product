@@ -14,7 +14,8 @@ import java.util.stream.Stream;
 // HA9 (moteurs BYTECODE + AST) - les entités implémentent Identifiable : « est-ce une entité ? » n'a qu'une
 // seule réponse. Toute classe du package du modèle doit implémenter `Identifiable` (reconnu par son nom
 // simple). Les records sont les value objects du modèle (immuables, sans identité) et en sont exemptés,
-// de même que les interfaces et les enums.
+// de même que les interfaces et les enums. Un record qui porte un identifiant n'est pas une valeur : il est signalé,
+// et le message dit d'en faire une classe, car HA3 interdit à un record d'implémenter Identifiable.
 public final class EntityMustImplementIdentifiableRule implements HarnessRule {
 
     private static final String MARKER_INTERFACE = DomainTypes.MARKER_INTERFACE;
@@ -44,6 +45,8 @@ public final class EntityMustImplementIdentifiableRule implements HarnessRule {
                 .should(ArchConditions.eachViolation("implement " + MARKER_INTERFACE, type -> Stream.of(type)
                         .filter(t -> !DomainTypes.isValueRecord(t))
                         .filter(t -> !DomainTypes.implementsMarker(t))
-                        .map(t -> t.getDescription() + " does not implement <" + MARKER_INTERFACE + "> in " + t.getSourceCodeLocation()))));
+                        .map(t -> t.getDescription() + " does not implement <" + MARKER_INTERFACE + "> in " + t.getSourceCodeLocation()
+                                + (t.isRecord() ? ". It is a record that carries an identifier: an entity is a class that implements <"
+                                        + MARKER_INTERFACE + "> with final fields (records are value objects, HA3)." : "")))));
     }
 }

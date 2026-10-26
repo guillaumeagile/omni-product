@@ -90,6 +90,16 @@ dans `Steps.java`.
 Périmètre : `com.omniproduct.model` (et `com.omniproduct.service` pour HA4.1, HA4.7, HA4.8, HA6, HA12.1). Le port carbone
 (`domain/`) et l'infrastructure ne font pas partie de l'exercice.
 
+### Mutations du harnais
+
+Une règle verte sur le legacy (le défaut n'y est pas encore) n'est prouvée que par une **mutation**. Elles sont rejouables :
+`harness/mutations/<nom>/src/...` contient le fichier mutant (même chemin que dans le dépôt, il doit compiler) et
+`expected.txt` une ligne `<règle> <fichier>:<ligne>` par détection attendue. `harness/mutate.sh [nom...]` applique le mutant,
+lance `./harness.sh all`, vérifie que **cette règle** signale **cette ligne** (une règle rouge ailleurs ne valide pas
+l'attente d'une autre), puis restaure `src/` même en cas d'échec ; il refuse de partir d'un `src/main/java` modifié. Le
+workflow `le-maitre-des-jeux` le joue sur chaque PR d'animateur (étape « Mutation du harnais ») et échoue si un défaut
+n'est pas vu. Mutation actuelle : `ha4.9-factory-branches-and-throws` (`Slug.of` avec `if` + `throw`).
+
 ### Propositions de règles (TODO, phase 2)
 
 Idées nées de la lecture du bloc « PMD quality metrics » de la PR #22 (HA4.7, 0 point PMD : fan-out 61 → 64,

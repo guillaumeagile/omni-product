@@ -2,9 +2,9 @@
 ## Code to follow along
 
 
-<img src="img/github-qrcode.png" alt="Alt text" style="width: 40%; height: auto;">
+<img src="img/exported_qrcode_image_600 (3).png" alt="Alt text" style="width: 40%; height: auto;">
 
-https://github.com/guillaumeagile/Cute-KanDDDinsky-2026
+https://github.com/guillaumeagile/omni-product
 
 
 --

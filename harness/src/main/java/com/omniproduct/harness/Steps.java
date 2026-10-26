@@ -20,6 +20,7 @@ import com.omniproduct.harness.rules.RichIdentifierRule;
 import com.omniproduct.harness.rules.SellChecksCanSellBeforeWithdrawRule;
 import com.omniproduct.harness.rules.SingleConcernRule;
 import com.omniproduct.harness.rules.ValueObjectFactoryRule;
+import com.omniproduct.harness.rules.VavrEscapeHatchesRule;
 
 import java.util.List;
 import java.util.Map;
@@ -80,12 +81,14 @@ public final class Steps {
                 new SellChecksCanSellBeforeWithdrawRule(IS_MODEL_OR_SERVICE)).stream()).toList();
     }
 
-    // L'étape 2 plus le style fonctionnel : HA14 (collections en pipeline), HA15 (fabrique par composition).
-    // La numérotation reprend à HA14 : on saute le 13.
+    // L'étape 2 plus le style fonctionnel : HA14 (collections en pipeline), HA15 (fabrique par composition) et HA21
+    // (un conteneur Vavr se consomme par fold, sans porte dérobée). La numérotation reprend à HA14 : on saute le 13 ;
+    // HA16 à HA20 restent réservés aux propositions de docs/harness-rules.md.
     private static List<HarnessRule> step3() {
         return Stream.concat(step2().stream(), List.<HarnessRule>of(
                 new CollectionsArePipelinesRule(IS_MODEL_OR_SERVICE),
-                new FactoryValidatesByCompositionRule(IS_MODEL)).stream()).toList();
+                new FactoryValidatesByCompositionRule(IS_MODEL),
+                new VavrEscapeHatchesRule(MODEL_PACKAGE + "..", SERVICE_PACKAGE + "..")).stream()).toList();
     }
 
     private static boolean isIn(String pkg, String base) {

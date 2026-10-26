@@ -66,7 +66,9 @@ offsets are UTF-8 bytes (text is read from the byte array, already handled by `S
    `<rule> <file>:<line>` lines. `harness/mutate.sh` applies it, runs the harness, checks that each expected rule
    reports that exact line (scoped to the rule's own block), then restores `src/`; the `le-maitre-des-jeux` workflow
    runs it on every animateur PR.
-6. **Wire it** into the right step in `Steps.java` (step 1 = HA5 to HA12.1; HA1, HA2 and HA4 are outside step 1). Perimeters:
+6. **Wire it** into the right step in `Steps.java` (step 1 = HA5 to HA12.1; step 2 = HA2, HA3, HA4.1 to HA4.7; step 3 = HA14
+   and HA15, the functional style; HA1 is outside the steps). New rules continue the numbering after the last one, **skipping
+   13** (the workshop is superstitious): the next free number is HA16. Perimeters:
    `com.omniproduct.model` and `com.omniproduct.service`, not `domain/` nor `infrastructure/`.
 7. **Update the documents**: the table and the heuristics section of `docs/harness-rules.md`, the student text
    `docs/CUPID-step-N.md` (describe only what the harness really does), the plan if the scope moved.

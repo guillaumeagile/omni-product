@@ -14,7 +14,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-// Filet de non-régression du refactoring de catalogLabels (exercice HA4.8) : il décrit le comportement, pas la forme.
+// Filet de non-régression du refactoring de catalogLabels (exercice HA14) : il décrit le comportement, pas la forme.
 // Toute construction du modèle passe par les trois fabriques en bas du fichier : si le modèle change (ADT, records),
 // elles seules s'adaptent, les assertions ne bougent pas.
 class CatalogServiceTest {

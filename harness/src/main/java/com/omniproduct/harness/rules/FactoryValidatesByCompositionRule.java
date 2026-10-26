@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// HA4.9 (moteur AST) - Composable : la fabrique d'un value object valide par composition, pas par branchement.
+// HA15 (moteur AST) - Composable : la fabrique d'un value object valide par composition, pas par branchement.
 // Un `if (a == null || b.isBefore(a)) return none();` répond à la question « est-ce valide ? » en coupant le flot ;
 // `Option.of(a).flatMap(s -> Option.of(b).filter(u -> !u.isBefore(s)).map(u -> new Perishable(s, u)))` ou
 // `Validation.combine(...).ap(Perishable::new)` la pose étape par étape, chacune nommée, chacune une valeur.
@@ -47,7 +47,7 @@ public final class FactoryValidatesByCompositionRule implements HarnessRule {
 
     @Override
     public String id() {
-        return "HA4.9";
+        return "HA15";
     }
 
     @Override

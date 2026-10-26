@@ -111,10 +111,7 @@ Products now have a shelf life, and the two kinds differ in their dates, not in 
 3. **Validate the invariant at the boundary.** Dates are input data, so a static factory `Perishable.create(...)`
    that returns a sealed result `PerishableCreation permits Perishable, InvalidDates` is better than a constructor
    that throws (HA4.2, HA4.4). `InvalidDates` is a record, not an exception. A Vavr `Either<InvalidDates, Perishable>`
-   (or `Validation`) is accepted too. Write the validation itself as a chain of steps, each one a value, rather than an
-   `if` that cuts the flow: `Option.of(sellBy).flatMap(s -> Option.of(useBy).filter(u -> !u.isBefore(s)).map(u -> new
-   Perishable(s, u)))`, or `Validation.combine(...).ap(Perishable::new)` (HA4.9). No `if`, `?:`, `switch`, `throw` or
-   `requireNonNull` in the factory, nor in a private helper it calls.
+   (or `Validation`) is accepted too.
 4. **Put the behaviour behind a `switch`**, so each alternative is handled and the compiler checks it:
    `Product.canSell(today)` returns `sealed interface SaleDecision permits Sellable, PastSellByDate`. A `Perishable`
    refuses the sale after `sellByDate`; a `NonExpiring` never refuses (HA4.5).
@@ -127,9 +124,6 @@ Products now have a shelf life, and the two kinds differ in their dates, not in 
    `ShelfLife`; the catalog labels (`CatalogService`) match on it to show "[BEST BEFORE PASSED]" for a `NonExpiring`
    past its date. Do not add a `default` branch to these `switch`es: without it, the compiler reports every missing
    case.
-8. **Transform collections with pipelines.** The catalog labels are built in a loop that fills a list. A `Stream`
-   says what you want instead of how to fill it: `products.stream().filter(...).map(product -> switch (...) {...})
-   .toList()`. Each step is a small pure function you can name and test (HA4.8).
 
 **Self-check:** adding a third kind (say `Frozen`) must only require a new record, one more type in the `permits`
 clause of `ShelfLife`, and the compiler pointing at every `switch` that now needs a case. If you had to edit an
@@ -137,7 +131,7 @@ existing class hierarchy, you extended by modification instead of composition.
 
 #### What the harness checks
 
-HA4 is verified by nine small rules, `HA4.1` to `HA4.9`. They never pin a type name (except `Product`, `canSell`,
+HA4 is verified by seven small rules, `HA4.1` to `HA4.7`. They never pin a type name (except `Product`, `canSell`,
 `withdraw`, and the factory names `create`, `build`, `of`, `from`, `make`), so you are free to choose yours. A *value
 object* here is a `record` that does not implement `Identifiable`.
 
@@ -150,8 +144,6 @@ object* here is a `record` that does not implement `Identifiable`.
 | HA4.5 | No `instanceof` or cast on a sealed type or its alternatives; no sealed result ignored as a statement; at least one `switch` covers every alternative of an ADT whose alternatives are all records. | error |
 | HA4.6 | The model never reads the clock: no `LocalDate.now()`, `Instant.now()`, `System.currentTimeMillis()`, `new Date()`, `Clock.systemUTC()`... Pass `today` or inject a `Clock`. | error |
 | HA4.7 | A sale withdraws stock only where `canSell` allowed it: inside the branch of an `if` or `switch` on the decision, inside a `map` (or other lambda) on it, or after a guard clause that returns the refusal. Calling `canSell` and ignoring its answer does not count. | error |
-| HA4.8 | A collection is transformed by a Stream pipeline (`stream().filter(...).map(...).toList()`, `Collectors.groupingBy`, `reduce`), never by a loop (`for`, `while`, `forEach`) that fills a list, a map, a builder or a counter declared outside it. | error |
-| HA4.9 | A value object factory (static, named `create`/`build`/`of`/`from`/`make` or returning the record) validates by composing `Option`/`Validation`/`Either` steps (`filter`, `flatMap`, `map`, `combine`): no `if`, `?:`, `switch`, `throw`, `assert` or guard call in it nor in a private helper it calls; a factory whose return type can fail must hold at least one lambda or method reference. At least one such factory must exist (a generic or sealed result): without one the rule is red, like HA4.4. | error |
 
 An error record is a record declared in the code. A warning is printed as `[WARN]` and does not fail the harness.
 
@@ -169,7 +161,9 @@ writes the same verdict as a JSON report, which the game uses (see "The game" in
 Do not relax or rewrite the harness rules to make the exercise pass - that defeats the assessment. If a rule genuinely
 looks wrong, flag it.
 
-## Phase 3 (preview): Vavr
+## Phase 3 (preview): functional style
 
-Once step 2 is green, Vavr is a bonus: `Either` chains results with `map` and `flatMap`, and it is consumed with `fold`.
-It comes in phase 3, with its own rules (no `get()`, no `getLeft()`). The sealed results of this step stay valid.
+Once step 2 is green, phase 3 asks for the functional style: collections are transformed by `Stream` pipelines (HA14),
+and a factory validates by composing `Option`/`Validation` steps instead of branching (HA15). Its statement is
+`CUPID-step-3.md`. The sealed results of this step stay valid. `Either` chains results with `map` and `flatMap`, and
+it is consumed with `fold`: a bonus for phase 3, with its own rules to come (no `get()`, no `getLeft()`).

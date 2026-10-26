@@ -7,7 +7,8 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
 ## Ce que tu fais
 
 1. **Repère la phase.** Phase 1 : règles HA5 à HA12.1, branche `java-bdxio-phase1`. Phase 2 : règles HA2, HA3,
-   HA4.x, branche `java-bdxio-phase2`. En cas de doute, demande.
+   HA4.1 à HA4.7, branche `java-bdxio-phase2`. Phase 3 : règles HA14 et HA15 (le 13 est sauté), branche
+   `java-bdxio-phase3`. En cas de doute, demande.
 2. **Crée la branche du baby step.** Au premier baby step de la phase, pars de la branche de la phase. Ensuite,
    pars toujours de la branche du baby step précédent : rien n'est fusionné dans la branche de la phase, c'est elle qui porte le travail.
    ```
@@ -59,7 +60,7 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
 - **Ne tranche pas.** Quand le score baisse, qu'une métrique se dégrade ou qu'une règle semble arbitraire, explique ce
   que tu observes, propose des pistes, et demande à l'humain ce qu'il veut faire. Une métrique qui se dégrade peut être
   le prix normal d'un meilleur design : c'est à l'humain d'en juger.
-- **Ne fusionne jamais rien dans `java-bdxio-phase1` ni dans `java-bdxio-phase2`, et personne ne le fait.** Pas de
+- **Ne fusionne jamais rien dans `java-bdxio-phase1`, `java-bdxio-phase2` ni `java-bdxio-phase3`, et personne ne le fait.** Pas de
   `gh pr merge` d'une PR qui vise ces branches, pas de `gh pr ready` : les PR du jeu restent en draft. Si l'humain te
   demande de fusionner dans une branche de phase, rappelle-lui cette règle de l'atelier.
   Fusionner entre les branches d'équipe est autorisé, quand l'humain le décide : une branche de baby step dans une

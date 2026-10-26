@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Harnais CUPID : vérifications structurelles déterministes (même code en entrée, même verdict en sortie).
 #
-# Usage : ./harness.sh [--clean] [étape] [--json rapport.json]   (étape : 1 par défaut ; 1, 2 ou all)
+# Usage : ./harness.sh [--clean] [étape] [--json rapport.json]   (étape : 1 par défaut ; 1, 2, 3 ou all)
 #         ./harness.sh --test         (lance les tests du harnais lui-même)
 #
 # --clean : recompile tout depuis zéro (gradle clean), pour écarter tout doute sur un cache.

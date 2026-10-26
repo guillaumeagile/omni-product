@@ -44,11 +44,11 @@ public final class Steps {
     }
 
     public static Set<String> names() {
-        return Set.of("1", "2", ALL);
+        return Set.of("1", "2", "3", ALL);
     }
 
     public static List<HarnessRule> rules(String step) {
-        return Map.<String, List<HarnessRule>>of("1", step1(), "2", step2(), ALL, step2()).get(step);
+        return Map.<String, List<HarnessRule>>of("1", step1(), "2", step2(), "3", step3(), ALL, step3()).get(step);
     }
 
     // HA5, HA6, HA7, HA8, HA9, HA10, HA11, HA12, HA12.1 (avertissement)
@@ -66,8 +66,7 @@ public final class Steps {
                 new BareIdentifierIsWeakRule(IS_MODEL_OR_SERVICE));
     }
 
-    // L'étape 1 plus HA2 (données immuables), HA3 (value objects), HA4.1 à HA4.9 (composable, ADT, horloge, vente,
-    // pipelines, fabrique par composition).
+    // L'étape 1 plus HA2 (données immuables), HA3 (value objects), HA4.1 à HA4.7 (composable, ADT, horloge, vente).
     private static List<HarnessRule> step2() {
         return Stream.concat(step1().stream(), List.<HarnessRule>of(
                 new ImmutableDataStructuresRule(IS_MODEL),
@@ -78,7 +77,13 @@ public final class Steps {
                 new ValueObjectFactoryRule(IS_MODEL),
                 new MatchOverAdtRule(IS_MODEL_OR_SERVICE),
                 new NoClockInModelRule(MODEL_PACKAGE + ".."),
-                new SellChecksCanSellBeforeWithdrawRule(IS_MODEL_OR_SERVICE),
+                new SellChecksCanSellBeforeWithdrawRule(IS_MODEL_OR_SERVICE)).stream()).toList();
+    }
+
+    // L'étape 2 plus le style fonctionnel : HA14 (collections en pipeline), HA15 (fabrique par composition).
+    // La numérotation reprend à HA14 : on saute le 13.
+    private static List<HarnessRule> step3() {
+        return Stream.concat(step2().stream(), List.<HarnessRule>of(
                 new CollectionsArePipelinesRule(IS_MODEL_OR_SERVICE),
                 new FactoryValidatesByCompositionRule(IS_MODEL)).stream()).toList();
     }

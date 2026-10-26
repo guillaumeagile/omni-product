@@ -47,6 +47,12 @@ public record Node(SourceFile file, TSNode raw) {
         return Stream.concat(Stream.of(this), descendants());
     }
 
+    public Optional<Node> parent() {
+        return Optional.ofNullable(raw.getParent())
+                .filter(node -> !node.isNull())
+                .map(node -> new Node(file, node));
+    }
+
     public Optional<Node> field(String name) {
         return Optional.ofNullable(raw.getChildByFieldName(name))
                 .filter(node -> !node.isNull())

@@ -124,4 +124,104 @@ class SingleConcernRuleTest {
                 }
                 """)).hasSize(1);
     }
+
+    @Test
+    void staticFactoriesAreNotAnExtraConcernWhateverTheirNameOrCount() {
+        assertThat(check("""
+                package demo.model;
+
+                public record Offer(String label) {
+                    public static Offer of(String label) { return null; }
+                    public static Offer of(String label, Double base) { return null; }
+                    public static Offer fromSupplier(Supplier supplier) { return null; }
+                    public static Offer ofPrice(Double price) { return null; }
+                    public static Optional<Offer> tryCreate(Double price, Integer stock) { return null; }
+                    public static Either<String, Offer> parse(String raw) { return null; }
+                    public static Builder builder() { return null; }
+                }
+                """)).isEmpty();
+    }
+
+    @Test
+    void aNestedBuilderIsNotAnExtraConcern() {
+        assertThat(check("""
+                package demo.model;
+
+                public class Offer {
+                    public static Builder builder() { return null; }
+
+                    public static final class Builder {
+                        public Builder price(Double price) { return this; }
+                        public Builder stock(Integer stock) { return this; }
+                        public Offer build() { return null; }
+                    }
+                }
+                """)).isEmpty();
+    }
+
+    @Test
+    void aStaticMethodThatTransformsAnInstanceIsStillCounted() {
+        List<Violation> violations = check("""
+                package demo.model;
+
+                public class Offer {
+                    public static Offer updatePrice(Offer offer) { return offer; }
+                    public static Offer updateStock(Offer offer, Integer stock) { return offer; }
+                }
+                """);
+
+        assertThat(violations).hasSize(1);
+        assertThat(violations.get(0).message()).contains("Pricing [updatePrice]", "Storage [updateStock]");
+    }
+
+    @Test
+    void aStaticMethodThatReturnsAnotherTypeIsStillCounted() {
+        assertThat(check("""
+                package demo.model;
+
+                public class Offer {
+                    public static Double priceOf(String label) { return null; }
+                    public static Integer stockOf(String label) { return null; }
+                }
+                """)).hasSize(1);
+    }
+
+    @Test
+    void aNonStaticMethodReturningTheTypeIsNotAFactory() {
+        assertThat(check("""
+                package demo.model;
+
+                public class Offer {
+                    public Offer withPrice(Double price) { return null; }
+                    public Offer withStock(Integer stock) { return null; }
+                }
+                """)).hasSize(1);
+    }
+
+    @Test
+    void aNestedTypeThatDoesNotBuildTheEnclosingTypeKeepsItsConcerns() {
+        assertThat(check("""
+                package demo.model;
+
+                public class Offer {
+                    public static class Helper {
+                        public Helper price(Double price) { return this; }
+                        public Helper stock(Integer stock) { return this; }
+                    }
+                }
+                """)).hasSize(1);
+    }
+
+    @Test
+    void aFactoryDoesNotHideARealConcernOfTheType() {
+        assertThat(check("""
+                package demo.model;
+
+                public record Offer(String label) {
+                    public static Offer of(String label) { return null; }
+                    public Double getPrice() { return null; }
+                    public Integer getStock() { return null; }
+                }
+                """)).hasSize(1);
+    }
 }

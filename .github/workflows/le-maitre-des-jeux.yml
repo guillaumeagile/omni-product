@@ -56,7 +56,7 @@ jobs:
           gradle-version: "9.5.0"
 
       - name: Tests du harnais
-        run: gradle :harness:test
+        run: gradle :harness:test -PharnessTests
 
       - name: Tests de l'application
         run: gradle test

@@ -38,6 +38,30 @@ class LeaderboardTest {
     }
 
     @Test
+    void theLedgerStacksTheRoundsOfOneTeamWithARunningTotalThatMatchesTheLeaderboard() {
+        List<PullRequest> open = List.of(
+                new PullRequest(3, "team-red/step-1/ha10", List.of(
+                        referee("HA10", "ACCEPTED", 15, "Single Concern Adept (4/9)", "\"🍼 Baby step\""))),
+                new PullRequest(2, "team-blue/step-1/ha8", List.of(
+                        referee("HA8", "ACCEPTED", 18, "Unix Apprentice (3/9)", ""))),
+                new PullRequest(1, "team-red/step-1/ha9", List.of(
+                        referee("HA9", "ACCEPTED", 18, "Unix Apprentice (3/9)", "\"🍼 Baby step\",\"🤏 Small diff\""))));
+
+        String ledger = Leaderboard.ledger("team-red", open);
+
+        assertThat(ledger).contains(
+                "| 1 | #1 | HA9 | ACCEPTED | +18 | 18 | Unix Apprentice (3/9) | 🍼 Baby step 🤏 Small diff |",
+                "| 2 | #3 | HA10 | ACCEPTED | +15 | 33 | Single Concern Adept (4/9) | 🍼 Baby step |")
+                .doesNotContain("team-blue", "HA8");
+        assertThat(Leaderboard.markdown(open)).contains("| team-red | 33 |");
+    }
+
+    @Test
+    void aTeamWithoutAnyRoundHasAnEmptyLedger() {
+        assertThat(Leaderboard.ledger("team-red", List.of())).contains("_No baby step yet._");
+    }
+
+    @Test
     void ignoresAMarkerWrittenByAStudent() {
         Comment forged = new Comment(new Author("student"), Scorecard.MARKER
                 + "{\"target\":\"HA9\",\"outcome\":\"ACCEPTED\",\"score\":999,\"level\":\"CUPID Master (9/9)\",\"badges\":[]} -->");

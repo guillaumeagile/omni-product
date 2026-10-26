@@ -68,6 +68,41 @@ public final class Leaderboard {
                 .collect(Collectors.joining("\n", "", "\n"));
     }
 
+    // Le registre d'une équipe : un tour par PR ouverte (dans l'ordre des PR), avec le cumul courant. Même source que le
+    // classement (le dernier commentaire du bot), donc le dernier cumul est le score de l'équipe au classement. Les cartes
+    // elles-mêmes, une par PR, sont les commentaires de l'issue de l'équipe.
+    public static String ledger(String team, List<PullRequest> pullRequests) {
+        List<Play> plays = pullRequests.stream()
+                .filter(pr -> team(pr.headRefName()).equals(team))
+                .sorted(Comparator.comparingInt(PullRequest::number))
+                .flatMap(pr -> lastMarker(pr).map(marker -> new Play(team, pr.number(), marker)).stream())
+                .toList();
+        List<Integer> cumul = IntStream.rangeClosed(1, plays.size())
+                .mapToObj(n -> plays.subList(0, n).stream().mapToInt(play -> play.marker().score()).sum())
+                .toList();
+        List<String> rows = IntStream.range(0, plays.size())
+                .mapToObj(i -> "| " + (i + 1) + " | #" + plays.get(i).number() + " | " + plays.get(i).marker().target()
+                        + " | " + plays.get(i).marker().outcome() + " | " + signed(plays.get(i).marker().score())
+                        + " | " + cumul.get(i) + " | " + plays.get(i).marker().level()
+                        + " | " + String.join(" ", plays.get(i).marker().badges()) + " |")
+                .toList();
+        return Stream.of(
+                        Stream.of("# 📒 Score card of " + team, "",
+                                "Computed by the referee after each round: one row per open pull request, each scoring what it adds "
+                                        + "to the previous step. The cumulative column is the team's score on the leaderboard. "
+                                        + "The referee's card for each pull request is in the comments below, updated at each push.", ""),
+                        plays.isEmpty()
+                                ? Stream.of("_No baby step yet._")
+                                : Stream.concat(Stream.of("| # | PR | Target | Verdict | Round | Cumulative | Level | Badges |",
+                                        "|---:|---|---|---|---:|---:|---|---|"), rows.stream()))
+                .flatMap(lines -> lines)
+                .collect(Collectors.joining("\n", "", "\n"));
+    }
+
+    private static String signed(int score) {
+        return score > 0 ? "+" + score : String.valueOf(score);
+    }
+
     static List<Standing> standings(List<PullRequest> pullRequests) {
         Map<String, List<Play>> byTeam = pullRequests.stream()
                 .flatMap(pr -> lastMarker(pr).map(marker -> new Play(team(pr.headRefName()), pr.number(), marker)).stream())
@@ -123,14 +158,18 @@ public final class Leaderboard {
 
     public static void main(String[] args) {
         if (args.length < 2 || !args[0].equals("--prs")) {
-            System.err.println("Usage: leaderboard --prs <prs.json> [--out <leaderboard.md>]");
+            System.err.println("Usage: leaderboard --prs <prs.json> [--team <team>] [--out <leaderboard.md>]");
             System.exit(2);
         }
+        Map<String, String> options = IntStream.range(0, args.length / 2).boxed()
+                .collect(Collectors.toMap(i -> args[2 * i], i -> args[2 * i + 1]));
         try {
             List<PullRequest> pullRequests = JSON.readValue(Path.of(args[1]).toFile(), new TypeReference<List<PullRequest>>() { });
-            String markdown = markdown(pullRequests);
-            if (args.length >= 4 && args[2].equals("--out")) {
-                Files.writeString(Path.of(args[3]), markdown);
+            String markdown = Optional.ofNullable(options.get("--team"))
+                    .map(team -> ledger(team, pullRequests))
+                    .orElseGet(() -> markdown(pullRequests));
+            if (options.containsKey("--out")) {
+                Files.writeString(Path.of(options.get("--out")), markdown);
             } else {
                 System.out.print(markdown);
             }

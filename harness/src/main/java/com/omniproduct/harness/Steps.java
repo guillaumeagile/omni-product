@@ -83,7 +83,7 @@ public final class Steps {
     }
 
     // L'étape 2 plus le style fonctionnel : HA14 (collections en pipeline), HA15 (fabrique par composition), HA16
-    // (une décision du domaine se compose, avertissement) et HA21 (un conteneur Vavr se consomme par fold, sans porte
+    // (une décision du domaine se compose) et HA21 (un conteneur Vavr se consomme par fold, sans porte
     // dérobée). La numérotation reprend à HA14 : on saute le 13 ;
     // HA17 à HA20 restent réservés aux propositions de docs/harness-rules.md.
     private static List<HarnessRule> step3() {

@@ -49,8 +49,8 @@ class HarnessMainTest {
 
         assertThat(result.exitCode()).isEqualTo(1);
         assertThat(result.out().lines().filter(line -> line.startsWith("[FAIL]")).map(line -> line.split(" ")[1]).toList())
-                .containsExactly("HA14", "HA15");
-        assertThat(result.out()).contains("CatalogService.java:", "Perishable.java:");
+                .containsExactly("HA14", "HA15", "HA16");
+        assertThat(result.out()).contains("CatalogService.java:", "Perishable.java:", "ProductService.java:");
         assertThat(result.out()).contains("HARNESS RESULT: FAIL");
     }
 
@@ -74,7 +74,7 @@ class HarnessMainTest {
                 .isEqualTo(Steps.rules("3").stream().map(HarnessRule::id).toList());
         assertThat(Steps.rules("3").stream().map(HarnessRule::id)).doesNotContain("HA13");
         assertThat(report.rules().stream().filter(rule -> rule.status().equals("FAIL")).map(HarnessReport.RuleResult::id).toList())
-                .isEqualTo(List.of("HA14", "HA15"));
+                .isEqualTo(List.of("HA14", "HA15", "HA16"));
         // Exercice volontaire (CatalogService.catalogLabels remplit une liste dans une boucle) : HA14 est rouge.
         assertThat(report.rule("HA14")).hasValueSatisfying(rule -> {
             assertThat(rule.status()).isEqualTo("FAIL");
@@ -86,10 +86,10 @@ class HarnessMainTest {
             assertThat(rule.severity()).isEqualTo("ERROR");
             assertThat(rule.violations()).isPositive();
         });
-        // Avertissement : la garde de ProductService.sellOne signale HA16 sans faire échouer le harnais.
+        // Exercice volontaire (la garde de ProductService.sellOne teste canSellOn avec un `if`) : HA16 est rouge.
         assertThat(report.rule("HA16")).hasValueSatisfying(rule -> {
-            assertThat(rule.status()).isEqualTo("WARN");
-            assertThat(rule.severity()).isEqualTo("WARNING");
+            assertThat(rule.status()).isEqualTo("FAIL");
+            assertThat(rule.severity()).isEqualTo("ERROR");
             assertThat(rule.violations()).isEqualTo(1);
         });
     }

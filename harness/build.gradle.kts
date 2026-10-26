@@ -39,6 +39,8 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.25.3")
     // Les fixtures de test portent de vraies annotations JPA
     testImplementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
+    // Les fixtures de la règle Vavr (HA21) manipulent de vrais Either, Option et Try
+    testImplementation("io.vavr:vavr:0.10.4")
 }
 
 application {

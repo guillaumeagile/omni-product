@@ -9,7 +9,8 @@ libraries already offer for "do this, then that", and small pure steps compose w
 
 **Where you start.** The phase 3 starting code has done steps 1 and 2: the model is immutable, `Product` carries a
 `ShelfLife` ADT, the sale checks `canSell` before it withdraws, the model never reads the clock. `./harness.sh 3` runs
-the rules of steps 1 and 2 too, and they are green. Two rules are red, and they are the exercise.
+the rules of steps 1 and 2 too, and they are green. Two rules are red, and they are the exercise. A third rule,
+`HA21`, is green: it guards the way you use Vavr (see below) and only turns red if you open a Vavr container.
 
 The rules of this step are numbered from `HA14`: the number 13 is skipped on purpose.
 
@@ -56,15 +57,34 @@ or `requireNonNull` in the factory, nor in a private helper it calls.
 **Self-check:** adding a new condition to a factory (say, `useBy` at most a year after `sellBy`) must only add one
 `filter` step, not change the shape of the code.
 
+### HA21 - A Vavr container is consumed by `fold`, never opened
+
+`Either`, `Option`, `Try` and `Validation` say "this may have failed" in the type. Opening them throws the information
+away: `get()`, `getLeft()` and `getOrElseThrow()` throw when you guessed the wrong side, and `isLeft()`, `isRight()`,
+`isEmpty()` only replay the `if` that the container exists to avoid.
+
+```java
+// refused: the caller must remember to test first
+if (result.isLeft()) { return report(result.getLeft()); }
+return use(result.get());
+
+// accepted: both cases are handled, the compiler checks that none is forgotten
+return result.fold(this::report, this::use);
+```
+
+`map`, `flatMap`, `filter`, `peek` and `getOrElse(value)` are fine. This rule is green when you start: it is a guard rail
+for the code you write to fix HA15, not an exercise.
+
 #### What the harness checks
 
-The two rules never pin a type name (except the factory names `create`, `build`, `of`, `from`, `make`), so you are free
+The rules never pin a type name (except the factory names `create`, `build`, `of`, `from`, `make`), so you are free
 to choose yours. A *value object* here is a `record` that does not implement `Identifiable`.
 
 | Rule | Checks | Level |
 |---|---|---|
 | HA14 | A collection is transformed by a Stream pipeline (`stream().filter(...).map(...).toList()`, `Collectors.groupingBy`, `reduce`), never by a loop (`for`, `while`, `forEach`) that fills a list, a map, a builder or a counter declared outside it. | error |
 | HA15 | A value object factory (static, named `create`/`build`/`of`/`from`/`make` or returning the record) validates by composing `Option`/`Validation`/`Either` steps (`filter`, `flatMap`, `map`, `combine`): no `if`, `?:`, `switch`, `throw`, `assert` or guard call in it nor in a private helper it calls; a factory whose return type can fail must hold at least one lambda or method reference. At least one such factory must exist (a generic or sealed result): without one the rule is red, like HA4.4. | error |
+| HA21 | No call, and no method reference, that opens a Vavr container of `io.vavr.control` (`Either`, `Option`, `Try`, `Validation`) in `model/` and `service/`: `get()`, `getLeft()`, `getError()`, `getCause()`, anything with `throw` in its name (`getOrElseThrow`), and the tests `isLeft()`, `isRight()`, `isEmpty()`, `isDefined()`, `isSuccess()`, `isFailure()`, `isValid()`, `isInvalid()`. The check is on the compiled code and reads the method name in words, so a static import or a variable typed by a supertype does not hide the call. | error |
 
 ## Assessment
 
@@ -81,7 +101,15 @@ It runs the rules of steps 1 and 2 and the rules of step 3, and exits `0` only w
 Do not relax or rewrite the harness rules to make the exercise pass - that defeats the assessment. If a rule genuinely
 looks wrong, flag it.
 
-## Beyond step 3 (preview): Vavr
+## Score in this phase
 
-`Either` chains results with `map` and `flatMap`, and it is consumed with `fold`. It comes with its own rules to come
-(no `get()`, no `getLeft()`). The sealed results of step 2 stay valid.
+The size of the code changes from one phase to the next, so the token thresholds of the scorecard do not stay the same.
+In phase 3 the starting code is small (about 1 700 tokens in `model/` and `service/`), and a baby step changes a few
+hundred tokens at most:
+
+| Bonus | Phase 3 |
+|---|---|
+| Small diff (changed tokens in `src/main/java`) | 200 or less: +3 |
+| Tokens removed from `model/` and `service/` | +1 per 50 tokens, up to +5 |
+
+The other points (turning a rule green, baby step, complexity, PMD) are the ones of `CUPID-step-1.md`.

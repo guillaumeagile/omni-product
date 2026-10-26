@@ -63,7 +63,9 @@ jobs:
       PR_TITLE: ${{ github.event.pull_request.title }}
       PR_BRANCH: ${{ github.event.pull_request.head.ref }}
       # Petit diff : tokens ajoutés ou retirés dans src/main/java (tests et Markdown exclus).
-      SMALL_DIFF_TOKENS: "400"
+      # Seuils calibrés sur les baby steps réels de la phase 3 (docs/PLAN-workshop-game.md, « Calibrage des seuils »).
+      SMALL_DIFF_TOKENS: "200"
+      TOKENS_PER_POINT: "50"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -184,6 +186,7 @@ jobs:
             --changed-files "$RUNNER_TEMP/changed-files.txt" \
             --changed-tokens "$(cat "$RUNNER_TEMP/changed-tokens.txt")" \
             --small-diff "$SMALL_DIFF_TOKENS" \
+            --tokens-per-point "$TOKENS_PER_POINT" \
             --out "$RUNNER_TEMP/scorecard.md"
           echo "exit=$?" >> "$GITHUB_OUTPUT"
 

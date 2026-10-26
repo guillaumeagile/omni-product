@@ -35,6 +35,7 @@ public final class Referee {
     static final int CLEAN_CODER_MIN_POINTS = 2;
     // Coût agentique : tokens et branches retirés du code de l'étape (model/ et service/). La complexité cyclomatique
     // pèse plus que les tokens : retirer des branches, c'est ce qui rend le code plus simple à lire et à tester.
+    // Par défaut ; chaque phase règle le sien (--tokens-per-point) : le code de départ n'a pas la même taille.
     static final long TOKENS_PER_POINT = 100;
     static final long TOKEN_CAP = 5;
     static final long COMPLEXITY_PER_POINT = 2;
@@ -44,7 +45,12 @@ public final class Referee {
     }
 
     // Ce que l'Action sait de la PR : titre, branche, fichiers modifiés, tokens modifiés dans model/ et service/.
-    public record PullRequest(String title, String branch, List<String> changedFiles, long changedTokens, long smallDiffTokens) {
+    public record PullRequest(String title, String branch, List<String> changedFiles, long changedTokens, long smallDiffTokens,
+                              long tokensPerPoint) {
+
+        public PullRequest(String title, String branch, List<String> changedFiles, long changedTokens, long smallDiffTokens) {
+            this(title, branch, changedFiles, changedTokens, smallDiffTokens, TOKENS_PER_POINT);
+        }
     }
 
     // Une règle vue des deux côtés. base vide : la règle n'existait pas dans le rapport de la base.
@@ -145,8 +151,8 @@ public final class Referee {
                                 new Points("Violations removed on rules still red (up to +" + PROGRESS_CAP + ")", progress(changes)),
                                 new Points("🍼 Baby step: exactly one rule turned green", babyStep ? SINGLE_GREEN_BONUS : 0),
                                 new Points("🤏 Small diff: " + pr.changedTokens() + " changed tokens", smallDiff ? SMALL_DIFF_BONUS : 0),
-                                new Points("Tokens removed (+1 per " + TOKENS_PER_POINT + ", up to +" + TOKEN_CAP + ")",
-                                        tokensRemoved.map(removed -> Math.min(TOKEN_CAP, Math.max(0, removed) / TOKENS_PER_POINT)).orElse(0L).intValue()),
+                                new Points("Tokens removed (+1 per " + pr.tokensPerPoint() + ", up to +" + TOKEN_CAP + ")",
+                                        tokensRemoved.map(removed -> Math.min(TOKEN_CAP, Math.max(0, removed) / pr.tokensPerPoint())).orElse(0L).intValue()),
                                 new Points("Cyclomatic complexity removed (+1 per " + COMPLEXITY_PER_POINT + ", up to +" + COMPLEXITY_CAP + ")",
                                         branchesRemoved.map(removed -> Math.min(COMPLEXITY_CAP, Math.max(0, removed) / COMPLEXITY_PER_POINT)).orElse(0L).intValue()),
                                 new Points("📐 PMD quality metrics improved", qualityPoints)))

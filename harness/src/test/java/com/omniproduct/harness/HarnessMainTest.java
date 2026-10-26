@@ -68,7 +68,7 @@ class HarnessMainTest {
         assertThat(report.result()).isEqualTo("FAIL");
         assertThat(report.rules()).extracting(HarnessReport.RuleResult::id)
                 .isEqualTo(Steps.rules("3").stream().map(HarnessRule::id).toList())
-                .endsWith("HA14", "HA15")
+                .endsWith("HA14", "HA15", "HA21")
                 .startsWith(Steps.rules("2").stream().map(HarnessRule::id).toArray(String[]::new));
         assertThat(Steps.rules("all").stream().map(HarnessRule::id).toList())
                 .isEqualTo(Steps.rules("3").stream().map(HarnessRule::id).toList());

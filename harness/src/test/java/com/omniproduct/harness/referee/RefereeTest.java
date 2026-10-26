@@ -282,4 +282,18 @@ class RefereeTest {
         assertThat(markdown).doesNotContain("Baby step: exactly one", "Small diff:", "quality metrics improved");
         assertThat(markdown).contains("CK metrics of model/ and service/: shown for comparison, no points");
     }
+
+    @Test
+    void theTokenScaleIsSetByThePhase() {
+        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, ck(8, 37, 14, 28, 0.90, 27, 64, 0, 5, 0)),
+                rule("HA9", "FAIL", 2));
+        Optional<HarnessReport> head = reportWith(new Metrics(2800, 40, 6, ck(8, 37, 14, 28, 0.90, 27, 64, 0, 5, 0)),
+                rule("HA9", "PASS", 0));
+
+        Verdict fine = Referee.judge(base, head, new PullRequest("HA9 green", "", List.of(), 120, 200, 50));
+        Verdict coarse = Referee.judge(base, head, new PullRequest("HA9 green", "", List.of(), 120, 200));
+
+        assertThat(Scorecard.markdown(fine)).contains("| Tokens removed (+1 per 50, up to +5) | +4 |");
+        assertThat(Scorecard.markdown(coarse)).contains("| Tokens removed (+1 per 100, up to +5) | +2 |");
+    }
 }

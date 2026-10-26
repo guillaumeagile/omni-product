@@ -127,10 +127,9 @@ Deux ou trois PR de test sur une branche d'équipe jetable (une PR verte, une PR
 
 ## Points ouverts (à trancher par l'animateur)
 
-- Le barème est validé. Les seuils en tokens (400 pour un petit diff, 100 tokens par point) sont à calibrer sur les
-  premières PR.
-- Le contrôle de l'arbitre est-il un check **obligatoire** (la PR ne peut pas être fusionnée) ou seulement un commentaire ?
-- Classement : issue épinglée, ou page partagée.
+- Le barème est validé. Les seuils en tokens sont **calibrés** (voir « Calibrage des seuils en tokens » plus bas).
+- Le contrôle de l'arbitre reste un check **obligatoire** (décision de l'animateur : il l'a toujours été).
+- Classement : inchangé, issue épinglée (par équipe, avec le cumul).
 
 ## Ordre
 
@@ -145,7 +144,32 @@ Lot 1 -> Lot 2 -> Lot 3 -> Lot 4 -> Lot 7 -> Lot 5 -> Lot 6. Phase 3 après l'at
 | 3 arbitre | fait | tests sur paires de rapports ; essai local base/tête (baby step HA3 simulé : +18) |
 | 4 GitHub Action `harness-game` | écrite | étapes rejouées en local ; **pas encore jouée sur GitHub** (lot 7) |
 | 5 classement | dans `harness-game` | tests du calcul ; recalculé à chaque round sur les PR ouvertes (l'ancien `harness-leaderboard`, déclenché à la fusion, est retiré) |
-| 6 textes étudiants | partiel | `CUPID-step-1.md` (règles du jeu) et `Workshop-CUTE DDD-full day.md` faits ; `CUPID-step1-2.md` reste à passer en Java |
+| 6 textes étudiants | fait | `CUPID-step-1.md` (règles du jeu), `CUPID-step1-2.md` (déjà en Java : `sealed`, `switch`, `./harness.sh 2`), `CUPID-step-3.md` et `Workshop-CUTE DDD-full day.md` |
 | 7 essai du principe | à faire | PR de test à ouvrir puis supprimer |
 | mesures CK au score | fait | essai sur PR #3 (+22, dont +5 CK) ; CK 0.7.0 ne voit pas les records (phase 2) |
 | mesures tokens + PMD | fait | tokens par JTokkit (o200k_base), complexité par PMD ; rapport JSON (`metrics`), arbitre et Action ; tests sur valeurs de référence |
+
+## Calibrage des seuils en tokens
+
+Mesuré sur les branches de jeu `test-team/*` (diff `-U0` de `src/main/java` entre un baby step et le précédent, jetons
+JTokkit `o200k_base`, comme l'Action) :
+
+| Phase | Départ (tokens de `model/` + `service/`) | Tokens modifiés par baby step | Tokens retirés |
+|---|---|---|---|
+| 1 | 3 141 | 1 371 à 6 060 (médiane ≈ 5 000) | 968 à 2 696 (un step ajoute 258) |
+| 2 | 1 453 | 0 à 532 (7 steps sur 9 sous 200) | -408 à +208 |
+| 3 | 1 779 | 206 (un seul step mesuré, HA15) | 54 |
+
+Avec 400 tokens et 100 par point, le petit diff est hors d'atteinte en phase 1 (aucun step sous 1 371) et acquis presque
+d'office en phase 2, et les tokens retirés plafonnent à +5 dès 500 tokens en phase 1 alors qu'ils ne dépassent pas +2 en
+phase 2. Les seuils deviennent donc un réglage **par phase**, posé dans `harness-game.yml` de chaque branche de phase
+(`SMALL_DIFF_TOKENS`, `TOKENS_PER_POINT`, transmis à l'arbitre par `--small-diff` et `--tokens-per-point`) :
+
+| Phase | Petit diff | Tokens par point | Effet attendu |
+|---|---|---|---|
+| 1 | 2 500 | 400 | petit diff accessible aux steps ciblés (HA9 : 1 371), +3 à +5 pour les gros nettoyages |
+| 2 | 200 | 50 | environ 2 steps sur 3 sous le seuil ; 208 tokens retirés valent +4 |
+| 3 | 200 | 50 | un diff d'une page de code ; 54 tokens retirés valent +1 |
+
+Posé **en phase 3 seulement** (cette branche) ; les valeurs des phases 1 et 2 restent à reporter dans leur workflow, et
+à recalibrer sur les premières PR d'équipe réelles (l'échantillon de la phase 3 est d'un step).

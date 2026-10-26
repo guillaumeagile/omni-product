@@ -7,10 +7,9 @@ import java.time.LocalDate;
 public record Perishable(LocalDate sellByDate, LocalDate useByDate) implements ShelfLife {
 
     public static Option<Perishable> of(LocalDate sellByDate, LocalDate useByDate) {
-        if (sellByDate == null || useByDate == null || useByDate.isBefore(sellByDate)) {
-            return Option.none();
-        }
-        return Option.of(new Perishable(sellByDate, useByDate));
+        return Option.of(sellByDate).flatMap(sell -> Option.of(useByDate)
+                .filter(use -> !use.isBefore(sell))
+                .map(use -> new Perishable(sell, use)));
     }
 
     public boolean isPastSellBy(TimeServiceProvider time) { return time.today().isAfter(sellByDate); }

@@ -79,8 +79,34 @@ class FactoryValidatesByCompositionRuleTest {
         assertThat(check(price)).isEmpty();
     }
 
+    // --- Rouge par absence : rien à examiner ne veut pas dire que c'est bon ---
+
+    private static void assertOnlyAbsence(List<Violation> violations) {
+        assertThat(violations).singleElement().satisfies(v -> {
+            assertThat(v.line()).isEqualTo(1);
+            assertThat(v.message()).contains("No value object has a static factory whose result can fail");
+        });
+    }
+
     @Test
-    void ignoresAFactoryThatReturnsThePlainRecordWithoutPromisingAFailure() {
+    void isRedWhenThereIsNoFactoryAtAll() {
+        String price = """
+                package demo.model;
+
+                public record Price(double base) {
+                }
+                """;
+
+        assertOnlyAbsence(check(price));
+    }
+
+    @Test
+    void isRedWhenTheModelIsEmpty() {
+        assertOnlyAbsence(check());
+    }
+
+    @Test
+    void aTrivialFactoryReturningThePlainRecordDoesNotMakeItGreen() {
         String slug = """
                 package demo.model;
 
@@ -89,7 +115,29 @@ class FactoryValidatesByCompositionRuleTest {
                 }
                 """;
 
-        assertThat(check(slug)).isEmpty();
+        assertOnlyAbsence(check(slug));
+    }
+
+    @Test
+    void aFactoryThatCanFailMakesItGreenEvenNextToATrivialOne() {
+        String slug = """
+                package demo.model;
+
+                public record Slug(String value) {
+                    public static Slug of(String raw) { return new Slug(raw.toLowerCase()); }
+                }
+                """;
+        String price = """
+                package demo.model;
+
+                import io.vavr.control.Option;
+
+                public record Price(double base) {
+                    public static Option<Price> of(double base) { return Option.when(base >= 0, () -> new Price(base)); }
+                }
+                """;
+
+        assertThat(check(slug, price)).isEmpty();
     }
 
     @Test
@@ -119,8 +167,10 @@ class FactoryValidatesByCompositionRuleTest {
                 }
                 """;
 
-        assertThat(check(entity)).isEmpty();
-        assertThat(check(instance)).isEmpty();
+        // Ni l'entité (pas un value object) ni la méthode d'instance (pas une fabrique) ne sont jugées, ni ne comptent :
+        // seule l'absence est signalée, jamais leur `if`.
+        assertOnlyAbsence(check(entity));
+        assertOnlyAbsence(check(instance));
     }
 
     @Test
@@ -138,7 +188,8 @@ class FactoryValidatesByCompositionRuleTest {
                 }
                 """;
 
-        assertThat(check(service)).isEmpty();
+        // Le `if` du service n'est pas jugé (hors modèle) : il ne reste que l'absence de fabrique dans le modèle.
+        assertOnlyAbsence(check(service));
     }
 
     // --- Mauvais cas : la fabrique branche, lance, ou ne décide rien ---

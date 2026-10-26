@@ -3,15 +3,13 @@ package com.omniproduct.model;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 public class Supplier implements Identifiable {
-    private SupplierId id;
+    private final SupplierId id;
 
-    private String name;
+    private final String name;
 
-    private Contact contact;
+    private final Contact contact;
 
-    private Address address;
-
-    public Supplier() {}
+    private final Address address;
 
     public Supplier(SupplierId id, String name, Contact contact, Address address) {
         this.id = id;
@@ -28,16 +26,8 @@ public class Supplier implements Identifiable {
         return id;
     }
 
-    public void setId(SupplierId id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     @JsonUnwrapped
@@ -45,16 +35,8 @@ public class Supplier implements Identifiable {
         return contact;
     }
 
-    public void setContact(Contact contact) {
-        this.contact = contact;
-    }
-
     @JsonUnwrapped
     public Address getAddress() {
         return address;
-    }
-
-    public void setAddress(Address address) {
-        this.address = address;
     }
 }

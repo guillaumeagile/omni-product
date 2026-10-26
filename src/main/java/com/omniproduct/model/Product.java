@@ -2,9 +2,9 @@ package com.omniproduct.model;
 
 public class Product implements Identifiable {
 
-    private ProductId id;
-    private String name;
-    private Price price;
+    private final ProductId id;
+    private final String name;
+    private final Price price;
 
     public Product(ProductId id, String name, Price price) {
         this.id = id;

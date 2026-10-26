@@ -9,19 +9,20 @@ Objectif : refactoriser du legacy vers du moderne, from SOLID to Cute DDD.
 
 1. respecter le Ubiquitous Language et qu'il s'applique au code
 3. séparer les Bounded Context (phase 1)
-4. voulez-vous moderniser le code ? CUPID is the way ! (phase 1 & 2)
+4. voulez-vous moderniser le code ? CUPID is the way ! (phases 1 à 3)
 
 ## Les deux phases
 
-L'atelier CUPID se joue en deux phases. Chaque phase vit sur sa propre branche, avec son propre code de départ et son
+L'atelier CUPID se joue en trois phases. Chaque phase vit sur sa propre branche, avec son propre code de départ et son
 propre harnais :
 
 | Phase | Branche | Thème | Règles | Énoncé | Guide en autonomie |
 |---|---|---|---|---|---|
 | 1 | `java-bdxio-phase1` | Unix philosophy : une classe, une raison de changer | HA5 à HA12.1 | [CUPID-step-1.md](docs/CUPID-step-1.md) | [CUPID-step-1-guide.md](CUPID-step-1-guide.md) |
-| 2 | `java-bdxio-phase2` | Composable : value objects, ADT, composition plutôt qu'héritage | celles de la phase 1, plus HA2, HA3, HA4.1 à HA4.9 | [CUPID-step1-2.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase2/docs/CUPID-step1-2.md) | [CUPID-step-2-guide.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase2/CUPID-step-2-guide.md) |
+| 2 | `java-bdxio-phase2` | Composable : value objects, ADT, composition plutôt qu'héritage | celles de la phase 1, plus HA2, HA3, HA4.1 à HA4.7 | [CUPID-step1-2.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase2/docs/CUPID-step1-2.md) | [CUPID-step-2-guide.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase2/CUPID-step-2-guide.md) |
+| 3 | `java-bdxio-phase3` | Composable, style fonctionnel : pipelines et fabriques qui composent | celles de la phase 2, plus HA14 et HA15 (le 13 est sauté) | [CUPID-step-3.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase3/docs/CUPID-step-3.md) | [CUPID-step-3-guide.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase3/CUPID-step-3-guide.md) |
 
-Les fichiers de la phase 2 n'existent que sur sa branche : les liens de la phase 2 pointent donc vers GitHub.
+Les fichiers des phases 2 et 3 n'existent que sur leur branche : leurs liens pointent donc vers GitHub.
 
 Le code à modifier est dans `src/main/java/com/omniproduct/model` et `src/main/java/com/omniproduct/service`. Ne
 touchez ni à `domain/`, ni à `infrastructure/`, ni à `harness/`.
@@ -31,11 +32,11 @@ touchez ni à `domain/`, ni à `infrastructure/`, ni à `harness/`.
 Le harnais est déterministe : le même code donne toujours le même verdict. Il analyse les sources avec tree-sitter et
 le bytecode avec ArchUnit, sans IA. Il faut un JDK 21 et Gradle.
 
-| Commande | Phase 1 | Phase 2 |
-|---|---|---|
-| règles de l'étape en cours | `./harness.sh 1` (ou `./harness.sh`) | `./harness.sh 2` (lance aussi les règles de l'étape 1) |
-| toutes les règles, comme l'arbitre | `./harness.sh all` | `./harness.sh all` |
-| rapport JSON en plus de la sortie texte | `./harness.sh all --json rapport.json` | `./harness.sh all --json rapport.json` |
+| Commande | Phase 1 | Phase 2 | Phase 3 |
+|---|---|---|---|
+| règles de l'étape en cours | `./harness.sh 1` (ou `./harness.sh`) | `./harness.sh 2` (lance aussi les règles de l'étape 1) | `./harness.sh 3` (lance aussi les règles des étapes 1 et 2) |
+| toutes les règles, comme l'arbitre | `./harness.sh all` | `./harness.sh all` | `./harness.sh all` |
+| rapport JSON en plus de la sortie texte | `./harness.sh all --json rapport.json` | `./harness.sh all --json rapport.json` | `./harness.sh all --json rapport.json` |
 
 Codes de sortie : `0` toutes les règles passent, `1` au moins une échoue, `2` le harnais n'a pas pu tourner (par
 exemple, le projet ne compile pas). Une ligne `[WARN]` ne fait jamais échouer le harnais, mais elle compte au jeu.
@@ -48,8 +49,8 @@ rouge, et c'est voulu.
 Chaque baby step est une pull request (PR) **en brouillon** (draft) qui fait passer **une seule** règle du rouge au
 vert.
 
-> **On ne fusionne jamais dans une branche de phase.** Personne ne fusionne de PR dans `java-bdxio-phase1` ni dans
-> `java-bdxio-phase2`, jamais : ces branches restent le point de départ commun à toutes les équipes. Vos PR restent en
+> **On ne fusionne jamais dans une branche de phase.** Personne ne fusionne de PR dans `java-bdxio-phase1`, `java-bdxio-phase2` ni
+> `java-bdxio-phase3`, jamais : ces branches restent le point de départ commun à toutes les équipes. Vos PR restent en
 > **draft**, ouvertes, et vos baby steps s'enchaînent sur vos propres branches. Entre vos branches de baby step, en
 > revanche, vous pouvez fusionner (`git merge`) : par exemple pour reprendre dans un baby step le travail d'un autre.
 
@@ -62,7 +63,7 @@ tableau de score, met à jour le classement et met le check au vert ou au rouge.
 
 1. **Partez de la bonne branche.**
    - Premier baby step de la phase : la branche de la phase (`java-bdxio-phase1` pour les règles HA5 à HA12.1,
-     `java-bdxio-phase2` pour celles de la phase 2).
+     `java-bdxio-phase2` pour celles de la phase 2, `java-bdxio-phase3` pour HA14 et HA15).
    - Baby steps suivants : la branche de **votre baby step précédent**. Rien n'étant fusionné dans la branche de la
      phase, c'est elle qui porte votre travail. Vous pouvez aussi y fusionner une autre de vos branches de baby step.
 
@@ -95,7 +96,7 @@ La **base** d'une PR est la branche à laquelle l'arbitre la compare. GitHub pro
 piège : `main` n'a pas d'arbitre, la PR est alors « hors jeu ».
 
 **La base est toujours la branche de la phase** : `java-bdxio-phase1` pour une règle de la phase 1,
-`java-bdxio-phase2` pour une règle de la phase 2. Jamais `main`, jamais la branche d'un autre baby step.
+`java-bdxio-phase2` pour une règle de la phase 2, `java-bdxio-phase3` pour une règle de la phase 3. Jamais `main`, jamais la branche d'un autre baby step.
 
 L'arbitre retrouve tout seul votre baby step précédent : la branche de votre équipe (même premier segment,
 `team-red/`) dont votre branche est partie. Il en tire deux mesures :
@@ -198,7 +199,7 @@ Ne fusionnez pas la PR dans la branche de la phase : laissez-la en draft, ouvert
 ouvertes. Pour le baby step suivant, créez une nouvelle branche à partir de celle que vous venez de terminer, puis une
 nouvelle PR draft vers la branche de la phase : retour à l'étape 1.
 
-Après chaque round, l'issue épinglée **CUPID workshop leaderboard (java-bdxio-phase1)** (ou `phase2`) classe les
+Après chaque round, l'issue épinglée **CUPID workshop leaderboard (java-bdxio-phase1)** (ou `phase2`, `phase3`) classe les
 équipes : la somme des scores de leurs PR ouvertes.
 
 ### Quand une PR est acceptée
@@ -246,12 +247,12 @@ pourquoi dans **Files changed**. Le nombre de classes est affiché sans points :
 | lambdas | +2 par lambda ajoutée, jusqu'à +10 |
 | imbrication max | +1 par niveau retiré, jusqu'à +4 |
 
-CK ne voit pas les records (limite de CK 0.7.0). En phase 2, les points viennent donc de mesures **PMD**
+CK ne voit pas les records (limite de CK 0.7.0). En phases 2 et 3, les points viennent donc de mesures **PMD**
 équivalentes, qui lisent Java 21 (records, `sealed`, `switch` à motifs) : fan-out (couplage), WMC max, TCC min
 (cohésion), champs mutables, affectations, boucles, lambdas, complexité cognitive totale et max ; plafond par mesure,
 sans plafond total. CK reste affiché pour comparaison, sans points.
 
-| Mesure PMD (phase 2) | Points |
+| Mesure PMD (phases 2 et 3) | Points |
 |---|---|
 | fan-out total (couplage) | +1 par 2 retirés, jusqu'à +5 |
 | fan-out max | +1 par 2 retirés, jusqu'à +4 |
@@ -293,7 +294,7 @@ score. Le harnais n'est qu'une heuristique : l'exercice, c'est votre réflexion 
 
 ### Règles du jeu
 
-- **Personne ne fusionne jamais dans `java-bdxio-phase1` ni dans `java-bdxio-phase2`.** Les PR restent en draft.
+- **Personne ne fusionne jamais dans `java-bdxio-phase1`, `java-bdxio-phase2` ni `java-bdxio-phase3`.** Les PR restent en draft.
   Fusionner une branche de baby step dans une autre est permis.
 - Ne modifiez jamais `harness/` pour faire passer une règle. Si une règle vous semble fausse, notez pourquoi et
   signalez-le à l'animateur.

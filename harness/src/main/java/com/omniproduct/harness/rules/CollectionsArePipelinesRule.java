@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// HA4.8 (moteur AST, erreur) - une collection se transforme par un pipeline (Stream), pas en remplissant un
+// HA14 (moteur AST, erreur) - une collection se transforme par un pipeline (Stream), pas en remplissant un
 // accumulateur. Est fautive toute itération qui modifie une variable déclarée hors d'elle :
 //   - une boucle `for`, `for (x : xs)`, `while`, `do ... while` ;
 //   - un `forEach` / `forEachOrdered` / `peek` dont la lambda ou la référence de méthode modifie l'extérieur
@@ -44,7 +44,7 @@ public final class CollectionsArePipelinesRule implements HarnessRule {
 
     @Override
     public String id() {
-        return "HA4.8";
+        return "HA14";
     }
 
     @Override

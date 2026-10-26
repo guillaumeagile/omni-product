@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Mutation du harnais : la preuve qu'une règle voit le défaut qu'elle vise, rejouée à chaque PR d'animateur.
 #
-# Une règle verte sur le legacy (parce que le défaut n'y est pas encore, comme HA4.9 : aucune fabrique) n'est prouvée
+# Une règle verte sur le legacy (parce que le défaut n'y est pas encore, comme HA15 : aucune fabrique) n'est prouvée
 # que par une mutation : on introduit le défaut dans le code, on lance le harnais, on vérifie qu'il le signale au bon
 # fichier et à la bonne ligne, puis on restaure le code. Chaque mutation est un dossier harness/mutations/<nom>/ :
 #   - les fichiers mutants, au même chemin que dans le dépôt (src/main/java/com/omniproduct/model/Slug.java) ;
@@ -52,7 +52,7 @@ mutate() {
 }
 
 # Les lignes signalées par UNE règle : celles qui suivent son « [FAIL] <règle> » jusqu'à la règle suivante.
-# Sans cette découpe, une ligne signalée par HA4.9 validerait aussi une attente sur HA4.8, rouge ailleurs.
+# Sans cette découpe, une ligne signalée par HA15 validerait aussi une attente sur HA14, rouge ailleurs.
 findings_of() {
     awk -v rule="$1" '/^\[(PASS|FAIL|WARN)\]/ { inside = ($1 == "[FAIL]" && $2 == rule); next } inside' "$2"
 }

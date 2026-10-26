@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-// Exercice étape 2 (HA4.8) : les libellés du catalogue se remplissent à la main, dans une boucle.
+// Exercice étape 2 (HA14) : les libellés du catalogue se remplissent à la main, dans une boucle.
 public class CatalogService {
 
     public List<String> catalogLabels(List<Product> products, LocalDate today) {

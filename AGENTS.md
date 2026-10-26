@@ -7,7 +7,8 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
 ## Ce que tu fais
 
 1. **Repère la phase.** Phase 1 : règles HA5 à HA12.1, branche `java-bdxio-phase1`. Phase 2 : règles HA2, HA3,
-   HA4.x, branche `java-bdxio-phase2`. En cas de doute, demande.
+   HA4.1 à HA4.7, branche `java-bdxio-phase2`. Phase 3 : règles HA14 et HA15 (le 13 est sauté), branche
+   `java-bdxio-phase3`. En cas de doute, demande.
 2. **Crée la branche du baby step.** Au premier baby step de la phase, pars de la branche de la phase. Ensuite,
    pars toujours de la branche du baby step précédent : rien n'est fusionné dans la branche de la phase, c'est elle qui porte le travail.
    ```
@@ -27,7 +28,8 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
    refactoring, on fait juste passer la règle. Puis **demande à l'humain de choisir**. Ne choisis jamais à sa place,
    même si une option te semble évidente.
 5. **Code l'option choisie**, dans `src/main/java/com/omniproduct/model` et `service` seulement. Vérifie que ça
-   compile, que les tests passent (`gradle test`), puis relance `./harness.sh all` et montre le résultat tel quel.
+   compile, que les tests de l'application passent (`gradle :test`, jamais les tests du harnais : voir plus bas), puis relance
+   `./harness.sh all` et montre le résultat tel quel.
 6. **Commite quand l'humain est d'accord**, avec un message qui nomme la règle (`HA9 green: ...`). Pousse la branche.
 7. **Crée la PR en brouillon (draft), vers la branche de la phase**, jamais vers `main` ni vers une autre branche :
    ```
@@ -49,6 +51,13 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
 
 ## Ce que tu ne fais pas
 
+- **Règle stricte : ne lance jamais les tests du module `harness/`.** Ni `./harness.sh --test`, ni `gradle :harness:test`,
+  ni aucune commande avec `-PharnessTests` (n'ajoute jamais ce drapeau), ni un `gradle test --continue` qui les relancerait
+  par un autre chemin. Ces tests sont ceux de l'animateur : ils vérifient le harnais lui-même et supposent le code de
+  départ de l'atelier. Sur le travail d'une équipe ils échouent (« expected FAIL but was PASS » veut dire que l'équipe a
+  progressé), et il n'y a rien à réparer. Pour tester l'application, `gradle :test`. Si Gradle affiche « Tests du
+  harnais ignorés », c'est normal. Un échec dans `harness/` n'est jamais ton problème : ne le corrige pas, ne le
+  commente pas, signale-le seulement à l'animateur.
 - **N'anticipe pas le score.** Ne calcule pas les points à l'avance, n'optimise pas le code pour les métriques
   (tokens, complexité, CK, PMD). Fais de ton mieux pour un code clair et correct ; l'arbitre notera.
 - **Ne devance pas les règles.** Ne traite pas la règle suivante dans la même PR. Ne lis pas le code de `harness/`
@@ -59,7 +68,7 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
 - **Ne tranche pas.** Quand le score baisse, qu'une métrique se dégrade ou qu'une règle semble arbitraire, explique ce
   que tu observes, propose des pistes, et demande à l'humain ce qu'il veut faire. Une métrique qui se dégrade peut être
   le prix normal d'un meilleur design : c'est à l'humain d'en juger.
-- **Ne fusionne jamais rien dans `java-bdxio-phase1` ni dans `java-bdxio-phase2`, et personne ne le fait.** Pas de
+- **Ne fusionne jamais rien dans `java-bdxio-phase1`, `java-bdxio-phase2` ni `java-bdxio-phase3`, et personne ne le fait.** Pas de
   `gh pr merge` d'une PR qui vise ces branches, pas de `gh pr ready` : les PR du jeu restent en draft. Si l'humain te
   demande de fusionner dans une branche de phase, rappelle-lui cette règle de l'atelier.
   Fusionner entre les branches d'équipe est autorisé, quand l'humain le décide : une branche de baby step dans une

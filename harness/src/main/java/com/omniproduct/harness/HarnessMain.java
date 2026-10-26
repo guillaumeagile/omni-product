@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 public final class HarnessMain {
 
     private static final String USAGE =
-            "Usage: harness [--step 1|2|all] [--json <rapport.json>] --classes <dossier-de-classes> <dossier-de-sources> [autres-sources...]";
+            "Usage: harness [--step 1|2|3|all] [--json <rapport.json>] --classes <dossier-de-classes> <dossier-de-sources> [autres-sources...]";
 
     private HarnessMain() {
     }

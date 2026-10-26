@@ -68,11 +68,33 @@ class HarnessMainTest {
             assertThat(rule.status()).isEqualTo("FAIL");
             assertThat(rule.severity()).isEqualTo("ERROR");
         });
-        // Exercice volontaire (CatalogService.catalogLabels remplit une liste dans une boucle) : HA4.8 est rouge.
-        assertThat(report.rule("HA4.8")).hasValueSatisfying(rule -> assertThat(rule.status()).isEqualTo("FAIL"));
-        // Le legacy n'a aucune fabrique (Perishable est une classe qui lance) : HA4.9 est rouge par absence, comme HA4.4.
+        // HA14 et HA15 sont des règles de l'étape 3 : l'étape 2 ne les connaît pas.
+        assertThat(report.rule("HA14")).isEmpty();
+        assertThat(report.rule("HA15")).isEmpty();
+    }
+
+    // L'étape 3 (phase 3, style fonctionnel) ajoute HA14 et HA15 à l'étape 2 ; `all` est l'étape 3. On saute le 13.
+    @Test
+    void step3AddsTheFunctionalStyleRulesAndAllIsStep3(@TempDir Path dir) {
+        Path json = dir.resolve("report.json");
+
+        Run result = run("--step", "3", "--json", json.toString(), "--classes", "../build/classes/java/main", "../src/main/java");
+        HarnessReport report = HarnessReport.read(json);
+
+        assertThat(result.exitCode()).isEqualTo(1);
+        assertThat(report.step()).isEqualTo("3");
+        assertThat(report.rules()).extracting(HarnessReport.RuleResult::id)
+                .isEqualTo(Steps.rules("3").stream().map(HarnessRule::id).toList())
+                .endsWith("HA14", "HA15")
+                .startsWith(Steps.rules("2").stream().map(HarnessRule::id).toArray(String[]::new));
+        assertThat(Steps.rules("all").stream().map(HarnessRule::id).toList())
+                .isEqualTo(Steps.rules("3").stream().map(HarnessRule::id).toList());
+        assertThat(Steps.rules("3").stream().map(HarnessRule::id)).doesNotContain("HA13");
+        // Exercice volontaire (CatalogService.catalogLabels remplit une liste dans une boucle) : HA14 est rouge.
+        assertThat(report.rule("HA14")).hasValueSatisfying(rule -> assertThat(rule.status()).isEqualTo("FAIL"));
+        // Le legacy n'a aucune fabrique (Perishable est une classe qui lance) : HA15 est rouge par absence, comme HA4.4.
         // Une règle verte parce qu'il n'y a rien à examiner ne prouverait rien et ne laisserait rien à jouer.
-        assertThat(report.rule("HA4.9")).hasValueSatisfying(rule -> {
+        assertThat(report.rule("HA15")).hasValueSatisfying(rule -> {
             assertThat(rule.status()).isEqualTo("FAIL");
             assertThat(rule.violations()).isEqualTo(1);
         });

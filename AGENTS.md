@@ -60,6 +60,7 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
   commente pas, signale-le seulement à l'animateur.
 - **N'anticipe pas le score.** Ne calcule pas les points à l'avance, n'optimise pas le code pour les métriques
   (tokens, complexité, CK, PMD). Fais de ton mieux pour un code clair et correct ; l'arbitre notera.
+  Ne remplis pas non plus `SCORE-TEAM.md` : c'est l'humain qui le tient à la main, en recopiant le verdict de l'arbitre.
 - **Ne devance pas les règles.** Ne traite pas la règle suivante dans la même PR. Ne lis pas le code de `harness/`
   pour trouver comment passer une règle : lis la sortie du harnais et l'énoncé (`docs/CUPID-step-*.md`).
 - **Ne réfléchis pas au-delà de la règle en cours.** Tu sais qu'il y a d'autres règles et qu'elles peuvent tirer dans

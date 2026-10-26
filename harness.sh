@@ -2,7 +2,7 @@
 # Harnais CUPID : vérifications structurelles déterministes (même code en entrée, même verdict en sortie).
 #
 # Usage : ./harness.sh [--clean] [étape] [--json rapport.json]   (étape : 1 par défaut ; 1 ou all)
-#         ./harness.sh --test         (lance les tests du harnais lui-même)
+#         ./harness.sh --test         (lance les tests du harnais lui-même : réservé à l'animateur)
 #
 # --clean : recompile tout depuis zéro (gradle clean), pour écarter tout doute sur un cache.
 #
@@ -24,7 +24,7 @@ else
 fi
 
 if [ "${1:-}" = "--test" ]; then
-    exec "${GRADLE[@]}" :harness:test
+    exec "${GRADLE[@]}" :harness:test -PharnessTests
 fi
 
 CLEAN=()

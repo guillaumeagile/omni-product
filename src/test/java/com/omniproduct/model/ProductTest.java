@@ -33,7 +33,7 @@ class ProductTest {
     @Test
     void aNonExpiringProductKeepsItsBestBeforeDate() {
         LocalDate bestBefore = LocalDate.of(2027, 6, 1);
-        Product rice = new Product(new ProductId(UUID_1), "Rice", PRICE, new NonExpiring(bestBefore));
+        Product rice = Product.of(new ProductId(UUID_1), "Rice", PRICE, new NonExpiring(bestBefore)).get();
 
         assertThat(rice.getName()).isEqualTo("Rice");
         assertThat(rice.getPrice()).isEqualTo(PRICE);
@@ -43,7 +43,7 @@ class ProductTest {
     @Test
     void aPerishableProductKeepsItsDates() {
         Perishable yoghurt = Perishable.of(LocalDate.of(2026, 11, 10), LocalDate.of(2026, 11, 15)).get();
-        Product product = new Product(new ProductId(UUID_1), "Yoghurt", PRICE, yoghurt);
+        Product product = Product.of(new ProductId(UUID_1), "Yoghurt", PRICE, yoghurt).get();
 
         assertThat(product.getShelfLife()).isEqualTo(yoghurt);
     }
@@ -51,7 +51,7 @@ class ProductTest {
     @Test
     void aPerishableProductCanBeSoldUntilItsSellByDate() {
         LocalDate sellBy = LocalDate.of(2026, 11, 10);
-        Product yoghurt = new Product(new ProductId(UUID_1), "Yoghurt", PRICE, Perishable.of(sellBy, sellBy.plusDays(5)).get());
+        Product yoghurt = Product.of(new ProductId(UUID_1), "Yoghurt", PRICE, Perishable.of(sellBy, sellBy.plusDays(5)).get()).get();
 
         assertThat(yoghurt.canSellOn(sellBy)).isTrue();
         assertThat(yoghurt.canSellOn(sellBy.plusDays(1))).isFalse();
@@ -59,8 +59,13 @@ class ProductTest {
 
     @Test
     void aNonExpiringProductCanAlwaysBeSold() {
-        Product rice = new Product(new ProductId(UUID_1), "Rice", PRICE, new NonExpiring(LocalDate.of(2027, 6, 1)));
+        Product rice = Product.of(new ProductId(UUID_1), "Rice", PRICE, new NonExpiring(LocalDate.of(2027, 6, 1))).get();
 
         assertThat(rice.canSellOn(LocalDate.of(2099, 1, 1))).isTrue();
+    }
+
+    @Test
+    void aProductWithoutShelfLifeIsNotCreated() {
+        assertThat(Product.of(new ProductId(UUID_1), "Gift card", PRICE, null).isEmpty()).isTrue();
     }
 }

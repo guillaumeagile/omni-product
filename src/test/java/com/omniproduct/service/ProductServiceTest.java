@@ -23,11 +23,11 @@ class ProductServiceTest {
     private static final LocalDate SELL_BY = LocalDate.of(2026, 11, 10);
     private static final ProductStock STOCK = new ProductStock(new Quantity(3), new Quantity(1), new Product.Warehouse(null));
 
-    private static final Product YOGHURT = new Product(
+    private static final Product YOGHURT = Product.of(
             new ProductId(UUID.fromString("0190a6e2-7b3c-7d4e-8f00-000000000001")),
             "Yoghurt",
             PRICE,
-            Perishable.of(SELL_BY, SELL_BY.plusDays(5)).get());
+            Perishable.of(SELL_BY, SELL_BY.plusDays(5)).get()).get();
 
     @Test
     void sellsOneUnitWhileTheProductCanBeSold() {

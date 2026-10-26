@@ -1,6 +1,7 @@
 package com.omniproduct.model;
 
 import com.omniproduct.model.valueobject.Price;
+import io.vavr.control.Option;
 
 import java.time.LocalDate;
 
@@ -11,11 +12,15 @@ public class Product implements Identifiable {
     private final Price price;
     private final ShelfLife shelfLife;
 
-    public Product(ProductId id, String name, Price price, ShelfLife shelfLife) {
+    private Product(ProductId id, String name, Price price, ShelfLife shelfLife) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.shelfLife = shelfLife;
+    }
+
+    public static Option<Product> of(ProductId id, String name, Price price, ShelfLife shelfLife) {
+        return Option.of(shelfLife).map(validShelfLife -> new Product(id, name, price, validShelfLife));
     }
 
     public ProductId getId() { return id; }

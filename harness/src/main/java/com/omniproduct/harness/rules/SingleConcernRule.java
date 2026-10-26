@@ -12,6 +12,7 @@ import com.omniproduct.harness.Violation;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -22,10 +23,19 @@ import java.util.stream.Stream;
 // ubiquitous-language-map.json. Un type dont l'API publique couvre plus d'un contexte mélange des
 // responsabilités : c'est le smell Product / ProductService (catalogue, prix, stock, fournisseur, transport...).
 // La section "restrictions" interdit en plus, par nom de type, du vocabulaire volontairement extrait.
+// Construire n'est pas une préoccupation de plus : une fabrique statique (méthode `static` qui rend le type ou son
+// Builder imbriqué, sans prendre d'instance du type en paramètre) et les membres d'un Builder (ceux qui rendent le
+// Builder ou le type construit) ne comptent pas dans les contextes. Le critère est la forme, jamais le nom : `of`,
+// `fromSupplier` ou `ofPrice` sont acceptées au même titre, et `static Product recompute(Product p)`, qui transforme
+// une instance, reste comptée. Les restrictions de vocabulaire, elles, s'appliquent à tous les membres.
 public final class SingleConcernRule implements HarnessRule {
 
-    // Un membre de l'API : son nom, l'endroit où le signaler, et les types qu'il expose (retour, paramètres).
-    private record Member(String name, Node at, List<String> types) {
+    // Un membre de l'API : son nom, l'endroit où le signaler, les types qu'il expose (retour, paramètres), et s'il
+    // construit le type (fabrique statique, Builder) plutôt que de rendre un service.
+    private record Member(String name, Node at, List<String> types, boolean construction) {
+        Member(String name, Node at, List<String> types) {
+            this(name, at, types, false);
+        }
     }
 
     private final UbiquitousLanguageMap languageMap;
@@ -60,6 +70,7 @@ public final class SingleConcernRule implements HarnessRule {
 
     private Stream<Violation> tooManyConcerns(Node type) {
         Map<String, List<String>> byConcern = publicMembers(type)
+                .filter(member -> !member.construction())
                 .flatMap(member -> concernOf(member)
                         .map(concern -> Map.entry(concern, member.name())).stream())
                 .collect(Collectors.groupingBy(Map.Entry::getKey, TreeMap::new,
@@ -121,11 +132,51 @@ public final class SingleConcernRule implements HarnessRule {
     }
 
     private static Stream<Member> methods(Node type) {
+        boolean builder = isBuilder(type);
         return type.field("body").stream()
                 .flatMap(Node::children)
                 .filter(member -> member.is("method_declaration") && !member.hasModifier("private"))
                 .flatMap(method -> method.field("name").stream().map(name -> new Member(name.text(), name,
-                        typeNames(Stream.concat(method.field("type").stream(), parameterTypes(method))))));
+                        typeNames(Stream.concat(method.field("type").stream(), parameterTypes(method))),
+                        constructs(type, builder, method))));
+    }
+
+    // Une fabrique statique rend le type ou son Builder imbriqué, et ne prend pas d'instance du type (sinon elle le
+    // transforme). Dans un Builder, construire, c'est rendre le Builder (setters fluides) ou le type construit.
+    private static boolean constructs(Node type, boolean builder, Node method) {
+        String own = nameOf(type);
+        List<String> returned = typeNames(method.field("type").stream());
+        return method.hasModifier("static")
+                ? returned.stream().anyMatch(name -> name.equals(own) || nestedNames(type).contains(name))
+                        && !typeNames(parameterTypes(method)).contains(own)
+                : builder && returned.stream().anyMatch(name -> name.equals(own) || enclosingName(type).filter(name::equals).isPresent());
+    }
+
+    // Un Builder est un type imbriqué dont une méthode d'instance rend le type englobant (`build()`).
+    private static boolean isBuilder(Node type) {
+        return enclosingName(type).map(enclosing -> type.field("body").stream()
+                .flatMap(Node::children)
+                .filter(member -> member.is("method_declaration") && !member.hasModifier("static"))
+                .anyMatch(method -> typeNames(method.field("type").stream()).contains(enclosing))).orElse(false);
+    }
+
+    private static Set<String> nestedNames(Node type) {
+        return type.field("body").stream()
+                .flatMap(Node::children)
+                .filter(member -> member.is("class_declaration", "record_declaration"))
+                .map(SingleConcernRule::nameOf)
+                .collect(Collectors.toSet());
+    }
+
+    private static Optional<String> enclosingName(Node type) {
+        return type.parent()
+                .flatMap(Node::parent)
+                .filter(outer -> outer.is("class_declaration", "record_declaration"))
+                .map(SingleConcernRule::nameOf);
+    }
+
+    private static String nameOf(Node type) {
+        return type.field("name").orElseThrow().text();
     }
 
     private static Stream<Node> parameterTypes(Node method) {

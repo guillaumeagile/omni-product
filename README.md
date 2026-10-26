@@ -202,6 +202,11 @@ nouvelle PR draft vers la branche de la phase : retour à l'étape 1.
 Après chaque round, l'issue épinglée **CUPID workshop leaderboard (java-bdxio-phase1)** (ou `phase2`, `phase3`) classe les
 équipes : la somme des scores de leurs PR ouvertes.
 
+Chaque round est noté seul, par rapport à votre baby step précédent. Le score total de votre équipe est envoyé par
+l'arbitre sous forme d'**issue** du projet, **Score <équipe> (<branche de la phase>)** : son corps est le registre
+cumulé de vos PR ouvertes (score du round, puis cumul), et chaque PR y a un commentaire, sa carte de score, mis à jour
+à chaque push. Rien à remplir à la main.
+
 ### Quand une PR est acceptée
 
 Une PR est acceptée quand :
@@ -282,6 +287,7 @@ Le niveau dépend de la part des règles bloquantes (hors `[WARN]`) au vert dans
 | 🍼 Baby step | une seule règle passe au vert |
 | 🧼 No regression | la PR est acceptée sans régression |
 | 🤏 Small diff | le diff fait 400 tokens ou moins |
+| 🧹 Clean Coder | les mesures PMD de `model/` et `service/` rapportent au moins +2 points dans le round (PR acceptée) |
 | 👑 Boss defeated | HA4.3 ou HA4.5 passe au vert (phase 2) |
 | 🧠 Compiler-checked | HA4.5 passe au vert (phase 2) |
 

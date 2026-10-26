@@ -72,6 +72,7 @@ public final class Scorecard {
             "🍼 Baby step", "2ea44f",
             "🧼 No regression", "1f6feb",
             "🤏 Small diff", "8250df",
+            "🧹 Clean Coder", "0e8a8a",
             "👑 Boss defeated", "d4a017",
             "🧠 Compiler-checked", "e36209");
 

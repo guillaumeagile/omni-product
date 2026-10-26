@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 
 // Ligne de commande de l'arbitre, appelée par la GitHub Action :
 //   referee --base base.json --head head.json --title "HA9 green: ..." --branch step-1/ha9 \
-//           [--changed-files fichiers.txt] [--changed-tokens 120] [--small-diff 400] [--out commentaire.md] \
+//           [--changed-files fichiers.txt] [--changed-tokens 120] [--small-diff 400] [--tokens-per-point 100] [--out commentaire.md] \
 //           [--phase phase.json --previous "`team-red/step-1/ha8` (abc1234)"]
 // --base est le baby step précédent de l'équipe (ou la branche de la phase au premier step) : le score du round est
 // le delta avec lui. --phase est le départ de la phase, pour montrer le chemin parcouru, sans points.
@@ -23,7 +23,7 @@ import java.util.stream.IntStream;
 public final class RefereeMain {
 
     private static final List<String> KEYS =
-            List.of("--base", "--head", "--title", "--branch", "--changed-files", "--changed-tokens", "--small-diff", "--out", "--phase", "--previous");
+            List.of("--base", "--head", "--title", "--branch", "--changed-files", "--changed-tokens", "--small-diff", "--tokens-per-point", "--out", "--phase", "--previous");
 
     private RefereeMain() {
     }
@@ -35,7 +35,7 @@ public final class RefereeMain {
     public static int run(String[] args) {
         if (args.length % 2 != 0 || IntStream.range(0, args.length / 2).anyMatch(i -> !KEYS.contains(args[2 * i]))) {
             System.err.println("Usage: referee --base <json> --head <json> --title <titre> --branch <branche> "
-                    + "[--changed-files <fichier>] [--changed-tokens <n>] [--small-diff <n>] [--out <md>] "
+                    + "[--changed-files <fichier>] [--changed-tokens <n>] [--small-diff <n>] [--tokens-per-point <n>] [--out <md>] "
                     + "[--phase <json> --previous <texte>]");
             return 2;
         }
@@ -47,7 +47,8 @@ public final class RefereeMain {
                 options.getOrDefault("--branch", ""),
                 Optional.ofNullable(options.get("--changed-files")).map(Path::of).map(RefereeMain::lines).orElse(List.of()),
                 Long.parseLong(options.getOrDefault("--changed-tokens", String.valueOf(Long.MAX_VALUE))),
-                Long.parseLong(options.getOrDefault("--small-diff", "400")));
+                Long.parseLong(options.getOrDefault("--small-diff", "400")),
+                Long.parseLong(options.getOrDefault("--tokens-per-point", String.valueOf(Referee.TOKENS_PER_POINT))));
 
         Optional<HarnessReport> head = report(options.get("--head"));
         Referee.Verdict verdict = Referee.judge(report(options.get("--base")), head, pr)

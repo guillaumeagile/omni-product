@@ -101,7 +101,7 @@ with [ArchUnit](https://www.archunit.org). Rule implementations and their pinnin
 
 The script compiles the project first: a project that does not compile never passes. Exit code `0` means every
 check passes, `1` that at least one fails, `2` that the harness could not run (bad usage, nothing compiled).
-`[WARN]` lines never fail the harness. `./harness.sh --test` runs the harness' own tests.
+`[WARN]` lines never fail the harness. `./harness.sh --test` runs the harness' own tests: that is for the workshop host only, players never run them.
 
 Do not relax or rewrite the harness rules to make the exercise pass - that defeats the assessment. If a rule
 genuinely looks wrong, flag it.

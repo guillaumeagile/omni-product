@@ -1,5 +1,7 @@
 package com.omniproduct.model;
 
+import com.omniproduct.model.valueobject.Price;
+
 public class Product implements Identifiable {
 
     private final ProductId id;
@@ -17,8 +19,6 @@ public class Product implements Identifiable {
     public String getName() { return name; }
 
     public Price getPrice() { return price; }
-
-    public record Price(Amount base, Amount tax, TaxRate taxRate) {}
 
     public record Warehouse(Location location) {}
 

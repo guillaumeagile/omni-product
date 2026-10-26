@@ -1,5 +1,7 @@
 package com.omniproduct.model;
 
+import com.omniproduct.model.valueobject.Price;
+
 import java.time.LocalDate;
 import java.util.Objects;
 

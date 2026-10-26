@@ -5,7 +5,7 @@ import com.omniproduct.model.NonExpiring;
 import com.omniproduct.model.Perishable;
 import com.omniproduct.model.Product;
 import com.omniproduct.model.ProductId;
-import com.omniproduct.model.TaxRate;
+import com.omniproduct.model.valueobject.Price;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -114,7 +114,7 @@ class CatalogServiceTest {
         return new ProductId(UUID.randomUUID());
     }
 
-    private static Product.Price price() {
-        return new Product.Price(new Amount(10.0), new Amount(2.0), new TaxRate(0.2));
+    private static Price price() {
+        return new Price(new Amount(10.0), new Amount(2.0));
     }
 }

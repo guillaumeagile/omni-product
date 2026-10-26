@@ -1,5 +1,6 @@
 package com.omniproduct.model;
 
+import com.omniproduct.model.valueobject.Price;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -11,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class PerishableTest {
 
     private static final ProductId ID = new ProductId(UUID.fromString("0190a6e2-7b3c-7d4e-8f00-000000000001"));
-    private static final Product.Price PRICE = new Product.Price(new Amount(10.0), new Amount(2.0), new TaxRate(0.2));
+    private static final Price PRICE = new Price(new Amount(10.0), new Amount(2.0));
     private static final LocalDate SELL_BY = LocalDate.of(2026, 11, 10);
     private static final LocalDate USE_BY = LocalDate.of(2026, 11, 15);
 

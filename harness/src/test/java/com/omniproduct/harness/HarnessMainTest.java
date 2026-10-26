@@ -49,13 +49,13 @@ class HarnessMainTest {
 
         assertThat(result.exitCode()).isEqualTo(1);
         assertThat(result.out().lines().filter(line -> line.startsWith("[FAIL]")).map(line -> line.split(" ")[1]).toList())
-                .containsExactly("HA14", "HA15", "HA16", "HA17");
-        assertThat(result.out()).contains("CatalogService.java:", "Perishable.java:", "ProductService.java:");
+                .containsExactly("HA14", "HA15", "HA16", "HA17", "HA18");
+        assertThat(result.out()).contains("CatalogService.java:", "Perishable.java:", "ProductService.java:", "Product.java:", "Supplier.java:");
         assertThat(result.out()).contains("HARNESS RESULT: FAIL");
     }
 
     // Le rapport JSON reflète la sortie texte : mêmes règles, dans l'ordre de l'étape, mêmes statuts.
-    // L'étape 3 ajoute HA14, HA15, HA16, HA17 et HA21 à l'étape 2 ; `all` est l'étape 3. La numérotation saute le 13.
+    // L'étape 3 ajoute HA14, HA15, HA16, HA17, HA18 et HA21 à l'étape 2 ; `all` est l'étape 3. La numérotation saute le 13.
     @Test
     void writesAMachineReadableReport(@TempDir Path dir) {
         Path json = dir.resolve("report.json");
@@ -68,13 +68,13 @@ class HarnessMainTest {
         assertThat(report.result()).isEqualTo("FAIL");
         assertThat(report.rules()).extracting(HarnessReport.RuleResult::id)
                 .isEqualTo(Steps.rules("3").stream().map(HarnessRule::id).toList())
-                .endsWith("HA14", "HA15", "HA16", "HA17", "HA21")
+                .endsWith("HA14", "HA15", "HA16", "HA17", "HA18", "HA21")
                 .startsWith(Steps.rules("2").stream().map(HarnessRule::id).toArray(String[]::new));
         assertThat(Steps.rules("all").stream().map(HarnessRule::id).toList())
                 .isEqualTo(Steps.rules("3").stream().map(HarnessRule::id).toList());
         assertThat(Steps.rules("3").stream().map(HarnessRule::id)).doesNotContain("HA13");
         assertThat(report.rules().stream().filter(rule -> rule.status().equals("FAIL")).map(HarnessReport.RuleResult::id).toList())
-                .isEqualTo(List.of("HA14", "HA15", "HA16", "HA17"));
+                .isEqualTo(List.of("HA14", "HA15", "HA16", "HA17", "HA18"));
         // Exercice volontaire (CatalogService.catalogLabels remplit une liste dans une boucle) : HA14 est rouge.
         assertThat(report.rule("HA14")).hasValueSatisfying(rule -> {
             assertThat(rule.status()).isEqualTo("FAIL");
@@ -97,6 +97,12 @@ class HarnessMainTest {
             assertThat(rule.status()).isEqualTo("FAIL");
             assertThat(rule.severity()).isEqualTo("ERROR");
             assertThat(rule.violations()).isEqualTo(1);
+        });
+        // Exercice volontaire (Product.Warehouse, Product.Supplier, Supplier.Contact, Supplier.Address) : HA18 est rouge.
+        assertThat(report.rule("HA18")).hasValueSatisfying(rule -> {
+            assertThat(rule.status()).isEqualTo("FAIL");
+            assertThat(rule.severity()).isEqualTo("ERROR");
+            assertThat(rule.violations()).isEqualTo(4);
         });
     }
 

@@ -9,7 +9,7 @@ libraries already offer for "do this, then that", and small pure steps compose w
 
 **Where you start.** The phase 3 starting code has done steps 1 and 2: the model is immutable, `Product` carries a
 `ShelfLife` ADT, the sale checks `canSell` before it withdraws, the model never reads the clock. `./harness.sh 3` runs
-the rules of steps 1 and 2 too, and they are green. Four rules are red, and they are the exercise. A fifth rule,
+the rules of steps 1 and 2 too, and they are green. Five rules are red, and they are the exercise. A sixth rule,
 `HA21`, is green: it guards the way you use Vavr (see below) and only turns red if you open a Vavr container.
 
 The rules of this step are numbered from `HA14`: the number 13 is skipped on purpose.
@@ -86,6 +86,12 @@ new ProductStock(new Quantity(stock.stock().value() - 1), stock.quantity(), stoc
 The service knows how a stock is made, and what "withdraw one" means is not written anywhere in the model. Tell the
 object what you want (`stock.withdrawOne()`) and let it decide how to change itself.
 
+### HA18 - A type nested in an entity is a concept of its own
+
+`Product` and `Supplier` hold small records inside their own body: `Product.Warehouse`, `Product.Supplier` (the same
+name as the `Supplier` entity), `Supplier.Contact`, `Supplier.Address`. A nested type cannot be used without naming the
+entity that hosts it, and the two names can collide. Give each one its own file and its own name.
+
 ### HA21 - A Vavr container is consumed by `fold`, never opened
 
 `Either`, `Option`, `Try` and `Validation` say "this may have failed" in the type. Opening them throws the information
@@ -115,6 +121,7 @@ to choose yours. A *value object* here is a `record` that does not implement `Id
 | HA15 | A value object factory (static, named `create`/`build`/`of`/`from`/`make` or returning the record) validates by composing `Option`/`Validation`/`Either` steps (`filter`, `flatMap`, `map`, `combine`): no `if`, `?:`, `switch`, `throw`, `assert` or guard call in it nor in a private helper it calls; a factory whose return type can fail must hold at least one lambda or method reference. At least one such factory must exist (a generic or sealed result): without one the rule is red, like HA4.4. | error |
 | HA16 | In `service`, no `if` whose condition carries a domain decision (a name with the word `can`, or `sellable`, `allowed`, `permitted`, `eligible`, `decide`, `decision`, directly or through a local variable) and whose branch ends in `return` or `throw`, and no such decision in a returned `?:`. Compose it with `Option.when`, `filter`, `map` or `fold`. | error |
 | HA17 | In `service`, a method does not build an object of the type of one of its parameters (`new T(...)` or `T.of(...)`, any factory name) from 2 or more distinct accessors of that parameter (`x()`, `getX()`, a field, a chain such as `p.x().y()`, or a local variable that holds the read). The type must be declared in the analysed sources. | error |
+| HA18 | In `model`, an entity (a class that implements `Identifiable`, or that declares an identity field such as `id` or `productId`) declares no type inside its body: no `record`, `class`, `interface` or `enum`, whatever its visibility or depth. | error |
 | HA21 | No call, and no method reference, that opens a Vavr container of `io.vavr.control` (`Either`, `Option`, `Try`, `Validation`) in `model/` and `service/`: `get()`, `getLeft()`, `getError()`, `getCause()`, anything with `throw` in its name (`getOrElseThrow`), and the tests `isLeft()`, `isRight()`, `isEmpty()`, `isDefined()`, `isSuccess()`, `isFailure()`, `isValid()`, `isInvalid()`. The check is on the compiled code and reads the method name in words, so a static import or a variable typed by a supertype does not hide the call. | error |
 
 ## Assessment

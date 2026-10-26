@@ -265,6 +265,7 @@ Le niveau dépend de la part des règles bloquantes (hors `[WARN]`) au vert dans
 | 🍼 Baby step | une seule règle passe au vert |
 | 🧼 No regression | la PR est acceptée sans régression |
 | 🤏 Small diff | le diff fait 400 tokens ou moins |
+| 🧹 Clean Coder | les mesures CK de `model/` et `service/` rapportent au moins +2 points dans le round (PR acceptée) |
 | 👑 Boss defeated | HA4.3 ou HA4.5 passe au vert (phase 2) |
 | 🧠 Compiler-checked | HA4.5 passe au vert (phase 2) |
 

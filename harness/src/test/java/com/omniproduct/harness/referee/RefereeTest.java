@@ -192,6 +192,25 @@ class RefereeTest {
     }
 
     @Test
+    void cleanCoderBadgeNeedsAtLeastTwoQualityPointsInAnAcceptedPullRequest() {
+        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, ck(8, 37, 14, 28, 0.90, 27, 64, 0, 5, 0)),
+                rule("HA9", "FAIL", 2));
+        // CBO max -3 : +1 point seulement.
+        Verdict onePoint = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(8, 37, 11, 28, 0.90, 27, 64, 0, 5, 0)),
+                rule("HA9", "PASS", 0)), pr("HA9 green"));
+        // CBO max -3 (+1) et WMC max -15 (+5) : +6 points.
+        Verdict sixPoints = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(8, 37, 11, 13, 0.90, 27, 64, 0, 5, 0)),
+                rule("HA9", "PASS", 0)), pr("HA9 green"));
+        // Même gain, mais une règle reste rouge : PR refusée, aucun point, aucun badge.
+        Verdict rejected = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(8, 37, 11, 13, 0.90, 27, 64, 0, 5, 0)),
+                rule("HA9", "FAIL", 1)), pr("HA9 green"));
+
+        assertThat(onePoint.badges()).doesNotContain("🧹 Clean Coder");
+        assertThat(sixPoints.badges()).contains("🧹 Clean Coder");
+        assertThat(rejected.badges()).doesNotContain("🧹 Clean Coder");
+    }
+
+    @Test
     void ckPointsAreCappedPerMetricOnlyAndAWorseMetricCostsNothing() {
         Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, ck(1, 500, 50, 100, 1.0, 100, 500, 50, 0, 9)),
                 rule("HA9", "FAIL", 2));

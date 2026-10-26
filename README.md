@@ -201,11 +201,10 @@ nouvelle PR draft vers la branche de la phase : retour à l'étape 1.
 Après chaque round, l'issue épinglée **CUPID workshop leaderboard (java-bdxio-phase1)** (ou `phase2`) classe les
 équipes : la somme des scores de leurs PR ouvertes.
 
-Chaque round est noté seul, par rapport à votre baby step précédent : pour suivre votre total, remplissez à la main
-[SCORE-TEAM.md](SCORE-TEAM.md) après chaque baby step (score du round, puis cumul) et comparez-le au classement.
-L'arbitre tient aussi, pour chaque équipe, une issue **Score <équipe> (<branche de la phase>)** : son corps est le registre
-cumulé de vos PR ouvertes, et chaque PR y a un commentaire, sa carte de score, mis à jour à chaque push. C'est la
-référence pour vérifier votre tableau.
+Chaque round est noté seul, par rapport à votre baby step précédent. Le score total de votre équipe est envoyé par
+l'arbitre sous forme d'**issue** du projet, **Score <équipe> (<branche de la phase>)** : son corps est le registre
+cumulé de vos PR ouvertes (score du round, puis cumul), et chaque PR y a un commentaire, sa carte de score, mis à jour
+à chaque push. Rien à remplir à la main.
 
 ### Quand une PR est acceptée
 

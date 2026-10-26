@@ -1,7 +1,9 @@
 package com.omniproduct.harness;
 
 import com.omniproduct.harness.rules.BareIdentifierIsWeakRule;
+import com.omniproduct.harness.rules.CollectionsArePipelinesRule;
 import com.omniproduct.harness.rules.EntityMustImplementIdentifiableRule;
+import com.omniproduct.harness.rules.FactoryValidatesByCompositionRule;
 import com.omniproduct.harness.rules.FanOutRule;
 import com.omniproduct.harness.rules.ImmutableDataStructuresRule;
 import com.omniproduct.harness.rules.MatchOverAdtRule;
@@ -64,8 +66,8 @@ public final class Steps {
                 new BareIdentifierIsWeakRule(IS_MODEL_OR_SERVICE));
     }
 
-    // L'étape 1 plus HA2 (données immuables), HA3 (value objects), HA4.1 à HA4.7 (composable, ADT, horloge, vente).
-    // HA4.7 est un avertissement.
+    // L'étape 1 plus HA2 (données immuables), HA3 (value objects), HA4.1 à HA4.9 (composable, ADT, horloge, vente,
+    // pipelines, fabrique par composition).
     private static List<HarnessRule> step2() {
         return Stream.concat(step1().stream(), List.<HarnessRule>of(
                 new ImmutableDataStructuresRule(IS_MODEL),
@@ -76,7 +78,9 @@ public final class Steps {
                 new ValueObjectFactoryRule(IS_MODEL),
                 new MatchOverAdtRule(IS_MODEL_OR_SERVICE),
                 new NoClockInModelRule(MODEL_PACKAGE + ".."),
-                new SellChecksCanSellBeforeWithdrawRule(IS_MODEL_OR_SERVICE)).stream()).toList();
+                new SellChecksCanSellBeforeWithdrawRule(IS_MODEL_OR_SERVICE),
+                new CollectionsArePipelinesRule(IS_MODEL_OR_SERVICE),
+                new FactoryValidatesByCompositionRule(IS_MODEL)).stream()).toList();
     }
 
     private static boolean isIn(String pkg, String base) {

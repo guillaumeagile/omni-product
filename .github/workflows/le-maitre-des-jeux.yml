@@ -1,0 +1,103 @@
+# Le maître des jeux : les PR de l'animateur, qui changent le jeu (harness/, workflows, exercices) au lieu d'y jouer.
+# Elles ne passent que si leur dernier commit contient le mot « abracadabra » ; harness-game s'efface alors (voir son
+# job « formule »). Ici, on vérifie que le harnais et l'application compilent et que leurs tests passent ; le harnais
+# est lancé sur le legacy pour information : il y est rouge, c'est voulu (les exercices). Puis les mutations du harnais
+# (harness/mutations, jouées par harness/mutate.sh) prouvent que chaque règle voit le défaut qu'elle vise.
+name: le-maitre-des-jeux
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: le-maitre-des-jeux-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  formule:
+    name: Formule magique
+    runs-on: ubuntu-latest
+    outputs:
+      magic: ${{ steps.word.outputs.magic }}
+    steps:
+      - id: word
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          message=$(gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA" --jq .commit.message)
+          if grep -qiw abracadabra <<< "$message"; then
+            echo "magic=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "magic=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  le-maitre-des-jeux:
+    name: le-maitre-des-jeux
+    needs: formule
+    if: needs.formule.outputs.magic == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      # gradle-wrapper.jar n'est pas versionné : on utilise le Gradle installé.
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.5.0"
+
+      - name: Tests du harnais
+        run: gradle :harness:test
+
+      - name: Tests de l'application
+        run: gradle test
+
+      - name: Harnais sur le legacy (pour information)
+        run: |
+          set +e
+          ./harness.sh all > "$RUNNER_TEMP/harness.txt" 2>&1
+          code=$?
+          {
+            echo "## 🧙 Le maître des jeux"
+            echo
+            echo "Harnais sur le legacy : code de sortie \`$code\` (0 vert, 1 règles rouges, 2 inutilisable)."
+            echo
+            echo '```'
+            grep -E '^\[(PASS|FAIL|WARN)\]|HARNESS RESULT' "$RUNNER_TEMP/harness.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat "$RUNNER_TEMP/harness.txt"
+          if [ "$code" -ge 2 ]; then
+            echo "::error title=Harnais inutilisable::le harnais n'a rien pu analyser (code $code)."
+            exit 1
+          fi
+
+      # Chaque dossier de harness/mutations introduit un défaut dans le code et dit quelle règle doit le voir, où.
+      # Un défaut non vu est une règle qui ne prouve rien : le job échoue.
+      - name: Mutation du harnais
+        run: |
+          set +e
+          harness/mutate.sh > "$RUNNER_TEMP/mutations.txt" 2>&1
+          code=$?
+          {
+            echo
+            echo "### 🧬 Mutation du harnais"
+            echo
+            echo '```'
+            grep -E '^== Mutation|^  \[(SEEN|MISSED)\]|^MUTATIONS:' "$RUNNER_TEMP/mutations.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat "$RUNNER_TEMP/mutations.txt"
+          if [ "$code" -ne 0 ]; then
+            echo "::error title=Mutation non vue::une règle ne signale pas le défaut qu'elle vise (voir harness/mutations)."
+            exit 1
+          fi

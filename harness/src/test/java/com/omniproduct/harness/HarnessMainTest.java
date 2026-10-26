@@ -63,10 +63,18 @@ class HarnessMainTest {
         });
         // Exercice volontaire (Perishable.isPastSellBy lit LocalDate.now()) : HA4.6 est rouge sur le legacy de l'étape 2.
         assertThat(report.rule("HA4.6")).hasValueSatisfying(rule -> assertThat(rule.status()).isEqualTo("FAIL"));
-        // Exercice volontaire (ProductService.sellOne retire du stock sans canSell) : l'avertissement HA4.7.
+        // Exercice volontaire (ProductService.sellOne retire du stock sans canSell) : HA4.7 est rouge.
         assertThat(report.rule("HA4.7")).hasValueSatisfying(rule -> {
-            assertThat(rule.status()).isEqualTo("WARN");
-            assertThat(rule.severity()).isEqualTo("WARNING");
+            assertThat(rule.status()).isEqualTo("FAIL");
+            assertThat(rule.severity()).isEqualTo("ERROR");
+        });
+        // Exercice volontaire (CatalogService.catalogLabels remplit une liste dans une boucle) : HA4.8 est rouge.
+        assertThat(report.rule("HA4.8")).hasValueSatisfying(rule -> assertThat(rule.status()).isEqualTo("FAIL"));
+        // Le legacy n'a encore aucune fabrique (Perishable est une classe qui lance) : HA4.9 est verte par absence.
+        // Elle rougit dès qu'une fabrique branche (voir FactoryValidatesByCompositionRuleTest et la preuve par mutation).
+        assertThat(report.rule("HA4.9")).hasValueSatisfying(rule -> {
+            assertThat(rule.status()).isEqualTo("PASS");
+            assertThat(rule.violations()).isZero();
         });
     }
 

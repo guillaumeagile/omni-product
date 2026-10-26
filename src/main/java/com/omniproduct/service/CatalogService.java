@@ -14,11 +14,11 @@ public class CatalogService {
     public List<String> catalogLabels(List<Product> products, LocalDate today) {
         List<String> labels = new ArrayList<>();
         for (Product product : products) {
-            if (product instanceof Perishable perishable && today.isAfter(perishable.getSellByDate())) {
+            if (product.getShelfLife() instanceof Perishable perishable && today.isAfter(perishable.sellByDate())) {
                 continue;
             }
             String label = product.getName();
-            if (product instanceof NonExpiring nonExpiring && today.isAfter(nonExpiring.getBestBeforeDate())) {
+            if (product.getShelfLife() instanceof NonExpiring nonExpiring && today.isAfter(nonExpiring.bestBeforeDate())) {
                 label = label + " [BEST BEFORE PASSED]";
             }
             labels.add(label);

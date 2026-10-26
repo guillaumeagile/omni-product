@@ -86,7 +86,7 @@ dans `Steps.java`.
 | HA4.6 pas d'horloge | oui | 2 | BYTECODE |
 | HA4.7 la vente dépend de `canSell` | oui | 2 | erreur ; vérifie la dépendance au résultat, plus l'ordre du texte |
 | HA14 collections en pipeline | oui | 3 | échoue sur `CatalogService.catalogLabels` (exercice ajouté) |
-| HA15 la fabrique valide par composition | oui | 3 | AST, sur `model` ; **rouge par absence** sur le legacy (aucune fabrique dont le résultat peut échouer, comme HA4.4) et rouge dès qu'une fabrique branche ou lance (preuve par mutation sur `Slug`) |
+| HA15 la fabrique valide par composition | oui | 3 | AST, sur `model` ; **rouge par absence** sur le legacy de la phase 2 (aucune fabrique dont le résultat peut échouer, comme HA4.4) et rouge dès qu'une fabrique branche ou lance (preuve par mutation sur `Slug`) ; sur le code de départ de la phase 3, elle est rouge parce que `Perishable.of` branche avec un `if` |
 | HA21 un conteneur Vavr se consomme par `fold` | oui | 3 | bytecode, sur `model` et `service` ; **verte** sur le départ de la phase 3 (garde-fou : aucun Vavr dans le départ, elle rougit quand une équipe ouvre un `Either`/`Option` avec `get()`, `isLeft()`…) ; mutation `ha21-vavr-escape-hatches` |
 
 Périmètre : `com.omniproduct.model` (et `com.omniproduct.service` pour HA4.1, HA4.7, HA6, HA12.1, HA14). Le port carbone
@@ -136,7 +136,7 @@ trivial est un défaut de la règle.
 | Règle | Avant (exact) | Maintenant (heuristique) |
 |---|---|---|
 | HA5 | `getX` / `isX` publics | tout accesseur sans paramètre qui renvoie une valeur (`getX`, `fetchX`, `x()`), les setters, les champs publics ; lire + écrire une propriété compte une fois ; ids exclus par mot |
-| HA6 | préfixe du nom après un verbe connu | mot ou suite de mots **n'importe où** dans le nom ; le mot-clé le plus spécifique gagne ; contexte « faible » (Lifecycle) seulement en dernier recours ; si le nom est générique, on lit les types de retour/paramètres, sauf les types d'identifiant (`ProductId` n'est d'aucun contexte) ; API = tout sauf `private` (+ champs publics) |
+| HA6 | préfixe du nom après un verbe connu | mot ou suite de mots **n'importe où** dans le nom ; le mot-clé le plus spécifique gagne ; contexte « faible » (Lifecycle) seulement en dernier recours ; si le nom est générique, on lit les types de retour/paramètres, sauf les types d'identifiant (`ProductId` n'est d'aucun contexte) ; API = tout sauf `private` (+ champs publics) ; **construire n'est pas une préoccupation** : une méthode `static` qui rend le type (ou son Builder imbriqué, même sous `Optional`/`Either`) sans prendre d'instance du type, et les membres d'un Builder (type imbriqué dont une méthode rend le type englobant) ne comptent pas, quel que soit leur nom ou leur nombre ; une méthode `static` qui transforme une instance, ou une méthode d'instance qui rend le type (`withX`), reste comptée |
 | HA8 | `jakarta.persistence`, Spring Data | + javax, Hibernate, JDBC, `java.sql`, jOOQ, MyBatis, MongoDB ; + forme stockée (`xxxJson`, `yyy_csv`) et `sync*`/`hydrate*` |
 | HA9 | interface nommée `Identifiable` | inchangé : c'est le contrat explicite de l'exercice |
 | HA10 | type du package `..service` ou nom en `Service` | package (`service`, `repository`, `application`, `infrastructure`…), suffixe (`Manager`, `Handler`, `Client`, `Gateway`, `Facade`, `Factory`…), annotation Spring, types dans les génériques ; entité = champ `id`, `<classe>Id` ou `@Id` |

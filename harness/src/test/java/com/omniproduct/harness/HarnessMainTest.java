@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,56 +27,37 @@ class HarnessMainTest {
         }
     }
 
-    // Dry run : le harnais DOIT trouver de vrais problèmes dans le code de départ de l'étape 2.
-    // S'il est vert ici, c'est lui qui est cassé, pas le code.
+    // Le code de départ de la phase 3 a fait les phases 1 et 2 : leurs étapes sont vertes.
     @Test
-    void failsOnTheLegacyWorkshopCode() {
-        Run result = run("--step", "1", "--classes", "../build/classes/java/main", "../src/main/java");
+    void theEarlierStepsAreGreenOnThePhase3StartCode() {
+        Run step1 = run("--step", "1", "--classes", "../build/classes/java/main", "../src/main/java");
+        Run step2 = run("--step", "2", "--classes", "../build/classes/java/main", "../src/main/java");
+
+        assertThat(step1.exitCode()).isZero();
+        assertThat(step2.exitCode()).isZero();
+        assertThat(step2.out()).contains("[PASS] HA2 ", "[PASS] HA4.1", "[PASS] HA4.5", "[PASS] HA4.7", "HARNESS RESULT: PASS");
+        // HA14 et HA15 sont des règles de l'étape 3 : l'étape 2 ne les connaît pas.
+        assertThat(step2.out()).doesNotContain("HA14", "HA15");
+    }
+
+    // Dry run : le harnais DOIT trouver de vrais problèmes dans le code de départ de la phase 3, et eux seuls
+    // (l'exercice : une boucle qui remplit une liste, une fabrique qui branche). S'il est vert ici, c'est lui qui est
+    // cassé, pas le code.
+    @Test
+    void failsOnTheStartCodeOfPhase3ExactlyOnTheFunctionalStyleRules() {
+        Run result = run("--step", "3", "--classes", "../build/classes/java/main", "../src/main/java");
 
         assertThat(result.exitCode()).isEqualTo(1);
-        // Le code de départ de l'étape 2 a fait l'étape 1, sauf HA7 : la hiérarchie Perishable/NonExpiring (exercice
-        // HA4.1 de l'étape 2) référence l'entité Product. Le harnais la trouve.
-        assertThat(result.out()).contains("[PASS] HA5", "[PASS] HA11", "[PASS] HA12 ", "[PASS] HA12.1", "[FAIL] HA7");
-        assertThat(result.out()).contains("Perishable.java:", "NonExpiring.java:");
-        // HA4 (héritage) est une règle de l'étape 2 : elle n'apparaît pas dans la sortie de l'étape 1. HA2 non plus.
-        assertThat(result.out()).doesNotContain("HA4", "HA2");
+        assertThat(result.out().lines().filter(line -> line.startsWith("[FAIL]")).map(line -> line.split(" ")[1]).toList())
+                .containsExactly("HA14", "HA15");
+        assertThat(result.out()).contains("CatalogService.java:", "Perishable.java:");
         assertThat(result.out()).contains("HARNESS RESULT: FAIL");
     }
 
     // Le rapport JSON reflète la sortie texte : mêmes règles, dans l'ordre de l'étape, mêmes statuts.
+    // L'étape 3 ajoute HA14 et HA15 à l'étape 2 ; `all` est l'étape 3. La numérotation saute le 13.
     @Test
     void writesAMachineReadableReport(@TempDir Path dir) {
-        Path json = dir.resolve("report.json");
-
-        Run result = run("--step", "2", "--json", json.toString(), "--classes", "../build/classes/java/main", "../src/main/java");
-        HarnessReport report = HarnessReport.read(json);
-
-        assertThat(result.exitCode()).isEqualTo(1);
-        assertThat(report.step()).isEqualTo("2");
-        assertThat(report.result()).isEqualTo("FAIL");
-        assertThat(report.rules()).extracting(HarnessReport.RuleResult::id)
-                .isEqualTo(Steps.rules("2").stream().map(HarnessRule::id).toList());
-        // HA2 (immuabilité) est rouge sur le code de départ de l'étape 2 : Product et Supplier ont des champs mutables.
-        assertThat(report.rule("HA2")).hasValueSatisfying(rule -> {
-            assertThat(rule.status()).isEqualTo("FAIL");
-            assertThat(rule.violations()).isPositive();
-            assertThat(result.out()).contains("[FAIL] HA2");
-        });
-        // Exercice volontaire (Perishable.isPastSellBy lit LocalDate.now()) : HA4.6 est rouge sur le legacy de l'étape 2.
-        assertThat(report.rule("HA4.6")).hasValueSatisfying(rule -> assertThat(rule.status()).isEqualTo("FAIL"));
-        // Exercice volontaire (ProductService.sellOne retire du stock sans canSell) : HA4.7 est rouge.
-        assertThat(report.rule("HA4.7")).hasValueSatisfying(rule -> {
-            assertThat(rule.status()).isEqualTo("FAIL");
-            assertThat(rule.severity()).isEqualTo("ERROR");
-        });
-        // HA14 et HA15 sont des règles de l'étape 3 : l'étape 2 ne les connaît pas.
-        assertThat(report.rule("HA14")).isEmpty();
-        assertThat(report.rule("HA15")).isEmpty();
-    }
-
-    // L'étape 3 (phase 3, style fonctionnel) ajoute HA14 et HA15 à l'étape 2 ; `all` est l'étape 3. On saute le 13.
-    @Test
-    void step3AddsTheFunctionalStyleRulesAndAllIsStep3(@TempDir Path dir) {
         Path json = dir.resolve("report.json");
 
         Run result = run("--step", "3", "--json", json.toString(), "--classes", "../build/classes/java/main", "../src/main/java");
@@ -83,6 +65,7 @@ class HarnessMainTest {
 
         assertThat(result.exitCode()).isEqualTo(1);
         assertThat(report.step()).isEqualTo("3");
+        assertThat(report.result()).isEqualTo("FAIL");
         assertThat(report.rules()).extracting(HarnessReport.RuleResult::id)
                 .isEqualTo(Steps.rules("3").stream().map(HarnessRule::id).toList())
                 .endsWith("HA14", "HA15", "HA21")
@@ -90,13 +73,18 @@ class HarnessMainTest {
         assertThat(Steps.rules("all").stream().map(HarnessRule::id).toList())
                 .isEqualTo(Steps.rules("3").stream().map(HarnessRule::id).toList());
         assertThat(Steps.rules("3").stream().map(HarnessRule::id)).doesNotContain("HA13");
+        assertThat(report.rules().stream().filter(rule -> rule.status().equals("FAIL")).map(HarnessReport.RuleResult::id).toList())
+                .isEqualTo(List.of("HA14", "HA15"));
         // Exercice volontaire (CatalogService.catalogLabels remplit une liste dans une boucle) : HA14 est rouge.
-        assertThat(report.rule("HA14")).hasValueSatisfying(rule -> assertThat(rule.status()).isEqualTo("FAIL"));
-        // Le legacy n'a aucune fabrique (Perishable est une classe qui lance) : HA15 est rouge par absence, comme HA4.4.
-        // Une règle verte parce qu'il n'y a rien à examiner ne prouverait rien et ne laisserait rien à jouer.
+        assertThat(report.rule("HA14")).hasValueSatisfying(rule -> {
+            assertThat(rule.status()).isEqualTo("FAIL");
+            assertThat(rule.violations()).isPositive();
+        });
+        // Exercice volontaire (Perishable.of branche avec un `if`) : HA15 est rouge.
         assertThat(report.rule("HA15")).hasValueSatisfying(rule -> {
             assertThat(rule.status()).isEqualTo("FAIL");
-            assertThat(rule.violations()).isEqualTo(1);
+            assertThat(rule.severity()).isEqualTo("ERROR");
+            assertThat(rule.violations()).isPositive();
         });
     }
 

@@ -31,6 +31,8 @@ public final class Referee {
     static final int SINGLE_GREEN_BONUS = 5;
     static final int SMALL_DIFF_BONUS = 3;
     static final int REGRESSION = -5;
+    // Badge « Clean Coder » : les mesures de qualité (PMD ici) rapportent au moins ce nombre de points dans le round.
+    static final int CLEAN_CODER_MIN_POINTS = 2;
     // Coût agentique : tokens et branches retirés du code de l'étape (model/ et service/). La complexité cyclomatique
     // pèse plus que les tokens : retirer des branches, c'est ce qui rend le code plus simple à lire et à tester.
     // Par défaut ; chaque phase règle le sien (--tokens-per-point) : le code de départ n'a pas la même taille.
@@ -141,6 +143,8 @@ public final class Referee {
                 .flatMap(lines -> lines)
                 .toList();
 
+        int qualityPoints = accepted ? MetricTables.PMD.points(base, head.get()) : 0;
+
         List<Points> breakdown = Stream.of(
                         changes.stream().filter(rule -> rule.points() != 0).map(rule -> new Points(reason(rule), rule.points())),
                         Stream.of(
@@ -151,8 +155,7 @@ public final class Referee {
                                         tokensRemoved.map(removed -> Math.min(TOKEN_CAP, Math.max(0, removed) / pr.tokensPerPoint())).orElse(0L).intValue()),
                                 new Points("Cyclomatic complexity removed (+1 per " + COMPLEXITY_PER_POINT + ", up to +" + COMPLEXITY_CAP + ")",
                                         branchesRemoved.map(removed -> Math.min(COMPLEXITY_CAP, Math.max(0, removed) / COMPLEXITY_PER_POINT)).orElse(0L).intValue()),
-                                new Points("📐 PMD quality metrics improved",
-                                        accepted ? MetricTables.PMD.points(base, head.get()) : 0)))
+                                new Points("📐 PMD quality metrics improved", qualityPoints)))
                 .flatMap(lines -> lines)
                 .filter(line -> line.points() != 0)
                 .toList();
@@ -162,6 +165,7 @@ public final class Referee {
                         babyStep ? Optional.of("🍼 Baby step") : Optional.<String>empty(),
                         accepted && regressions.isEmpty() ? Optional.of("🧼 No regression") : Optional.<String>empty(),
                         smallDiff ? Optional.of("🤏 Small diff") : Optional.<String>empty(),
+                        qualityPoints >= CLEAN_CODER_MIN_POINTS ? Optional.of("🧹 Clean Coder") : Optional.<String>empty(),
                         changes.stream().anyMatch(rule -> rule.turnedGreen() && BOSSES.contains(rule.id()))
                                 ? Optional.of("👑 Boss defeated") : Optional.<String>empty(),
                         changes.stream().anyMatch(rule -> rule.turnedGreen() && rule.id().equals("HA4.5"))

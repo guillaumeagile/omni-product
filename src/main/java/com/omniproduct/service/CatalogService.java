@@ -8,21 +8,26 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-// Exercice étape 2 (HA14) : les libellés du catalogue se remplissent à la main, dans une boucle.
+// Exercice étape 3 (HA14) : les libellés du catalogue se remplissent à la main, dans une boucle.
 public class CatalogService {
 
     public List<String> catalogLabels(List<Product> products, LocalDate today) {
         List<String> labels = new ArrayList<>();
         for (Product product : products) {
-            if (product instanceof Perishable perishable && today.isAfter(perishable.getSellByDate())) {
+            if (!product.canSellOn(today)) {
                 continue;
             }
-            String label = product.getName();
-            if (product instanceof NonExpiring nonExpiring && today.isAfter(nonExpiring.getBestBeforeDate())) {
-                label = label + " [BEST BEFORE PASSED]";
-            }
-            labels.add(label);
+            labels.add(label(product, today));
         }
         return labels;
+    }
+
+    private String label(Product product, LocalDate today) {
+        return switch (product.getShelfLife()) {
+            case Perishable perishable -> product.getName();
+            case NonExpiring nonExpiring -> today.isAfter(nonExpiring.bestBeforeDate())
+                    ? product.getName() + " [BEST BEFORE PASSED]"
+                    : product.getName();
+        };
     }
 }

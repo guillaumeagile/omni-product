@@ -236,7 +236,7 @@ jobs:
               (if (.badges | length) > 0
                 then (.badges | map("![" + . + "](https://img.shields.io/badge/" + (gsub("-"; "--") | gsub("_"; "__") | @uri)
                     + "-" + ({"🍼 Baby step": "2ea44f", "🧼 No regression": "1f6feb", "🤏 Small diff": "8250df",
-                             "👑 Boss defeated": "d4a017", "🧠 Compiler-checked": "e36209"}[.] // "555555")
+                             "🧹 Clean Coder": "0e8a8a", "👑 Boss defeated": "d4a017", "🧠 Compiler-checked": "e36209"}[.] // "555555")
                     + "?style=for-the-badge)") | join(" ")) + "\n"
                 else empty end),
               "_Mis à jour par l’arbitre à chaque push ; le détail est dans son commentaire._",
@@ -272,6 +272,41 @@ jobs:
             gh issue pin "$url" || true
           else
             gh issue edit "$number" --body-file "$RUNNER_TEMP/leaderboard.md"
+          fi
+
+      # Les cartes de l'équipe, empilées : une issue par équipe et par phase (« Score team-red (java-bdxio-phase2) »).
+      # Son corps est le registre cumulé (une ligne par PR ouverte, avec le cumul courant) ; chaque PR y a UN commentaire,
+      # sa carte, créé au premier round puis mis à jour à chaque push (repéré par un marqueur). Écrire dans une issue ne
+      # relance pas cette Action (elle écoute les PR seulement) : pas de boucle, donc pas de garde à prévoir.
+      - name: Team score card
+        if: steps.referee.outcome == 'success'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          team=${PR_BRANCH%%/*}
+          [ "$team" != "$PR_BRANCH" ] || exit 0
+          title="Score $team ($BASE_REF)"
+          gh pr list --state open --base "$BASE_REF" --limit 1000 --json number,headRefName,comments > "$RUNNER_TEMP/prs.json"
+          java -cp "$RUNNER_TEMP/base/harness/build/install/harness/lib/*" com.omniproduct.harness.referee.Leaderboard \
+            --prs "$RUNNER_TEMP/prs.json" --team "$team" --out "$RUNNER_TEMP/ledger.md"
+          number=$(gh issue list --state open --search "\"$title\" in:title" --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          if [ -z "$number" ]; then
+            url=$(gh issue create --title "$title" --body-file "$RUNNER_TEMP/ledger.md")
+            number=${url##*/}
+          else
+            gh issue edit "$number" --body-file "$RUNNER_TEMP/ledger.md"
+          fi
+          marker="<!-- scorecard-pr:$PR_NUMBER -->"
+          { echo "$marker"; echo "## PR #$PR_NUMBER · $PR_TITLE"; echo; cat "$RUNNER_TEMP/scorecard.md"; } > "$RUNNER_TEMP/card.md"
+          comment=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$number/comments" \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | head -1)
+          if [ -z "$comment" ]; then
+            gh issue comment "$number" --body-file "$RUNNER_TEMP/card.md"
+          else
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment" -F body=@"$RUNNER_TEMP/card.md" > /dev/null
           fi
 
       - uses: actions/upload-artifact@v4

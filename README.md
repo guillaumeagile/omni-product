@@ -292,6 +292,16 @@ Vous pouvez jouer avec un agent de code (Claude Code, Copilot, Cursor...). Ses c
 qui décidez : il vous propose des options et leurs compromis, il ne tranche pas, et il ne cherche pas à deviner le
 score. Le harnais n'est qu'une heuristique : l'exercice, c'est votre réflexion sur CUPID.
 
+Quelques conseils pour jouer avec un LLM :
+
+- **Pas de modèle frontière.** Choisissez un modèle économique : il suffit largement pour cet atelier, dont la
+  difficulté est dans vos choix de conception, pas dans la puissance du modèle.
+- **Faites un clear du contexte entre chaque step** (`/clear` dans Claude Code, ou une nouvelle conversation). Un
+  baby step ne dépend que du code de votre branche et de la sortie du harnais : un contexte long coûte plus cher et
+  fait dériver l'agent vers les règles suivantes.
+- **Regardez toujours vous-mêmes** la PR, son diff (**Files changed**) et le score de l'arbitre, puis **discutez-en
+  dans l'équipe** avant de passer au step suivant. L'agent n'est pas là pour valider à votre place.
+
 ### Règles du jeu
 
 - **Personne ne fusionne jamais dans `java-bdxio-phase1`, `java-bdxio-phase2` ni `java-bdxio-phase3`.** Les PR restent en draft.

@@ -61,7 +61,11 @@ offsets are UTF-8 bytes (text is read from the byte array, already handled by `S
    - if the legacy has no violation (rule that only an exercise change can trip), do a **mutation**: copy the file to
      the scratchpad, introduce the violation, run `./harness.sh`, confirm detection, restore the file, check
      `git status` shows no change to `model/`/`service/`.
-   A rule green on the legacy without a mutation proof is not finished.
+   A rule green on the legacy without a mutation proof is not finished. Make the proof **replayable**: put the mutant
+   under `harness/mutations/<name>/src/...` (same path as in the repo, it must compile) with an `expected.txt` of
+   `<rule> <file>:<line>` lines. `harness/mutate.sh` applies it, runs the harness, checks that each expected rule
+   reports that exact line (scoped to the rule's own block), then restores `src/`; the `le-maitre-des-jeux` workflow
+   runs it on every animateur PR.
 6. **Wire it** into the right step in `Steps.java` (step 1 = HA5 to HA12.1; HA1, HA2 and HA4 are outside step 1). Perimeters:
    `com.omniproduct.model` and `com.omniproduct.service`, not `domain/` nor `infrastructure/`.
 7. **Update the documents**: the table and the heuristics section of `docs/harness-rules.md`, the student text

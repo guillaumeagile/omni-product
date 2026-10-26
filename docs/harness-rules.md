@@ -17,6 +17,7 @@ sur le Java en phase 3.
 | HA4.6 | Le modèle ne lit pas l'horloge | Le modèle reçoit `today`, ou un `Clock` injecté | `LocalDate.now()`, `Instant.now()`, `System.currentTimeMillis()`, `new Date()`, `Clock.systemUTC()`… dans `model` | BYTECODE (appels, imports statiques compris) | Error |
 | HA4.7 | La vente dépend de `canSell` | Une vente ne retire du stock que si le domaine l'a permise | Le retrait doit se trouver dans une branche (`if`, ternaire, `switch`) ou une lambda (`map`, `Option.when`) qui dépend de la décision, ou après une clause de garde qui renvoie le refus ; un `canSell` ignoré ne garde rien | AST | Error |
 | HA4.8 | Collections en pipeline | Une collection se transforme par un Stream, pas en remplissant un accumulateur | Boucle (`for`, for-each, `while`, `do`) ou `forEach`/`peek` qui modifie une variable déclarée hors d'elle | AST | Error |
+| HA4.9 | La fabrique valide par composition | La fabrique d'un value object exprime sa validation comme une chaîne d'étapes (`Option.of(...).filter(...).flatMap(...)`, `Validation.combine(...).ap(...)`), pas comme un branchement | `if`, ternaire ou `switch` dans la fabrique ou dans un helper privé qu'elle appelle ; `throw`, `assert` ou appel de garde (`requireNonNull`…) ; fabrique dont le retour promet un échec (générique, ADT scellée) sans aucune lambda ni référence de méthode | AST | Error |
 | HA5 | Pas de god class | Au plus 4 propriétés publiques par type (hors `*Id`) | Compter les composants de `record`, les getters publics et les champs publics, hors noms finissant par `Id` | AST | Error |
 | HA6 | Single concern | Les méthodes publiques d'une classe couvrent au plus 1 contexte borné ; restrictions de vocabulaire par type | Même `ubiquitous-language-map.json` ; préfixe du nom de méthode comparé aux mots-clés par contexte | AST | Error |
 | HA7 | Fan-out | Une entité ne référence aucune autre entité, seulement des ids | Champs, paramètres, retours, locaux, arguments génériques (`List<Supplier>`, `Supplier[]`, `Optional<Supplier>`) | BYTECODE (dépendances de type) + AST pour la ligne | Error |
@@ -59,7 +60,7 @@ HA5 → HA4, HA2 → HA6 → HA8 → HA7 → HA9, HA10 → HA12, HA12.1.
 
 ## État d'implémentation et étapes
 
-L'**étape 1** (`./harness.sh`, `docs/CUPID-step-1.md`) couvre **HA5 à HA12.1** uniquement. L'**étape 2** (`./harness.sh 2`) ajoute HA2, HA3 et HA4.1 à HA4.8 ; `all` lance les deux étapes. Les règles se règlent
+L'**étape 1** (`./harness.sh`, `docs/CUPID-step-1.md`) couvre **HA5 à HA12.1** uniquement. L'**étape 2** (`./harness.sh 2`) ajoute HA2, HA3 et HA4.1 à HA4.9 ; `all` lance les deux étapes. Les règles se règlent
 dans `Steps.java`.
 
 | Règle | Implémentée | Étape | Notes |
@@ -84,9 +85,44 @@ dans `Steps.java`.
 | HA4.6 pas d'horloge | oui | 2 | BYTECODE |
 | HA4.7 la vente dépend de `canSell` | oui | 2 | erreur ; vérifie la dépendance au résultat, plus l'ordre du texte |
 | HA4.8 collections en pipeline | oui | 2 | échoue sur `CatalogService.catalogLabels` (exercice ajouté) |
+| HA4.9 la fabrique valide par composition | oui | 2 | AST, sur `model` ; verte par absence sur le legacy (aucune fabrique), rougit dès qu'une fabrique branche ou lance (preuve par mutation sur `Slug`) |
 
 Périmètre : `com.omniproduct.model` (et `com.omniproduct.service` pour HA4.1, HA4.7, HA4.8, HA6, HA12.1). Le port carbone
 (`domain/`) et l'infrastructure ne font pas partie de l'exercice.
+
+### Mutations du harnais
+
+Une règle verte sur le legacy (le défaut n'y est pas encore) n'est prouvée que par une **mutation**. Elles sont rejouables :
+`harness/mutations/<nom>/src/...` contient le fichier mutant (même chemin que dans le dépôt, il doit compiler) et
+`expected.txt` une ligne `<règle> <fichier>:<ligne>` par détection attendue. `harness/mutate.sh [nom...]` applique le mutant,
+lance `./harness.sh all`, vérifie que **cette règle** signale **cette ligne** (une règle rouge ailleurs ne valide pas
+l'attente d'une autre), puis restaure `src/` même en cas d'échec ; il refuse de partir d'un `src/main/java` modifié. Le
+workflow `le-maitre-des-jeux` le joue sur chaque PR d'animateur (étape « Mutation du harnais ») et échoue si un défaut
+n'est pas vu. Mutation actuelle : `ha4.9-factory-branches-and-throws` (`Slug.of` avec `if` + `throw`).
+
+### Propositions de règles (TODO, phase 2)
+
+Idées nées de la lecture du bloc « PMD quality metrics » de la PR #22 (HA4.7, 0 point PMD : fan-out 61 → 64,
+complexité cognitive 2 → 3, **0 lambda** alors que le barème en récompense jusqu'à +10). Le gain PMD annoncé est une
+**hypothèse** : chaque règle s'écrit, se câble, puis se **joue dans une PR dédiée** pour lire le gain réel dans le
+commentaire de l'arbitre. Une règle à la fois ; les numéros sont provisoires. HA4.8 (pipelines) et HA4.9 (fabrique par
+composition) sont nées de cette liste.
+
+| TODO | Règle | Cible dans le code d'aujourd'hui | Gain PMD supposé | CUPID | Détection envisagée |
+|---|---|---|---|---|---|
+| TODO HA4.10 | Une décision du domaine se compose, elle ne se teste pas : `if (!canSell) return none()` devient `Option.when(canSell, …)` / `filter` / `map` | la clause de garde de `ProductService.sellOne` | cognitive −1, nesting −1, +1 à +2 lambdas (+2 à +4) | Composable, Idiomatic | durcissement de HA4.7 : dans `service`, un `if` dont la condition porte une décision `can*` et dont la branche est un `return` ; Warning d'abord |
+| TODO HA4.11 | Le service ne reconstruit pas un value object champ par champ (*Tell, don't ask*) : `new ProductStock(new Quantity(stock.stock().value() - 1), stock.quantity(), stock.warehouse())` devient `stock.withdrawOne()` | `ProductService.withdrawStock` | fan-out du service −2 (+1) | Domain-based | méthode de `service` qui appelle ≥ 2 accesseurs d'un même paramètre pour construire un objet du type de ce paramètre |
+| TODO HA13 | Un record imbriqué dans une entité est un concept à part : `Product.Warehouse`, `Product.Supplier` (collision avec l'entité `Supplier`), `Supplier.Contact`, `Supplier.Address` | `Product`, `Supplier` | fan-out max −2 à −4 (+1 à +2) ; le compteur « Types » monte, non noté par choix | Domain-based, Composable | record déclaré dans le corps d'une classe qui implémente `Identifiable` |
+| TODO HA14 | Pas de code mort ni de doublon de décision dans le modèle : `Perishable.isPastSellBy(TimeServiceProvider)` n'est appelé nulle part et duplique `Product.canSellOn(today)` avec une autre convention d'horloge | `Perishable` | fan-out −1, WMC −1 | Unix philosophy, Predictable | méthode publique du modèle sans référence dans `model`, `service` et les tests ; variante : une seule convention d'horloge (`today` passé **ou** fournisseur injecté) |
+| TODO HA11-service | HA11 étendu au `service` : pas de primitives aux frontières (`calculateShipmentCarbon(String, Double, Double)`) | `ProductTransportService` | ≈ nul (fan-out +1 possible) : règle de design pur, pas de score | Domain-based | même heuristique que HA11, périmètre `service` |
+
+Ajustements du **barème PMD** à envisager, indépendants des règles :
+
+- TODO Affectations : 8 des 9 affectations sont les `this.x = x` des constructeurs de `Product` et `Supplier`, que
+  HA3/HA9 obligent à rester des classes. Ne pas compter les affectations de champ dans un constructeur (ne garder que
+  les réaffectations et les variables locales), sinon la métrique reste inerte toute la phase 2.
+- TODO TCC min = 0 : ce sont `ProductService` et `SystemTimeServiceProvider`, sans champ. Non actionnable sans mutiler
+  le code : laisser à 0 point ou la calculer sur `model` seul.
 
 ## Heuristiques, pas correspondances exactes
 
@@ -110,6 +146,7 @@ trivial est un défaut de la règle.
 | HA4.6 | `LocalDate.now()` seulement | appel du JDK (`java.time`, `Calendar`, `System`, `new Date()`) dont un mot est `now`, `today`, `clock`, `utc`, `system`, `instance`, ou `currentTimeMillis`/`nanoTime` ; `Duration.toMillis()` n'est pas une horloge |
 | HA4.7 | l'ordre des lignes, `sell` et `withdraw` nommés | vente = méthode non privée qui retire, sauf nom d'opération de stock (`restock`, `discard`, `adjust`, `transfer`, `withdraw`…) ; un mot de vente (`sell`, `sale`, `sold`, `buy`, `purchase`, `checkout`, `order`) force le contrôle. Retrait = appel ou référence de méthode `withdraw`/`decrement`/`deduct`/`destock`/`unstock`, ou construction/appel qui parle de `stock`/`inventory` avec une soustraction (`-`, `minus`, `subtract`), ou appel d'une méthode du fichier qui retire (transitivement). Décision = appel `can` + `sell`/`sale`, `sellable`/`saleable`, `sell`/`sale` + `decide`/`decision`/`allowed`/`permitted`, ou variable locale qui en porte une. Gardé = dans la branche d'un `if`/ternaire/`switch` dont la condition porte la décision, dans une lambda ou référence de méthode passée à un appel dont le receveur ou un autre argument la porte, ou après une clause de garde `if (décision) return/throw`. Limites : un nom d'opération de stock (`withdrawOne`) échappe au contrôle ; la branche `else` d'un `if (canSell)` compte comme gardée ; les variables ne sont suivies que dans la méthode |
 | HA4.8 | `for` seulement, `List.add` seulement | boucles `for`, for-each, `while`, `do` et `forEach`/`forEachOrdered`/`peek` (lambda ou référence de méthode, `result::add`) ; modifier = affectation (`=`, `+=`, `++`) ou appel d'un verbe de remplissage (`add`, `put`, `append`, `push`, `offer`, `insert`, `set`, `remove`, `merge`, `compute`, `increment`, `accumulate`, `accept`, `clear`) sur une variable, un champ (`this.x`), une constante ou un tableau non déclarés dans l'itération ; `Collections.addAll(result, …)` vise son premier argument. Limites : une boucle qui ne remplit rien (recherche avec `return` anticipé, simple affichage) n'est pas visée ; un remplissage délégué à une méthode d'un autre nom (`register(p)`) n'est pas suivi |
+| HA4.9 | `if` dans une méthode nommée `of` | fabrique = méthode statique non privée d'un record non entité, dont le nom porte un mot de fabrique (`create`/`build`/`of`/`from`/`make`) **ou** dont le type de retour nomme le record (`Option<Perishable>`, `PerishableCreation`, `Perishable`) : `parse` n'échappe pas. Lus : le corps, et transitivement les méthodes du même type appelées (`validate(a, b)`, `this.validate`, `Perishable.validate`), chaque défaut signalé une fois. Branchement = `if`, ternaire, `switch`, même dans une lambda ; lancer = `throw`, `assert`, appel dont un mot est `require`/`check`/`assert`/`throw`, qualifié ou non. « Ne décide rien » = retour générique ou ADT scellée du code, sans aucune `lambda_expression` ni `method_reference` atteignable ; une fabrique qui renvoie le record nu n'est pas concernée (c'est HA4.4) |
 | HA12 | noms `id`/`*Id`/`*Ids`, liste de types interdits, `randomUUID()` d'un identifiant | un mot `id`/`identifier`/`uuid`/`guid`/`uid` dans le nom (casse et séparateur libres) ; généré par défaut, naturel seulement si un mot du nom est dans `naturalIdentifiers` (`tvaId`, `supplierSiren`) : renommer `productId` en `ownerId` n'échappe pas à la règle, mais renommer un id en `tvaId` oui (limite connue, visible en revue) ; **tout** type autre qu'UUID/Ulid ou record qui en enveloppe un ; tout UUID non v7 construit dans le modèle (`randomUUID`, import statique, `UUID::randomUUID`, `nameUUIDFromBytes`, `new UUID`, `UuidCreator.get*` hors `getTimeOrderedEpoch`) |
 
 Chaque contournement est écrit dans `HeuristicEvasionTest` (et son pendant `SingleConcernRuleTest`) : si une règle
@@ -157,6 +194,9 @@ Restent des faux négatifs, assumés (par conception ou faute de moyen sûr de l
   `default` n'est pas compté comme alternative.
 - HA4.6 : une horloge lue par une bibliothèque tierce, ou par réflexion, n'est pas vue.
 - HA4.7 : la décision n'est suivie que dans une même méthode (variables locales) ; un retrait délégué à une autre classe n'est vu que par les mots de son nom.
+- HA4.9 : un branchement déplacé dans **un autre type** (`Dates.ordered(a, b)` statique ailleurs dans `model`) n'est pas suivi ; une
+  fabrique qui compose une seule étape triviale (`Option.of(x).map(Slug::new)`, sans `filter`) passe : la règle voit la forme,
+  pas la force de la validation. Les `&&`/`||` dans une lambda de `filter` ne sont pas des branchements pour elle.
 
 ## Ce que « heuristique » promet
 

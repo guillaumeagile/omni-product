@@ -233,7 +233,7 @@ jobs:
               (if (.badges | length) > 0
                 then (.badges | map("![" + . + "](https://img.shields.io/badge/" + (gsub("-"; "--") | gsub("_"; "__") | @uri)
                     + "-" + ({"🍼 Baby step": "2ea44f", "🧼 No regression": "1f6feb", "🤏 Small diff": "8250df",
-                             "👑 Boss defeated": "d4a017", "🧠 Compiler-checked": "e36209"}[.] // "555555")
+                             "🧹 Clean Coder": "0e8a8a", "👑 Boss defeated": "d4a017", "🧠 Compiler-checked": "e36209"}[.] // "555555")
                     + "?style=for-the-badge)") | join(" ")) + "\n"
                 else empty end),
               "_Mis à jour par l’arbitre à chaque push ; le détail est dans son commentaire._",

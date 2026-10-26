@@ -28,6 +28,9 @@ import java.util.stream.Stream;
 // Signalés : un `if`, un ternaire, un `switch` ; un `throw`, un `assert`, un appel de garde (requireNonNull,
 // checkArgument...) ; et, à défaut de branchement, l'absence totale de lambda ou de référence de méthode alors que
 // le type de retour promet un échec (type générique ou ADT scellée du code) : la fabrique ne décide rien.
+// Existence : la règle est rouge s'il n'y a aucune fabrique dont le résultat peut échouer (type générique ou ADT
+// scellée). Une règle verte parce qu'il n'y a rien à examiner ne prouverait rien ; une fabrique triviale qui renvoie
+// le record nu (`Slug.of(raw)`) ne compte pas non plus.
 public final class FactoryValidatesByCompositionRule implements HarnessRule {
 
     private static final Set<String> FACTORY_WORDS = Set.of("create", "build", "of", "from", "make");
@@ -55,13 +58,32 @@ public final class FactoryValidatesByCompositionRule implements HarnessRule {
     @Override
     public List<Violation> check(SourceSet sources) {
         Set<String> adts = SourceTypes.adts(sources).keySet();
-        return sources.files().stream()
+        List<SourceFile> model = sources.files().stream()
                 .filter(file -> packageFilter.test(file.packageName()))
+                .toList();
+        List<Violation> smells = model.stream()
                 .flatMap(file -> SourceTypes.declarations(file)
                         .filter(SourceTypes::isValueObject)
                         .flatMap(record -> factories(record)
                                 .flatMap(factory -> violations(file, record, factory, adts))))
                 .toList();
+        boolean existsAndCanFail = model.stream().anyMatch(file -> SourceTypes.declarations(file)
+                .filter(SourceTypes::isValueObject)
+                .anyMatch(record -> factories(record).anyMatch(factory -> promisesFailure(factory, adts))));
+        return Stream.concat(smells.stream(), absence(model, existsAndCanFail)).toList();
+    }
+
+    // Rien à composer, rien à juger : une règle qui passe par vide ne prouve rien (comme HA4.4, elle est rouge tant
+    // qu'aucun value object n'a une fabrique dont le résultat peut échouer).
+    private static Stream<Violation> absence(List<SourceFile> model, boolean existsAndCanFail) {
+        if (existsAndCanFail) {
+            return Stream.empty();
+        }
+        return Stream.of(new Violation(
+                model.stream().findFirst().map(SourceFile::path).orElse("<no files>"), 1,
+                "No value object has a static factory whose result can fail (a generic result such as Option/Either/"
+                        + "Validation, or a sealed result). Write one that validates by composing steps "
+                        + "(filter, flatMap, map, combine), not with if/throw."));
     }
 
     private static Stream<Node> factories(Node record) {

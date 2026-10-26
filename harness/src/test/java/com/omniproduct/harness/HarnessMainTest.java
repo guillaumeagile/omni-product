@@ -70,11 +70,11 @@ class HarnessMainTest {
         });
         // Exercice volontaire (CatalogService.catalogLabels remplit une liste dans une boucle) : HA4.8 est rouge.
         assertThat(report.rule("HA4.8")).hasValueSatisfying(rule -> assertThat(rule.status()).isEqualTo("FAIL"));
-        // Le legacy n'a encore aucune fabrique (Perishable est une classe qui lance) : HA4.9 est verte par absence.
-        // Elle rougit dès qu'une fabrique branche (voir FactoryValidatesByCompositionRuleTest et la preuve par mutation).
+        // Le legacy n'a aucune fabrique (Perishable est une classe qui lance) : HA4.9 est rouge par absence, comme HA4.4.
+        // Une règle verte parce qu'il n'y a rien à examiner ne prouverait rien et ne laisserait rien à jouer.
         assertThat(report.rule("HA4.9")).hasValueSatisfying(rule -> {
-            assertThat(rule.status()).isEqualTo("PASS");
-            assertThat(rule.violations()).isZero();
+            assertThat(rule.status()).isEqualTo("FAIL");
+            assertThat(rule.violations()).isEqualTo(1);
         });
     }
 

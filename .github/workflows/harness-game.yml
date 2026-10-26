@@ -29,8 +29,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Le maître des jeux : une PR dont le dernier commit contient le mot « abracadabra » change le jeu (harness/,
+  # workflows) au lieu d'y jouer. L'arbitre ne la juge pas (pas de verdict, de commentaire ni de classement) ; c'est
+  # le workflow le-maitre-des-jeux qui la vérifie.
+  formule:
+    name: Formule magique
+    runs-on: ubuntu-latest
+    outputs:
+      magic: ${{ steps.word.outputs.magic }}
+    steps:
+      - id: word
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          message=$(gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA" --jq .commit.message)
+          if grep -qiw abracadabra <<< "$message"; then
+            echo "magic=true" >> "$GITHUB_OUTPUT"
+            echo "Abracadabra : l'arbitre laisse la main au maître des jeux."
+          else
+            echo "magic=false" >> "$GITHUB_OUTPUT"
+          fi
+
   referee:
     name: Arbitre CUPID (harnais sur la base et sur la PR)
+    needs: formule
+    if: needs.formule.outputs.magic != 'true'
     runs-on: ubuntu-latest
     env:
       # La base vient du commit de fusion de la PR (GITHUB_SHA), voir l'étape « Base of the PR ».

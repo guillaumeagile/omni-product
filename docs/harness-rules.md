@@ -85,7 +85,7 @@ dans `Steps.java`.
 | HA4.6 pas d'horloge | oui | 2 | BYTECODE |
 | HA4.7 la vente dépend de `canSell` | oui | 2 | erreur ; vérifie la dépendance au résultat, plus l'ordre du texte |
 | HA14 collections en pipeline | oui | 3 | échoue sur `CatalogService.catalogLabels` (exercice ajouté) |
-| HA15 la fabrique valide par composition | oui | 3 | AST, sur `model` ; **rouge par absence** sur le legacy (aucune fabrique dont le résultat peut échouer, comme HA4.4) et rouge dès qu'une fabrique branche ou lance (preuve par mutation sur `Slug`) |
+| HA15 la fabrique valide par composition | oui | 3 | AST, sur `model` ; **rouge par absence** sur le legacy de la phase 2 (aucune fabrique dont le résultat peut échouer, comme HA4.4) et rouge dès qu'une fabrique branche ou lance (preuve par mutation sur `Slug`) ; sur le code de départ de la phase 3, elle est rouge parce que `Perishable.of` branche avec un `if` |
 
 Périmètre : `com.omniproduct.model` (et `com.omniproduct.service` pour HA4.1, HA4.7, HA6, HA12.1, HA14). Le port carbone
 (`domain/`) et l'infrastructure ne font pas partie de l'exercice.

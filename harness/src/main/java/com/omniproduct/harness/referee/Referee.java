@@ -30,7 +30,7 @@ public final class Referee {
     static final int PROGRESS_CAP = 5;
     static final int SINGLE_GREEN_BONUS = 5;
     static final int SMALL_DIFF_BONUS = 3;
-    static final int REGRESSION = -5;
+    static final int REGRESSION = -20;
     // Badge « Clean Coder » : les mesures de qualité (CK ici) rapportent au moins ce nombre de points dans le round.
     static final int CLEAN_CODER_MIN_POINTS = 2;
     // Coût agentique : tokens et branches retirés du code de l'étape (model/ et service/). La complexité cyclomatique

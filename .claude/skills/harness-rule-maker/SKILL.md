@@ -66,7 +66,7 @@ offsets are UTF-8 bytes (text is read from the byte array, already handled by `S
    `com.omniproduct.model` and `com.omniproduct.service`, not `domain/` nor `infrastructure/`.
 7. **Update the documents**: the table and the heuristics section of `docs/harness-rules.md`, the student text
    `docs/CUPID-step-N.md` (describe only what the harness really does), the plan if the scope moved.
-8. **Run everything**: `gradle :harness:test --offline`, then `./harness.sh` (exit 0 pass, 1 failure, 2 unusable or
+8. **Run everything**: `gradle :harness:test -PharnessTests --offline` (the harness tests only run with that flag), then `./harness.sh` (exit 0 pass, 1 failure, 2 unusable or
    nothing compiled; never a false PASS when classes are missing). `./harness.sh --test` runs the harness' own tests.
 
 ## Reviewing an existing rule for evasions

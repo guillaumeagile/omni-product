@@ -14,7 +14,8 @@ public class CatalogService {
     public List<String> catalogLabels(List<Product> products, LocalDate today) {
         List<String> labels = new ArrayList<>();
         for (Product product : products) {
-            if (product instanceof Perishable perishable && today.isAfter(perishable.getSellByDate())) {
+            if (product instanceof Perishable perishable
+                    && today.isAfter(perishable.getShelfLife().sellByDate())) {
                 continue;
             }
             String label = product.getName();

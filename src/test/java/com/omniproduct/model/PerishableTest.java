@@ -1,6 +1,7 @@
 package com.omniproduct.model;
 
 import com.omniproduct.model.valueobject.Price;
+import com.omniproduct.model.valueobject.ShelfLife;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -23,13 +24,13 @@ class PerishableTest {
         assertThat(yoghurt.getId()).isEqualTo(ID);
         assertThat(yoghurt.getName()).isEqualTo("Yoghurt");
         assertThat(yoghurt.getPrice()).isEqualTo(PRICE);
-        assertThat(yoghurt.getSellByDate()).isEqualTo(SELL_BY);
-        assertThat(yoghurt.getUseByDate()).isEqualTo(USE_BY);
+        assertThat(yoghurt.getShelfLife()).isEqualTo(new ShelfLife(SELL_BY, USE_BY));
     }
 
     @Test
     void acceptsAUseByDateEqualToTheSellByDate() {
-        assertThat(new Perishable(ID, "Yoghurt", PRICE, SELL_BY, SELL_BY).getUseByDate()).isEqualTo(SELL_BY);
+        assertThat(new Perishable(ID, "Yoghurt", PRICE, SELL_BY, SELL_BY).getShelfLife())
+                .isEqualTo(new ShelfLife(SELL_BY, SELL_BY));
     }
 
     @Test

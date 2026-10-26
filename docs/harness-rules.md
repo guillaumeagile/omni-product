@@ -90,6 +90,30 @@ dans `Steps.java`.
 Périmètre : `com.omniproduct.model` (et `com.omniproduct.service` pour HA4.1, HA4.7, HA4.8, HA6, HA12.1). Le port carbone
 (`domain/`) et l'infrastructure ne font pas partie de l'exercice.
 
+### Propositions de règles (TODO, phase 2)
+
+Idées nées de la lecture du bloc « PMD quality metrics » de la PR #22 (HA4.7, 0 point PMD : fan-out 61 → 64,
+complexité cognitive 2 → 3, **0 lambda** alors que le barème en récompense jusqu'à +10). Le gain PMD annoncé est une
+**hypothèse** : chaque règle s'écrit, se câble, puis se **joue dans une PR dédiée** pour lire le gain réel dans le
+commentaire de l'arbitre. Une règle à la fois ; les numéros sont provisoires. HA4.8 (pipelines) et HA4.9 (fabrique par
+composition) sont nées de cette liste.
+
+| TODO | Règle | Cible dans le code d'aujourd'hui | Gain PMD supposé | CUPID | Détection envisagée |
+|---|---|---|---|---|---|
+| TODO HA4.10 | Une décision du domaine se compose, elle ne se teste pas : `if (!canSell) return none()` devient `Option.when(canSell, …)` / `filter` / `map` | la clause de garde de `ProductService.sellOne` | cognitive −1, nesting −1, +1 à +2 lambdas (+2 à +4) | Composable, Idiomatic | durcissement de HA4.7 : dans `service`, un `if` dont la condition porte une décision `can*` et dont la branche est un `return` ; Warning d'abord |
+| TODO HA4.11 | Le service ne reconstruit pas un value object champ par champ (*Tell, don't ask*) : `new ProductStock(new Quantity(stock.stock().value() - 1), stock.quantity(), stock.warehouse())` devient `stock.withdrawOne()` | `ProductService.withdrawStock` | fan-out du service −2 (+1) | Domain-based | méthode de `service` qui appelle ≥ 2 accesseurs d'un même paramètre pour construire un objet du type de ce paramètre |
+| TODO HA13 | Un record imbriqué dans une entité est un concept à part : `Product.Warehouse`, `Product.Supplier` (collision avec l'entité `Supplier`), `Supplier.Contact`, `Supplier.Address` | `Product`, `Supplier` | fan-out max −2 à −4 (+1 à +2) ; le compteur « Types » monte, non noté par choix | Domain-based, Composable | record déclaré dans le corps d'une classe qui implémente `Identifiable` |
+| TODO HA14 | Pas de code mort ni de doublon de décision dans le modèle : `Perishable.isPastSellBy(TimeServiceProvider)` n'est appelé nulle part et duplique `Product.canSellOn(today)` avec une autre convention d'horloge | `Perishable` | fan-out −1, WMC −1 | Unix philosophy, Predictable | méthode publique du modèle sans référence dans `model`, `service` et les tests ; variante : une seule convention d'horloge (`today` passé **ou** fournisseur injecté) |
+| TODO HA11-service | HA11 étendu au `service` : pas de primitives aux frontières (`calculateShipmentCarbon(String, Double, Double)`) | `ProductTransportService` | ≈ nul (fan-out +1 possible) : règle de design pur, pas de score | Domain-based | même heuristique que HA11, périmètre `service` |
+
+Ajustements du **barème PMD** à envisager, indépendants des règles :
+
+- TODO Affectations : 8 des 9 affectations sont les `this.x = x` des constructeurs de `Product` et `Supplier`, que
+  HA3/HA9 obligent à rester des classes. Ne pas compter les affectations de champ dans un constructeur (ne garder que
+  les réaffectations et les variables locales), sinon la métrique reste inerte toute la phase 2.
+- TODO TCC min = 0 : ce sont `ProductService` et `SystemTimeServiceProvider`, sans champ. Non actionnable sans mutiler
+  le code : laisser à 0 point ou la calculer sur `model` seul.
+
 ## Heuristiques, pas correspondances exactes
 
 Une règle qui compare des noms exacts se contourne en renommant (`fetchSlug` au lieu de `getSlug`, `productID` au lieu

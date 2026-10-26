@@ -20,6 +20,7 @@ import com.omniproduct.harness.rules.RecordsAreValueObjectsRule;
 import com.omniproduct.harness.rules.RichIdentifierRule;
 import com.omniproduct.harness.rules.SellChecksCanSellBeforeWithdrawRule;
 import com.omniproduct.harness.rules.SingleConcernRule;
+import com.omniproduct.harness.rules.TellDontAskRule;
 import com.omniproduct.harness.rules.ValueObjectFactoryRule;
 import com.omniproduct.harness.rules.VavrEscapeHatchesRule;
 
@@ -83,14 +84,16 @@ public final class Steps {
     }
 
     // L'étape 2 plus le style fonctionnel : HA14 (collections en pipeline), HA15 (fabrique par composition), HA16
-    // (une décision du domaine se compose, avertissement) et HA21 (un conteneur Vavr se consomme par fold, sans porte
+    // (une décision du domaine se compose), HA17 (Tell, don't ask : le service ne reconstruit pas un objet champ par
+    // champ) et HA21 (un conteneur Vavr se consomme par fold, sans porte
     // dérobée). La numérotation reprend à HA14 : on saute le 13 ;
-    // HA17 à HA20 restent réservés aux propositions de docs/harness-rules.md.
+    // HA18 à HA20 restent réservés aux propositions de docs/harness-rules.md.
     private static List<HarnessRule> step3() {
         return Stream.concat(step2().stream(), List.<HarnessRule>of(
                 new CollectionsArePipelinesRule(IS_MODEL_OR_SERVICE),
                 new FactoryValidatesByCompositionRule(IS_MODEL),
                 new DecisionComposesRule(pkg -> isIn(pkg, SERVICE_PACKAGE)),
+                new TellDontAskRule(pkg -> isIn(pkg, SERVICE_PACKAGE)),
                 new VavrEscapeHatchesRule(MODEL_PACKAGE + "..", SERVICE_PACKAGE + "..")).stream()).toList();
     }
 

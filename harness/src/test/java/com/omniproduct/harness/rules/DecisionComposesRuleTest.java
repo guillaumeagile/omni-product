@@ -1,6 +1,5 @@
 package com.omniproduct.harness.rules;
 
-import com.omniproduct.harness.HarnessSeverity;
 import com.omniproduct.harness.SourceSet;
 import com.omniproduct.harness.Violation;
 import org.junit.jupiter.api.Test;
@@ -133,8 +132,8 @@ class DecisionComposesRuleTest {
     }
 
     @Test
-    void isAWarningThatNeverFailsTheHarness() {
-        assertThat(new DecisionComposesRule(pkg -> true).severity()).isEqualTo(HarnessSeverity.WARNING);
+    void isAnErrorThatFailsTheHarness() {
+        assertThat(new DecisionComposesRule(pkg -> true).severity().name()).isEqualTo("ERROR");
         assertThat(new DecisionComposesRule(pkg -> true).id()).isEqualTo("HA16");
     }
 

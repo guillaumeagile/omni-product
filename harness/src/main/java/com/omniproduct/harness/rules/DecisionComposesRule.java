@@ -1,7 +1,6 @@
 package com.omniproduct.harness.rules;
 
 import com.omniproduct.harness.HarnessRule;
-import com.omniproduct.harness.HarnessSeverity;
 import com.omniproduct.harness.Node;
 import com.omniproduct.harness.SourceFile;
 import com.omniproduct.harness.SourceSet;
@@ -15,7 +14,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// HA16 (moteur AST, avertissement d'abord) - une décision du domaine se compose, elle ne se teste pas : un `if` (ou
+// HA16 (moteur AST, erreur) - une décision du domaine se compose, elle ne se teste pas : un `if` (ou
 // un ternaire retourné) dont la condition porte une décision `can*` et dont une branche sort de la méthode par un
 // `return` ou un `throw` coupe le flux. `Option.when(canSell, ...)`, `filter`, `map` ou `fold` en font une étape.
 // Heuristiques, par mots (`Words`) :
@@ -44,12 +43,7 @@ public final class DecisionComposesRule implements HarnessRule {
 
     @Override
     public String name() {
-        return "A domain decision is composed (Option.when, filter, map, fold), not tested by an if that returns (warning)";
-    }
-
-    @Override
-    public HarnessSeverity severity() {
-        return HarnessSeverity.WARNING;
+        return "A domain decision is composed (Option.when, filter, map, fold), not tested by an if that returns";
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.omniproduct.model.NonExpiring;
 import com.omniproduct.model.Perishable;
 import com.omniproduct.model.Product;
 import com.omniproduct.model.ProductId;
+import com.omniproduct.model.StandardProduct;
 import com.omniproduct.model.valueobject.Price;
 import org.junit.jupiter.api.Test;
 
@@ -99,7 +100,7 @@ class CatalogServiceTest {
     // --- Seules ces fabriques connaissent la forme du modèle. ---
 
     private static Product plain(String name) {
-        return new Product(id(), name, price());
+        return new StandardProduct(id(), name, price());
     }
 
     private static Product perishable(String name, LocalDate sellBy) {

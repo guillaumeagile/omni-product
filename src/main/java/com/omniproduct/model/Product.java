@@ -2,25 +2,15 @@ package com.omniproduct.model;
 
 import com.omniproduct.model.valueobject.Price;
 
-public class Product implements Identifiable {
+public interface Product extends Identifiable {
 
-    private final ProductId id;
-    private final String name;
-    private final Price price;
+    ProductId getId();
 
-    public Product(ProductId id, String name, Price price) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-    }
+    String getName();
 
-    public ProductId getId() { return id; }
+    Price getPrice();
 
-    public String getName() { return name; }
+    record Warehouse(Location location) {}
 
-    public Price getPrice() { return price; }
-
-    public record Warehouse(Location location) {}
-
-    public record Supplier(String name, Siren siren, TvaId tvaId) {}
+    record Supplier(String name, Siren siren, TvaId tvaId) {}
 }

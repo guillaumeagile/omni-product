@@ -45,7 +45,20 @@ application {
     mainClass = "com.omniproduct.harness.HarnessMain"
 }
 
+// Les tests du harnais sont ceux de l'animateur, pas des joueurs : ils décrivent le code de départ de l'atelier (ils
+// attendent des règles rouges sur le legacy) et échouent dès qu'une équipe progresse. Un `gradle test` à la racine, avec
+// ou sans --continue, ne doit donc pas les lancer : ils ne tournent que sur demande explicite, avec -PharnessTests
+// (c'est ce que passent `./harness.sh --test` et le workflow le-maitre-des-jeux).
+val harnessTestsRequested = providers.gradleProperty("harnessTests").isPresent
+
+gradle.taskGraph.whenReady {
+    if (!harnessTestsRequested && hasTask(tasks.test.get())) {
+        logger.lifecycle("Tests du harnais ignorés : réservés à l'animateur (-PharnessTests). Ne les lancez pas pour jouer.")
+    }
+}
+
 tasks.test {
+    onlyIf("réservé à l'animateur : lancer avec -PharnessTests (./harness.sh --test)") { harnessTestsRequested }
     // Le dry run analyse le vrai code de l'atelier : il doit être compilé avant
     dependsOn(":classes")
     useJUnitPlatform()

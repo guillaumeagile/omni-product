@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Harnais CUPID : vérifications structurelles déterministes (même code en entrée, même verdict en sortie).
 #
-# Usage : ./harness.sh [--clean] [étape] [--json rapport.json]   (étape : 1 par défaut ; 1, 2, 3 ou all)
+# Usage : ./harness.sh [--clean] [phase] [--json rapport.json]   (phase : 1 par défaut ; 1, 2, 3 ou all)
 #         ./harness.sh --test         (lance les tests du harnais lui-même : réservé à l'animateur)
 #
 # --clean : recompile tout depuis zéro (gradle clean), pour écarter tout doute sur un cache.
@@ -33,7 +33,7 @@ if [ "${1:-}" = "--clean" ]; then
     shift
 fi
 
-STEP="${1:-1}"
+PHASE="${1:-1}"
 [ $# -gt 0 ] && shift
 
 echo "== Code analysé =="
@@ -47,7 +47,7 @@ fi
 echo "== Compilation =="
 "${GRADLE[@]}" ${CLEAN[@]+"${CLEAN[@]}"} classes :harness:installDist -q
 
-echo "== Harnais CUPID, étape $STEP =="
+echo "== Harnais CUPID, phase $PHASE =="
 # Lancé directement (pas via 'gradle run') pour rendre fidèlement le code de sortie 0 / 1 / 2.
-harness/build/install/harness/bin/harness --step "$STEP" ${@+"$@"} \
+harness/build/install/harness/bin/harness --phase "$PHASE" ${@+"$@"} \
     --classes build/classes/java/main src/main/java 2> >(grep -v '^SLF4J' >&2)

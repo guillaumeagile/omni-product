@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-// HA4.4 (moteur AST) - Composable, étape 3 (heuristique) : l'entrée est validée à la frontière, pas en lançant une
+// HA4.4 (moteur AST) - Composable, phase 3 (heuristique) : l'entrée est validée à la frontière, pas en lançant une
 // exception dans un constructeur. Au moins un value object expose une méthode statique de fabrication (create, build,
 // of, from, make : des mots, donc `fromRawValue` compte) qui renvoie un résultat scellé ou une ADT de Vavr :
 //   - soit une ADT dont une alternative est le value object et une autre un record d'erreur

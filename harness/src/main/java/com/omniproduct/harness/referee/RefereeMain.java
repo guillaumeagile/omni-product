@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 // Ligne de commande de l'arbitre, appelée par la GitHub Action :
-//   referee --base base.json --head head.json --title "HA9 green: ..." --branch step-1/ha9 \
+//   referee --base base.json --head head.json --title "HA9 green: ..." --branch phase-1/ha9 \
 //           [--changed-files fichiers.txt] [--changed-tokens 120] [--small-diff 400] [--tokens-per-point 100] [--out commentaire.md] \
-//           [--phase phase.json --previous "`team-red/step-1/ha8` (abc1234)"]
-// --base est le baby step précédent de l'équipe (ou la branche de la phase au premier step) : le score du round est
+//           [--phase phase.json --previous "`team-red/phase-1/ha8` (abc1234)"]
+// --base est le baby branche précédente de l'équipe (ou la branche de la phase au première branche) : le score du round est
 // le delta avec lui. --phase est le départ de la phase, pour montrer le chemin parcouru, sans points.
 // Un rapport absent (le projet ne compile pas) est un rapport vide, pas une erreur d'usage.
 // Code de sortie : 0 accepté ou hors jeu, 1 refusé, 2 mauvais usage.

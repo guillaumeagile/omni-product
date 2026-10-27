@@ -27,17 +27,17 @@ class HarnessMainTest {
         }
     }
 
-    // Le code de départ de la phase 3 a fait les phases 1 et 2 : leurs étapes sont vertes.
+    // Le code de départ de la phase 3 a fait les phases 1 et 2 : leurs phases sont vertes.
     @Test
-    void theEarlierStepsAreGreenOnThePhase3StartCode() {
-        Run step1 = run("--step", "1", "--classes", "../build/classes/java/main", "../src/main/java");
-        Run step2 = run("--step", "2", "--classes", "../build/classes/java/main", "../src/main/java");
+    void theEarlierPhasesAreGreenOnThePhase3StartCode() {
+        Run phase1 = run("--phase", "1", "--classes", "../build/classes/java/main", "../src/main/java");
+        Run phase2 = run("--phase", "2", "--classes", "../build/classes/java/main", "../src/main/java");
 
-        assertThat(step1.exitCode()).isZero();
-        assertThat(step2.exitCode()).isZero();
-        assertThat(step2.out()).contains("[PASS] HA2 ", "[PASS] HA4.1", "[PASS] HA4.5", "[PASS] HA4.7", "HARNESS RESULT: PASS");
-        // HA14 et HA15 sont des règles de l'étape 3 : l'étape 2 ne les connaît pas.
-        assertThat(step2.out()).doesNotContain("HA14", "HA15");
+        assertThat(phase1.exitCode()).isZero();
+        assertThat(phase2.exitCode()).isZero();
+        assertThat(phase2.out()).contains("[PASS] HA2 ", "[PASS] HA4.1", "[PASS] HA4.5", "[PASS] HA4.7", "HARNESS RESULT: PASS");
+        // HA14 et HA15 sont des règles de la phase 3 : la phase 2 ne les connaît pas.
+        assertThat(phase2.out()).doesNotContain("HA14", "HA15");
     }
 
     // Dry run : le harnais DOIT trouver de vrais problèmes dans le code de départ de la phase 3, et eux seuls
@@ -45,7 +45,7 @@ class HarnessMainTest {
     // cassé, pas le code.
     @Test
     void failsOnTheStartCodeOfPhase3ExactlyOnTheFunctionalStyleRules() {
-        Run result = run("--step", "3", "--classes", "../build/classes/java/main", "../src/main/java");
+        Run result = run("--phase", "3", "--classes", "../build/classes/java/main", "../src/main/java");
 
         assertThat(result.exitCode()).isEqualTo(1);
         assertThat(result.out().lines().filter(line -> line.startsWith("[FAIL]")).map(line -> line.split(" ")[1]).toList())
@@ -54,25 +54,25 @@ class HarnessMainTest {
         assertThat(result.out()).contains("HARNESS RESULT: FAIL");
     }
 
-    // Le rapport JSON reflète la sortie texte : mêmes règles, dans l'ordre de l'étape, mêmes statuts.
-    // L'étape 3 ajoute HA14, HA15, HA16, HA17 et HA21 à l'étape 2 ; `all` est l'étape 3. La numérotation saute le 13.
+    // Le rapport JSON reflète la sortie texte : mêmes règles, dans l'ordre de la phase, mêmes statuts.
+    // La phase 3 ajoute HA14, HA15, HA16, HA17 et HA21 à la phase 2 ; `all` est la phase 3. La numérotation saute le 13.
     @Test
     void writesAMachineReadableReport(@TempDir Path dir) {
         Path json = dir.resolve("report.json");
 
-        Run result = run("--step", "3", "--json", json.toString(), "--classes", "../build/classes/java/main", "../src/main/java");
+        Run result = run("--phase", "3", "--json", json.toString(), "--classes", "../build/classes/java/main", "../src/main/java");
         HarnessReport report = HarnessReport.read(json);
 
         assertThat(result.exitCode()).isEqualTo(1);
-        assertThat(report.step()).isEqualTo("3");
+        assertThat(report.phase()).isEqualTo("3");
         assertThat(report.result()).isEqualTo("FAIL");
         assertThat(report.rules()).extracting(HarnessReport.RuleResult::id)
-                .isEqualTo(Steps.rules("3").stream().map(HarnessRule::id).toList())
+                .isEqualTo(Phases.rules("3").stream().map(HarnessRule::id).toList())
                 .endsWith("HA14", "HA15", "HA16", "HA17", "HA21")
-                .startsWith(Steps.rules("2").stream().map(HarnessRule::id).toArray(String[]::new));
-        assertThat(Steps.rules("all").stream().map(HarnessRule::id).toList())
-                .isEqualTo(Steps.rules("3").stream().map(HarnessRule::id).toList());
-        assertThat(Steps.rules("3").stream().map(HarnessRule::id)).doesNotContain("HA13");
+                .startsWith(Phases.rules("2").stream().map(HarnessRule::id).toArray(String[]::new));
+        assertThat(Phases.rules("all").stream().map(HarnessRule::id).toList())
+                .isEqualTo(Phases.rules("3").stream().map(HarnessRule::id).toList());
+        assertThat(Phases.rules("3").stream().map(HarnessRule::id)).doesNotContain("HA13");
         assertThat(report.rules().stream().filter(rule -> rule.status().equals("FAIL")).map(HarnessReport.RuleResult::id).toList())
                 .isEqualTo(List.of("HA14", "HA15", "HA16", "HA17"));
         // Exercice volontaire (CatalogService.catalogLabels remplit une liste dans une boucle) : HA14 est rouge.

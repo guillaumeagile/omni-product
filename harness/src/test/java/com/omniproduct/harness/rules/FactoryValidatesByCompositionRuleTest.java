@@ -18,7 +18,7 @@ class FactoryValidatesByCompositionRuleTest {
                 .check(SourceSet.ofSources(files, null));
     }
 
-    // --- Bons cas : la validation est une chaîne d'étapes, chacune une valeur ---
+    // --- Bons cas : la validation est une chaîne d'phases, chacune une valeur ---
 
     @Test
     void acceptsAFactoryComposingOptionSteps() {

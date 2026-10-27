@@ -1,4 +1,4 @@
-### Step 1.2: Composable, Value Objects and ADTs
+### Phase 1.2: Composable, Value Objects and ADTs
 **"Extend through composition, not modification"**
 
 **Problem**: `Price` mixes its amount with the VAT entity, so the price cannot be computed as a chain of rules. Products
@@ -22,11 +22,11 @@ The net price applies several rules in this order: the margin first, then the tr
 if applicable. An absent adjustment is simply missing from the ordered list of adjustments: no `null`, no `Optional`.
 
 The code you work on lives in `src/main/java/com/omniproduct/model` and `src/main/java/com/omniproduct/service`, as in
-step 1. Run `./harness.sh 2`: it runs the step 1 rules and the step 2 rules.
+phase 1. Run `./harness.sh 2`: it runs the phase 1 rules and the phase 2 rules.
 
-Work as in step 1: **one pull request per baby step**, each turning one HA rule green, as a **draft** PR
-targeting `java-bdxio-phase2`, never merged, each branch built on the previous step (see "How to work" and "The game"
-in `CUPID-step-1.md`). The diff of each PR is the lesson: you see what each rule costs.
+Work as in phase 1: **one pull request per baby step**, each turning one HA rule green, as a **draft** PR
+targeting `java-bdxio-phase2`, never merged, each branch built on the previous branch (see "How to work" and "The game"
+in `CUPID-phase-1.md`). The diff of each PR is the lesson: you see what each rule costs.
 
 ## Harness (HA)
 
@@ -40,11 +40,11 @@ of vavr (phase 3) instead.
 ### HA3 - Records are Value Objects, never entities
 
 A record never implements `Identifiable`: identity belongs to entities (HA9), and a record's job is to be a value
-object: immutable, equality by value, no identity. HA2 already forbids setters and HA5 (step 1) already caps public
+object: immutable, equality by value, no identity. HA2 already forbids setters and HA5 (phase 1) already caps public
 properties at 4; HA3 adds that a record is not an entity, and that the `valueobject` package holds records only. A
 `class` declared there is a violation.
 
-HA3 also pins the concrete deliverable of this step: a record named `Price` must exist in a `valueobject` package.
+HA3 also pins the concrete deliverable of this phase: a record named `Price` must exist in a `valueobject` package.
 `Price` is the running value object example: refactor it to drop the VAT entity, keep it composable and keep it an
 immutable record.
 
@@ -155,15 +155,15 @@ pass the harness verification:
 ./harness.sh 2
 ```
 
-It runs the step 1 rules and the step 2 rules, and exits `0` only when every error passes. `./harness.sh 2 --json report.json`
-writes the same verdict as a JSON report, which the game uses (see "The game" in `CUPID-step-1.md`).
+It runs the phase 1 rules and the phase 2 rules, and exits `0` only when every error passes. `./harness.sh 2 --json report.json`
+writes the same verdict as a JSON report, which the game uses (see "The game" in `CUPID-phase-1.md`).
 
 Do not relax or rewrite the harness rules to make the exercise pass - that defeats the assessment. If a rule genuinely
 looks wrong, flag it.
 
 ## Phase 3 (preview): functional style
 
-Once step 2 is green, phase 3 asks for the functional style: collections are transformed by `Stream` pipelines (HA14),
+Once phase 2 is green, phase 3 asks for the functional style: collections are transformed by `Stream` pipelines (HA14),
 and a factory validates by composing `Option`/`Validation` steps instead of branching (HA15). Its statement is
-`CUPID-step-3.md`. The sealed results of this step stay valid. `Either` chains results with `map` and `flatMap`, and
+`CUPID-phase-3.md`. The sealed results of this phase stay valid. `Either` chains results with `map` and `flatMap`, and
 it is consumed with `fold`: a bonus for phase 3, with its own rules to come (no `get()`, no `getLeft()`).

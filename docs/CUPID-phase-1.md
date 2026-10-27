@@ -1,4 +1,4 @@
-### Step 1: Single Responsibility → Unix Philosophy
+### Phase 1: Single Responsibility → Unix Philosophy
 **"One class, one reason to change"**
 
 **Problem**: `Product` handles catalog (slug, discounts, images), pricing (`Price`), storage (stock, quantity,
@@ -33,26 +33,26 @@ Each baby step goes in its own pull request, so you can see how much code each r
   you are tempted to fix two rules at once, split the work into two PRs.
 - **Never merge.** Nobody ever merges into `java-bdxio-phase1` or `java-bdxio-phase2`: open every PR as a
   **draft** (`gh pr create --draft`) and leave it open.
-- **Chain the branches, always target the phase branch.** Branch the first step from the phase branch, and each next
-  step from your previous step (`step-1/ha9-identifiable` from `step-1/ha8-no-jpa`). The PR always targets the phase
-  branch (`java-bdxio-phase1`, or `java-bdxio-phase2` for a phase 2 rule), never `main` nor another step: each PR is
-  scored against the start of the phase, so the score shows the whole way from the legacy. To see one step only,
+- **Chain the branches, always target the phase branch.** Branch the first rule from the phase branch, and each next
+  rule from your previous rule (`phase-1/ha9-identifiable` from `phase-1/ha8-no-jpa`). The PR always targets the phase
+  branch (`java-bdxio-phase1`, or `java-bdxio-phase2` for a phase 2 rule), never `main` nor another rule: each PR is
+  scored against the start of the phase, so the score shows the whole way from the legacy. To see one rule only,
   pick its commits in Files changed.
 - **Name the rule in the title**: `HA9 green: Product and Supplier implement Identifiable`.
 - **Paste the harness output in the description**, before and after: the rule that turned green, and any rule
   that turned red because of it (that happens, say so rather than hiding it).
-- **Read the diff of the step.** Small or large? Did it touch services too? Was the class split, or only
+- **Read the diff of the rule.** Small or large? Did it touch services too? Was the class split, or only
   renamed? Answering these questions is how you learn the refactoring, not just the green light.
 - **Never touch `harness/`** in a PR.
 
 ### The game
 
 Every pull request is refereed by a GitHub Action (`harness-game`). It runs the harness on the phase branch, on your
-previous step (found automatically: the branch of your team your branch started from) and on your PR, then comments
-your PR with a scorecard: the rules that moved since your previous step and the points of this round, your level, your
+previous branch (found automatically: the branch of your team your branch started from) and on your PR, then comments
+your PR with a scorecard: the rules that moved since your previous branch and the points of this round, your level, your
 badges, and the way travelled since the start of the phase (no points there). The leaderboard adds up your rounds.
 
-- **Branch** `team-<name>/step-1/ha<N>-<what>`, for example `team-red/step-1/ha9-identifiable`. The first segment is
+- **Branch** `team-<name>/phase-1/ha<N>-<what>`, for example `team-red/phase-1/ha9-identifiable`. The first segment is
   your team on the leaderboard.
 - **Target**: the rule in the PR title (`HA9 green: ...`), or in the branch name (`ha9`, `ha4-3`). Without a target,
   the PR is off game.
@@ -81,7 +81,7 @@ in the scorecard but never penalized: an exhaustive `switch` (HA4.5) adds one br
 [CK](https://github.com/mauricioaniche/ck) metrics (CBO total and max, WMC max, LCOM* max, mutable fields,
 assignments, loops, lambdas, max nesting) are detailed in a collapsible block of the scorecard, with the points of
 each one. An improvement earns points, a worse metric costs nothing. The number of classes is shown but not scored.
-CK 0.7.0 does not see records: in step 2, a record is not measured.
+CK 0.7.0 does not see records: in phase 2, a record is not measured.
 
 Badges: 🍼 Baby step, 🧼 No regression, 🤏 Small diff, 👑 Boss defeated, 🧠 Compiler-checked. Run `./harness.sh` locally
 before pushing: the referee uses the same harness.

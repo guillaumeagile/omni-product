@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 public final class HarnessMain {
 
     private static final String USAGE =
-            "Usage: harness [--step 1|2|3|all] [--json <rapport.json>] --classes <dossier-de-classes> <dossier-de-sources> [autres-sources...]";
+            "Usage: harness [--phase 1|2|3|all] [--json <rapport.json>] --classes <dossier-de-classes> <dossier-de-sources> [autres-sources...]";
 
     private HarnessMain() {
     }
@@ -23,7 +23,7 @@ public final class HarnessMain {
 
     private enum Status { PASS, WARN, FAIL }
 
-    private record Options(String step, List<Path> sources, List<Path> classes, Optional<Path> json) {
+    private record Options(String phase, List<Path> sources, List<Path> classes, Optional<Path> json) {
 
         static Options parse(List<String> args) {
             return parse(args, new Options("all", List.of(), List.of(), Optional.empty()));
@@ -34,13 +34,13 @@ public final class HarnessMain {
                 return acc;
             }
             String head = args.get(0);
-            if (head.equals("--step") || head.equals("--classes") || head.equals("--json")) {
+            if (head.equals("--phase") || head.equals("--classes") || head.equals("--json")) {
                 if (args.size() < 2) {
                     throw new IllegalArgumentException(head + " requires a value");
                 }
                 String value = args.get(1);
                 Options next = switch (head) {
-                    case "--step" -> acc.withStep(value);
+                    case "--phase" -> acc.withPhase(value);
                     case "--json" -> acc.withJson(Path.of(value));
                     default -> acc.withClasses(Path.of(value));
                 };
@@ -49,28 +49,28 @@ public final class HarnessMain {
             return parse(args.subList(1, args.size()), acc.withSource(Path.of(head)));
         }
 
-        Options withStep(String value) {
+        Options withPhase(String value) {
             return new Options(value, sources, classes, json);
         }
 
         Options withSource(Path path) {
-            return new Options(step, Stream.concat(sources.stream(), Stream.of(path)).toList(), classes, json);
+            return new Options(phase, Stream.concat(sources.stream(), Stream.of(path)).toList(), classes, json);
         }
 
         Options withClasses(Path path) {
-            return new Options(step, sources, Stream.concat(classes.stream(), Stream.of(path)).toList(), json);
+            return new Options(phase, sources, Stream.concat(classes.stream(), Stream.of(path)).toList(), json);
         }
 
         Options withJson(Path path) {
-            return new Options(step, sources, classes, Optional.of(path));
+            return new Options(phase, sources, classes, Optional.of(path));
         }
 
         void validate() {
             if (sources.isEmpty() || classes.isEmpty()) {
                 throw new IllegalArgumentException(USAGE);
             }
-            if (!Steps.names().contains(step)) {
-                throw new IllegalArgumentException("Unknown --step value '" + step + "'. Use " + String.join(", ", Steps.names().stream().sorted().toList()) + " or omit.");
+            if (!Phases.names().contains(phase)) {
+                throw new IllegalArgumentException("Unknown --phase value '" + phase + "'. Use " + String.join(", ", Phases.names().stream().sorted().toList()) + " or omit.");
             }
         }
     }
@@ -118,9 +118,9 @@ public final class HarnessMain {
             return 2;
         }
 
-        List<HarnessRule> rules = Steps.rules(options.step());
+        List<HarnessRule> rules = Phases.rules(options.phase());
 
-        System.out.println("CUPID step " + options.step() + " harness - deterministic structural checks");
+        System.out.println("CUPID phase " + options.phase() + " harness - deterministic structural checks");
         System.out.println("Analyzed " + sources.files().size() + " source file(s), " + sources.classes().size() + " class(es)\n");
 
         List<Outcome> outcomes = rules.stream()
@@ -132,7 +132,7 @@ public final class HarnessMain {
 
         boolean pass = outcomes.stream().noneMatch(outcome -> outcome.status() == Status.FAIL);
         System.out.println("\nHARNESS RESULT: " + (pass ? "PASS" : "FAIL"));
-        options.json().ifPresent(file -> new HarnessReport(options.step(), pass ? "PASS" : "FAIL",
+        options.json().ifPresent(file -> new HarnessReport(options.phase(), pass ? "PASS" : "FAIL",
                 outcomes.stream().map(Outcome::toResult).toList(), Metrics.of(sources)).write(file));
         return pass ? 0 : 1;
     }

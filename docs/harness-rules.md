@@ -61,7 +61,7 @@ HA5 → HA4, HA2 → HA6 → HA8 → HA7 → HA9, HA10 → HA12, HA12.1.
 
 ## État d'implémentation et phases
 
-L'**phase 1** (`./harness.sh`, `docs/CUPID-phase-1.md`) couvre **HA5 à HA12.1** uniquement. L'**phase 2** (`./harness.sh 2`) ajoute HA2, HA3 et HA4.1 à HA4.7 ; l'**phase 3** (`./harness.sh 3`, `docs/CUPID-phase-3.md`) ajoute HA14, HA15 et HA21 (style fonctionnel : pipelines, fabrique par composition, conteneurs Vavr consommés par `fold`) ; `all` lance toutes les phases, c'est-à-dire la phase 3. La numérotation reprend à HA14 : on saute le 13. Les règles se règlent
+La **phase 1** (`./harness.sh`, `docs/CUPID-phase-1.md`) couvre **HA5 à HA12.1** uniquement. La **phase 2** (`./harness.sh 2`) ajoute HA2, HA3 et HA4.1 à HA4.7 ; l'**phase 3** (`./harness.sh 3`, `docs/CUPID-phase-3.md`) ajoute HA14, HA15 et HA21 (style fonctionnel : pipelines, fabrique par composition, conteneurs Vavr consommés par `fold`) ; `all` lance toutes les phases, c'est-à-dire la phase 3. La numérotation reprend à HA14 : on saute le 13. Les règles se règlent
 dans `Phases.java`.
 
 | Règle | Implémentée | Phase | Notes |
@@ -202,7 +202,7 @@ Restent des faux négatifs, assumés (par conception ou faute de moyen sûr de l
   `isEmpty()`/`isDefined()` : elle juge la forme (on ne teste pas un conteneur, on le replie), pas le risque d'exception.
   Elle est verte tant qu'aucun Vavr n'est utilisé : elle protège les règles à jouer, elle n'en est pas une.
 - HA15 : un branchement déplacé dans **un autre type** (`Dates.ordered(a, b)` statique ailleurs dans `model`) n'est pas suivi ; une
-  fabrique qui compose une seule phase triviale (`Option.of(x).map(Slug::new)`, sans `filter`) passe : la règle voit la forme,
+  fabrique qui compose une seule étape triviale (`Option.of(x).map(Slug::new)`, sans `filter`) passe : la règle voit la forme,
   pas la force de la validation. Les `&&`/`||` dans une lambda de `filter` ne sont pas des branchements pour elle.
 
 ## Ce que « heuristique » promet

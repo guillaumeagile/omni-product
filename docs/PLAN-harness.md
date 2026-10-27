@@ -37,7 +37,7 @@ En C#, le harnais s'appuie sur Roslyn (arbre syntaxique + `Compilation` sémanti
 - Contrats : `HarnessRule` (`id`, `name`, `severity`, `check(SourceSet) -> List<Violation>`),
   `Violation(file, line, message)`, `HarnessSeverity`.
 - `SourceSet` : fichiers `.java` triés (ordre déterministe), arbres tree-sitter, classes ArchUnit importées.
-- Runner CLI : `--step 1`, sortie `[PASS] / [FAIL] / [WARN] HAx - nom`, code de sortie 0 seulement si aucune erreur.
+- Runner CLI : `--phase 1`, sortie `[PASS] / [FAIL] / [WARN] HAx - nom`, code de sortie 0 seulement si aucune erreur.
 - Première règle de bout en bout : HA5, pas de god class, avec son test de pinning.
 - Critère : `./gradlew :harness:test -PharnessTests` vert ; le runner tourne sur `src/main/java/com/omniproduct`.
 
@@ -63,8 +63,8 @@ Une règle à la fois, chacune avec ses tests de pinning (fixtures Java valides 
 
 ## Phase 5 : matériel d'atelier
 
-- `CUPID-step-1-1.md` et `CUPID-step-1-2.md` en version Java ; mettre à jour `Workshop-CUTE DDD-full day.md`.
-- Scripts `cupid-step-1-1.harness.sh` / `.ps1` (build puis harnais).
+- `CUPID-phase-1-1.md` et `CUPID-phase-1-2.md` en version Java ; mettre à jour `Workshop-CUTE DDD-full day.md`.
+- Scripts `cupid-phase-1-1.harness.sh` / `.ps1` (build puis harnais).
 - `AGENTS.md` (ne pas relâcher les règles pour faire passer l'exercice), `README.md`.
 - Slides : alignement avec la version C#.
 

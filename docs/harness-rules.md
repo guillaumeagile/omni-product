@@ -43,16 +43,16 @@ en phase 2). La liste exacte des checks est un livrable de la phase 3.
 
 HA5 → HA4, HA2 → HA6 → HA8 → HA7 → HA9, HA10 → HA12, HA12.1.
 
-## État d'implémentation et étapes
+## État d'implémentation et phases
 
-L'**étape 1** (`./harness.sh`, `docs/CUPID-step-1.md`) couvre **HA5 à HA12.1** uniquement. Les règles se règlent
-dans `Steps.java`.
+L'**phase 1** (`./harness.sh`, `docs/CUPID-phase-1.md`) couvre **HA5 à HA12.1** uniquement. Les règles se règlent
+dans `Phases.java`.
 
-| Règle | Implémentée | Étape | Notes |
+| Règle | Implémentée | Phase | Notes |
 |---|---|---|---|
-| HA1 idiomes | non | hors étape 1 | à décider (Error Prone ou Checkstyle) |
-| HA2 données immuables | oui (`ImmutableDataStructuresRule`) | étape suivante | écrite et testée, pas branchée dans l'étape 1 |
-| HA4 pas d'héritage | oui (`NoInheritanceRule`) | 2 | écrite et testée, retirée de l'étape 1 (non câblée dans `Steps.java`) |
+| HA1 idiomes | non | hors phase 1 | à décider (Error Prone ou Checkstyle) |
+| HA2 données immuables | oui (`ImmutableDataStructuresRule`) | phase suivante | écrite et testée, pas branchée dans la phase 1 |
+| HA4 pas d'héritage | oui (`NoInheritanceRule`) | 2 | écrite et testée, retirée de la phase 1 (non câblée dans `Phases.java`) |
 | HA5 pas de god class | oui | 1 | seuil 4 (le document C# annonce 6 mais le code C# exécute 4) |
 | HA6 single concern | oui | 1 | `ubiquitous-language-map.json` adapté au vocabulaire Java |
 | HA7 fan-out | oui | 1 | entité = implémente `Identifiable` ou déclare un champ `id` |

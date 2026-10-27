@@ -1,14 +1,14 @@
 ---
 name: harness-rule-maker
-description: Create, change or review a rule of the deterministic workshop harness (harness/ module, rules HAx, tree-sitter AST + ArchUnit). Use when asked to add a rule, port a rule from the C# Cupid.Harness, make a rule less easy to evade, or wire a rule into a workshop step.
+description: Create, change or review a rule of the deterministic workshop harness (harness/ module, rules HAx, tree-sitter AST + ArchUnit). Use when asked to add a rule, port a rule from the C# Cupid.Harness, make a rule less easy to evade, or wire a rule into a workshop phase.
 ---
 
 # Harness rule maker
 
-The harness (`harness/`, run with `./harness.sh [step]`) grades the refactoring workshop on the legacy code in
+The harness (`harness/`, run with `./harness.sh [phase]`) grades the refactoring workshop on the legacy code in
 `src/main/java/com/omniproduct/model` and `service`. It is **deterministic** (same code in, same verdict out, no AI).
-Rules are in `harness/src/main/java/com/omniproduct/harness/rules/`, steps in `Steps.java`, the inventory in
-`docs/harness-rules.md`, the plan in `docs/PLAN-harness.md`, the student-facing text in `docs/CUPID-step-N.md`.
+Rules are in `harness/src/main/java/com/omniproduct/harness/rules/`, phases in `Phases.java`, the inventory in
+`docs/harness-rules.md`, the plan in `docs/PLAN-harness.md`, the student-facing text in `docs/CUPID-phase-N.md`.
 
 ## Non-negotiables
 
@@ -43,7 +43,7 @@ offsets are UTF-8 bytes (text is read from the byte array, already handled by `S
 ## Workflow for a new rule
 
 1. **Read the source of truth**: the C# rule in `/Users/guillaume/SOURCES/for SAM 2025/Cute-KanDDDinsky-2026-CUPID-phase1/sources`
-   (`Cupid.Harness`) and its `CUPID-step-N.md`. Port the *executable* behaviour, not only the doc (the doc said 6
+   (`Cupid.Harness`) and its `CUPID-phase-N.md`. Port the *executable* behaviour, not only the doc (the doc said 6
    public properties for HA5, the code used 4: we kept the code).
 2. **Write the contract first** as a failing test: a `good` fixture and a `bad` fixture in
    `harness/src/test/java/com/omniproduct/harness/fixtures/<rule>/{good,bad}/model/` (compiled, because bytecode rules
@@ -62,10 +62,10 @@ offsets are UTF-8 bytes (text is read from the byte array, already handled by `S
      the scratchpad, introduce the violation, run `./harness.sh`, confirm detection, restore the file, check
      `git status` shows no change to `model/`/`service/`.
    A rule green on the legacy without a mutation proof is not finished.
-6. **Wire it** into the right step in `Steps.java` (step 1 = HA5 to HA12.1; HA1, HA2 and HA4 are outside step 1). Perimeters:
+6. **Wire it** into the right phase in `Phases.java` (phase 1 = HA5 to HA12.1; HA1, HA2 and HA4 are outside phase 1). Perimeters:
    `com.omniproduct.model` and `com.omniproduct.service`, not `domain/` nor `infrastructure/`.
 7. **Update the documents**: the table and the heuristics section of `docs/harness-rules.md`, the student text
-   `docs/CUPID-step-N.md` (describe only what the harness really does), the plan if the scope moved.
+   `docs/CUPID-phase-N.md` (describe only what the harness really does), the plan if the scope moved.
 8. **Run everything**: `gradle :harness:test -PharnessTests --offline` (the harness tests only run with that flag), then `./harness.sh` (exit 0 pass, 1 failure, 2 unusable or
    nothing compiled; never a false PASS when classes are missing). `./harness.sh --test` runs the harness' own tests.
 

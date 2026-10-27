@@ -15,9 +15,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-// Les règles que chaque étape de l'atelier fait passer. L'étape 1 (CUPID-step-1.md) couvre HA5 à HA12.1 ;
-// HA4 (pas d'héritage) relève de l'étape 2 : sa règle reste dans le harnais, elle n'est simplement pas câblée ici.
-public final class Steps {
+// Les règles que chaque phase de l'atelier fait passer. La phase 1 (CUPID-phase-1.md) couvre HA5 à HA12.1 ;
+// HA4 (pas d'héritage) relève de la phase 2 : sa règle reste dans le harnais, elle n'est simplement pas câblée ici.
+public final class Phases {
 
     // Le code de l'exercice : le modèle et les services, pas le port carbone (domain/) ni l'infrastructure.
     private static final String MODEL_PACKAGE = "com.omniproduct.model";
@@ -28,19 +28,19 @@ public final class Steps {
 
     public static final String ALL = "all";
 
-    private Steps() {
+    private Phases() {
     }
 
     public static Set<String> names() {
         return Set.of("1", ALL);
     }
 
-    public static List<HarnessRule> rules(String step) {
-        return Map.<String, List<HarnessRule>>of("1", step1(), ALL, step1()).get(step);
+    public static List<HarnessRule> rules(String phase) {
+        return Map.<String, List<HarnessRule>>of("1", phase1(), ALL, phase1()).get(phase);
     }
 
     // HA5, HA6, HA7, HA8, HA9, HA10, HA11, HA12, HA12.1 (avertissement)
-    private static List<HarnessRule> step1() {
+    private static List<HarnessRule> phase1() {
         UbiquitousLanguageMap language = UbiquitousLanguageMap.load();
         return List.of(
                 new NoGodClassRule(4, IS_MODEL),

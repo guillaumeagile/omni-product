@@ -74,14 +74,14 @@ harnais. Les phases sont cumulatives : la phase 2 reprend les règles de la phas
 
 | Phase | Branche | Thème | Règles | Énoncé | Guide en autonomie |
 |---|---|---|---|---|---|
-| 1 | [`java-bdxio-phase1`](https://github.com/guillaumeagile/omni-product/tree/java-bdxio-phase1) | Unix philosophy : une classe, une raison de changer | HA5 à HA12.1 | [CUPID-step-1.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase1/docs/CUPID-step-1.md) | [CUPID-step-1-guide.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase1/CUPID-step-1-guide.md) |
-| 2 | [`java-bdxio-phase2`](https://github.com/guillaumeagile/omni-product/tree/java-bdxio-phase2) | Composable : value objects, ADT, composition plutôt qu'héritage | celles de la phase 1, plus HA2, HA3, HA4.1 à HA4.9 | [CUPID-step1-2.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase2/docs/CUPID-step1-2.md) | [CUPID-step-2-guide.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase2/CUPID-step-2-guide.md) |
-| 3 | [`java-bdxio-phase3`](https://github.com/guillaumeagile/omni-product/tree/java-bdxio-phase3) | Composable, style fonctionnel : pipelines et fabriques qui composent | celles de la phase 2, plus HA14 et HA15 (le 13 est sauté) | [CUPID-step-3.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase3/docs/CUPID-step-3.md) | [CUPID-step-3-guide.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase3/CUPID-step-3-guide.md) |
+| 1 | [`java-bdxio-phase1`](https://github.com/guillaumeagile/omni-product/tree/java-bdxio-phase1) | Unix philosophy : une classe, une raison de changer | HA5 à HA12.1 | [CUPID-phase-1.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase1/docs/CUPID-phase-1.md) | [CUPID-phase-1-guide.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase1/CUPID-phase-1-guide.md) |
+| 2 | [`java-bdxio-phase2`](https://github.com/guillaumeagile/omni-product/tree/java-bdxio-phase2) | Composable : value objects, ADT, composition plutôt qu'héritage | celles de la phase 1, plus HA2, HA3, HA4.1 à HA4.9 | [CUPID-phase1-2.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase2/docs/CUPID-phase1-2.md) | [CUPID-phase-2-guide.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase2/CUPID-phase-2-guide.md) |
+| 3 | [`java-bdxio-phase3`](https://github.com/guillaumeagile/omni-product/tree/java-bdxio-phase3) | Composable, style fonctionnel : pipelines et fabriques qui composent | celles de la phase 2, plus HA14 et HA15 (le 13 est sauté) | [CUPID-phase-3.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase3/docs/CUPID-phase-3.md) | [CUPID-phase-3-guide.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase3/CUPID-phase-3-guide.md) |
 
 **Par où commencer** : choisissez la phase à jouer, puis partez de sa branche.
 
 ```bash
-git switch -c team-<équipe>/step-1/ha9-identifiable origin/java-bdxio-phase1
+git switch -c team-<équipe>/phase-1/ha9-identifiable origin/java-bdxio-phase1
 ```
 
 Les énoncés des phases 2 et 3 n'existent que sur leur branche : leurs liens pointent donc vers GitHub.

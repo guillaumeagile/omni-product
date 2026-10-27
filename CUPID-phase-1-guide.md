@@ -1,10 +1,10 @@
-# CUPID étape 1 : parcours en autonomie
+# CUPID phase 1 : parcours en autonomie
 
-Ce guide est pour faire l'étape 1 seul. Il explique ce que le harnais vérifie, dans quel ordre travailler et comment
+Ce guide est pour faire la phase 1 seul. Il explique ce que le harnais vérifie, dans quel ordre travailler et comment
 lire sa sortie. Il ne donne pas la réponse : la conception des parties Storage, Catalog, Pricing, Supplier,
 Notification et Transport vous appartient.
 
-Lisez d'abord [docs/CUPID-step-1.md](docs/CUPID-step-1.md) pour l'énoncé du problème et la définition des règles
+Lisez d'abord [docs/CUPID-phase-1.md](docs/CUPID-phase-1.md) pour l'énoncé du problème et la définition des règles
 (HA5 à HA12.1). Ce guide est le mode d'emploi.
 
 ## 1. Ce que vous modifiez
@@ -20,7 +20,7 @@ Ne touchez pas à `domain/` ni à `infrastructure/` : ils sont hors exercice.
 transport (kilos, volume). `Supplier` détient ses produits et prend des services dans son constructeur. Les entités
 portent aussi des annotations JPA et se référencent directement entre elles.
 
-L'objectif de l'étape 1 est de séparer ces préoccupations pour que chaque classe n'ait qu'une seule raison de
+L'objectif de la phase 1 est de séparer ces préoccupations pour que chaque classe n'ait qu'une seule raison de
 changer, et de ne garder dans chaque classe que ce dont son contexte borné a besoin. Il ne s'agit pas de réécrire
 toute l'application, mais de faire passer le modèle au harnais.
 
@@ -56,7 +56,7 @@ faites : cet ordre marche mieux que de corriger les échecs dans l'ordre où ils
    `harness/src/main/resources/ubiquitous-language-map.json`. Les mots de ce fichier sont ceux que le harnais
    recherche, c'est donc un bon guide pour les noms que vous rencontrerez.
 2. **Retirer les identifiants qui ne sont pas des valeurs métier.** Décidez ce qui est un identifiant et ce qui est
-   une propriété. Repérez les identifiants (voir HA11 et HA12, section 4) pour savoir lesquels seront à corriger aux étapes 8 et 9.
+   une propriété. Repérez les identifiants (voir HA11 et HA12, section 4) pour savoir lesquels seront à corriger aux phases 8 et 9.
 3. **Découper les entités.** Extrayez une classe par préoccupation (HA5, HA6). Gardez chaque classe extraite petite.
 4. **Couper les références entre entités** (HA7). Une entité ne se relie à une autre que par son identifiant.
 5. **Retirer la persistance du modèle** (HA8). Le modèle n'importe pas JPA. Si le mapping reste nécessaire, il vit
@@ -70,13 +70,13 @@ faites : cet ordre marche mieux que de corriger les échecs dans l'ordre où ils
    record qui en enveloppe un. Traitez-le en dernier, une fois les classes stabilisées, puisque c'est le point qui
    touche le plus de code.
 
-Lancez `./harness.sh` après chaque étape. Un petit changement qui fait passer une règle de FAIL à PASS vaut mieux
+Lancez `./harness.sh` après chaque phase. Un petit changement qui fait passer une règle de FAIL à PASS vaut mieux
 qu'un gros refactoring que vous ne pouvez pas vérifier.
 
 ## 4. Règle par règle
 
 Pour chaque règle, la liste de contrôle indique ce que le harnais regarde. Le texte des règles dans
-[docs/CUPID-step-1.md](docs/CUPID-step-1.md) fait autorité ; ce qui suit n'est qu'une aide à la lecture.
+[docs/CUPID-phase-1.md](docs/CUPID-phase-1.md) fait autorité ; ce qui suit n'est qu'une aide à la lecture.
 
 ### HA5 - pas de classe Dieu
 
@@ -160,14 +160,14 @@ Une ligne d'échec nomme la règle, la classe et, quand le harnais peut la retro
 la première règle en échec dans la sortie et corrigez cette classe avant de passer à la suivante. Plusieurs échecs ont
 souvent la même cause : sortir une préoccupation de `Product` peut corriger HA5, HA6 et HA7 en même temps.
 
-Quand un résultat vous surprend, relisez le texte de la règle dans [docs/CUPID-step-1.md](docs/CUPID-step-1.md) avant
+Quand un résultat vous surprend, relisez le texte de la règle dans [docs/CUPID-phase-1.md](docs/CUPID-phase-1.md) avant
 de modifier le code. Si le code est correct pour le domaine et que le harnais proteste quand même, notez le cas et
 signalez-le à l'animateur plutôt que de contourner la règle.
 
 ## 6. Terminé
 
-L'étape 1 est terminée quand `./harness.sh` sort avec le code `0`. Les avertissements sont autorisés. Avant de
-considérer l'étape comme finie :
+La phase 1 est terminée quand `./harness.sh` sort avec le code `0`. Les avertissements sont autorisés. Avant de
+considérer la phase comme finie :
 
 - le harnais sort avec `0` sur votre machine, après une compilation propre
 - vous savez expliquer, pour chaque classe extraite, quelle préoccupation elle porte et pourquoi

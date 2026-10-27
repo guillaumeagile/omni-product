@@ -35,7 +35,7 @@ The issue stemmed from Hibernate's lazy loading mechanism combined with the bidi
 
 ## Solution
 
-### Step 1: Add `@Transactional` to Service Method
+### Phase 1: Add `@Transactional` to Service Method
 
 Added `@Transactional(readOnly = true)` annotation to the `getSuppliersByProduct()` method in `SupplierService`:
 
@@ -56,7 +56,7 @@ public List<Supplier> getSuppliersByProduct(String productId) {
 - `readOnly = true` optimizes the transaction for read-only operations
 - The lazy-loaded `products` collection can now be initialized within the active session
 
-### Step 2: Add `@Transactional` to Test Method
+### Phase 2: Add `@Transactional` to Test Method
 
 Added `@Transactional` annotation to the test method:
 

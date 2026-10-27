@@ -249,7 +249,7 @@ class RefereeTest {
         assertThat(markdown).contains(
                 "| Score | Points |",
                 "| `HA9` turned green 🎯 | +10 |",
-                "| `HA7` regressed (was green) | -5 |",
+                "| `HA7` regressed (was green) | -20 |",
                 "| `HA12.1` warning resolved | +3 |",
                 "| Violations removed on rules still red (up to +5) | +2 |",
                 "| Tokens removed (+1 per 100, up to +5) | +2 |",

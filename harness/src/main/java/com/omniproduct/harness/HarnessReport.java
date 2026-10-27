@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 // Le verdict du harnais lisible par une machine (`--json`) : ce que l'arbitre des PR compare entre la base et la tête.
-// Déterministe : règles dans l'ordre de Steps, aucun horodatage. Les mesures (tokens, complexité) sont celles de model/ et service/.
-public record HarnessReport(String step, String result, List<RuleResult> rules, Metrics metrics) {
+// Déterministe : règles dans l'ordre de Phases, aucun horodatage. Les mesures (tokens, complexité) sont celles de model/ et service/.
+public record HarnessReport(String phase, String result, List<RuleResult> rules, Metrics metrics) {
 
     public record RuleResult(String id, String name, String severity, String status, int violations) {
     }

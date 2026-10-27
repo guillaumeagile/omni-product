@@ -17,7 +17,7 @@ sur le Java en phase 3.
 | HA4.6 | Le modèle ne lit pas l'horloge | Le modèle reçoit `today`, ou un `Clock` injecté | `LocalDate.now()`, `Instant.now()`, `System.currentTimeMillis()`, `new Date()`, `Clock.systemUTC()`… dans `model` | BYTECODE (appels, imports statiques compris) | Error |
 | HA4.7 | La vente dépend de `canSell` | Une vente ne retire du stock que si le domaine l'a permise | Le retrait doit se trouver dans une branche (`if`, ternaire, `switch`) ou une lambda (`map`, `Option.when`) qui dépend de la décision, ou après une clause de garde qui renvoie le refus ; un `canSell` ignoré ne garde rien | AST | Error |
 | HA4.8 | Collections en pipeline | Une collection se transforme par un Stream, pas en remplissant un accumulateur | Boucle (`for`, for-each, `while`, `do`) ou `forEach`/`peek` qui modifie une variable déclarée hors d'elle | AST | Error |
-| HA4.9 | La fabrique valide par composition | La fabrique d'un value object exprime sa validation comme une chaîne d'étapes (`Option.of(...).filter(...).flatMap(...)`, `Validation.combine(...).ap(...)`), pas comme un branchement | `if`, ternaire ou `switch` dans la fabrique ou dans un helper privé qu'elle appelle ; `throw`, `assert` ou appel de garde (`requireNonNull`…) ; fabrique dont le retour promet un échec (générique, ADT scellée) sans aucune lambda ni référence de méthode ; **aucune** fabrique dont le résultat peut échouer (rouge par absence, comme HA4.4) | AST | Error |
+| HA4.9 | La fabrique valide par composition | La fabrique d'un value object exprime sa validation comme une chaîne d'phases (`Option.of(...).filter(...).flatMap(...)`, `Validation.combine(...).ap(...)`), pas comme un branchement | `if`, ternaire ou `switch` dans la fabrique ou dans un helper privé qu'elle appelle ; `throw`, `assert` ou appel de garde (`requireNonNull`…) ; fabrique dont le retour promet un échec (générique, ADT scellée) sans aucune lambda ni référence de méthode ; **aucune** fabrique dont le résultat peut échouer (rouge par absence, comme HA4.4) | AST | Error |
 | HA5 | Pas de god class | Au plus 4 propriétés publiques par type (hors `*Id`) | Compter les composants de `record`, les getters publics et les champs publics, hors noms finissant par `Id` | AST | Error |
 | HA6 | Single concern | Les méthodes publiques d'une classe couvrent au plus 1 contexte borné ; restrictions de vocabulaire par type | Même `ubiquitous-language-map.json` ; préfixe du nom de méthode comparé aux mots-clés par contexte | AST | Error |
 | HA7 | Fan-out | Une entité ne référence aucune autre entité, seulement des ids | Champs, paramètres, retours, locaux, arguments génériques (`List<Supplier>`, `Supplier[]`, `Optional<Supplier>`) | BYTECODE (dépendances de type) + AST pour la ligne | Error |
@@ -58,14 +58,14 @@ en phase 2). La liste exacte des checks est un livrable de la phase 3.
 
 HA5 → HA4, HA2 → HA6 → HA8 → HA7 → HA9, HA10 → HA12, HA12.1.
 
-## État d'implémentation et étapes
+## État d'implémentation et phases
 
-L'**étape 1** (`./harness.sh`, `docs/CUPID-step-1.md`) couvre **HA5 à HA12.1** uniquement. L'**étape 2** (`./harness.sh 2`) ajoute HA2, HA3 et HA4.1 à HA4.9 ; `all` lance les deux étapes. Les règles se règlent
-dans `Steps.java`.
+L'**phase 1** (`./harness.sh`, `docs/CUPID-phase-1.md`) couvre **HA5 à HA12.1** uniquement. L'**phase 2** (`./harness.sh 2`) ajoute HA2, HA3 et HA4.1 à HA4.9 ; `all` lance les deux phases. Les règles se règlent
+dans `Phases.java`.
 
-| Règle | Implémentée | Étape | Notes |
+| Règle | Implémentée | Phase | Notes |
 |---|---|---|---|
-| HA1 idiomes | non | hors étape 1 | à décider (Error Prone ou Checkstyle) |
+| HA1 idiomes | non | hors phase 1 | à décider (Error Prone ou Checkstyle) |
 | HA5 pas de god class | oui | 1 | seuil 4 (le document C# annonce 6 mais le code C# exécute 4) |
 | HA6 single concern | oui | 1 | `ubiquitous-language-map.json` adapté au vocabulaire Java |
 | HA7 fan-out | oui | 1 | entité = implémente `Identifiable` ou déclare un champ `id` |
@@ -97,7 +97,7 @@ Une règle verte sur le legacy (le défaut n'y est pas encore) n'est prouvée qu
 `expected.txt` une ligne `<règle> <fichier>:<ligne>` par détection attendue. `harness/mutate.sh [nom...]` applique le mutant,
 lance `./harness.sh all`, vérifie que **cette règle** signale **cette ligne** (une règle rouge ailleurs ne valide pas
 l'attente d'une autre), puis restaure `src/` même en cas d'échec ; il refuse de partir d'un `src/main/java` modifié. Le
-workflow `le-maitre-des-jeux` le joue sur chaque PR d'animateur (étape « Mutation du harnais ») et échoue si un défaut
+workflow `le-maitre-des-jeux` le joue sur chaque PR d'animateur (phase « Mutation du harnais ») et échoue si un défaut
 n'est pas vu. Mutation actuelle : `ha4.9-factory-branches-and-throws` (`Slug.of` avec `if` + `throw`).
 
 ### Propositions de règles (TODO, phase 2)
@@ -195,7 +195,7 @@ Restent des faux négatifs, assumés (par conception ou faute de moyen sûr de l
 - HA4.6 : une horloge lue par une bibliothèque tierce, ou par réflexion, n'est pas vue.
 - HA4.7 : la décision n'est suivie que dans une même méthode (variables locales) ; un retrait délégué à une autre classe n'est vu que par les mots de son nom.
 - HA4.9 : un branchement déplacé dans **un autre type** (`Dates.ordered(a, b)` statique ailleurs dans `model`) n'est pas suivi ; une
-  fabrique qui compose une seule étape triviale (`Option.of(x).map(Slug::new)`, sans `filter`) passe : la règle voit la forme,
+  fabrique qui compose une seule phase triviale (`Option.of(x).map(Slug::new)`, sans `filter`) passe : la règle voit la forme,
   pas la force de la validation. Les `&&`/`||` dans une lambda de `filter` ne sont pas des branchements pour elle.
 
 ## Ce que « heuristique » promet

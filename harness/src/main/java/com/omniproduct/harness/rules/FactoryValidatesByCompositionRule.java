@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 // HA4.9 (moteur AST) - Composable : la fabrique d'un value object valide par composition, pas par branchement.
 // Un `if (a == null || b.isBefore(a)) return none();` répond à la question « est-ce valide ? » en coupant le flot ;
 // `Option.of(a).flatMap(s -> Option.of(b).filter(u -> !u.isBefore(s)).map(u -> new Perishable(s, u)))` ou
-// `Validation.combine(...).ap(Perishable::new)` la pose étape par étape, chacune nommée, chacune une valeur.
+// `Validation.combine(...).ap(Perishable::new)` la pose phase par phase, chacune nommée, chacune une valeur.
 // Fabrique = méthode statique non privée d'un value object dont le nom porte un mot de fabrique (create, build, of,
 // from, make, comme HA4.4) OU dont le type de retour nomme le record (`Option<Perishable>`, `PerishableCreation`) :
 // renommer `of` en `parse` n'échappe pas. Sont lus le corps de la fabrique et, transitivement, les méthodes du même

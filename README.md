@@ -18,8 +18,8 @@ propre harnais :
 
 | Phase | Branche | Thème | Règles | Énoncé | Guide en autonomie |
 |---|---|---|---|---|---|
-| 1 | `java-bdxio-phase1` | Unix philosophy : une classe, une raison de changer | HA5 à HA12.1 | [CUPID-step-1.md](docs/CUPID-step-1.md) | [CUPID-step-1-guide.md](CUPID-step-1-guide.md) |
-| 2 | `java-bdxio-phase2` | Composable : value objects, ADT, composition plutôt qu'héritage | celles de la phase 1, plus HA2, HA3, HA4.1 à HA4.9 | [CUPID-step1-2.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase2/docs/CUPID-step1-2.md) | [CUPID-step-2-guide.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase2/CUPID-step-2-guide.md) |
+| 1 | `java-bdxio-phase1` | Unix philosophy : une classe, une raison de changer | HA5 à HA12.1 | [CUPID-phase-1.md](docs/CUPID-phase-1.md) | [CUPID-phase-1-guide.md](CUPID-phase-1-guide.md) |
+| 2 | `java-bdxio-phase2` | Composable : value objects, ADT, composition plutôt qu'héritage | celles de la phase 1, plus HA2, HA3, HA4.1 à HA4.9 | [CUPID-phase1-2.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase2/docs/CUPID-phase1-2.md) | [CUPID-phase-2-guide.md](https://github.com/guillaumeagile/omni-product/blob/java-bdxio-phase2/CUPID-phase-2-guide.md) |
 
 Les fichiers de la phase 2 n'existent que sur sa branche : les liens de la phase 2 pointent donc vers GitHub.
 
@@ -33,7 +33,7 @@ le bytecode avec ArchUnit, sans IA. Il faut un JDK 21 et Gradle.
 
 | Commande | Phase 1 | Phase 2 |
 |---|---|---|
-| règles de l'étape en cours | `./harness.sh 1` (ou `./harness.sh`) | `./harness.sh 2` (lance aussi les règles de l'étape 1) |
+| règles de la phase en cours | `./harness.sh 1` (ou `./harness.sh`) | `./harness.sh 2` (lance aussi les règles de la phase 1) |
 | toutes les règles, comme l'arbitre | `./harness.sh all` | `./harness.sh all` |
 | rapport JSON en plus de la sortie texte | `./harness.sh all --json rapport.json` | `./harness.sh all --json rapport.json` |
 
@@ -55,7 +55,7 @@ vert.
 
 Chaque PR passe
 devant **l'arbitre CUPID** : une GitHub Action (le check `harness-game`) qui lance le harnais sur la branche de la
-phase, sur votre baby step précédent et sur la PR elle-même. L'arbitre compare les résultats, commente la PR avec un
+phase, sur votre baby branche précédente et sur la PR elle-même. L'arbitre compare les résultats, commente la PR avec un
 tableau de score, met à jour le classement et met le check au vert ou au rouge.
 
 ### 1. Préparer la branche
@@ -63,30 +63,30 @@ tableau de score, met à jour le classement et met le check au vert ou au rouge.
 1. **Partez de la bonne branche.**
    - Premier baby step de la phase : la branche de la phase (`java-bdxio-phase1` pour les règles HA5 à HA12.1,
      `java-bdxio-phase2` pour celles de la phase 2).
-   - Baby steps suivants : la branche de **votre baby step précédent**. Rien n'étant fusionné dans la branche de la
+   - Baby steps suivants : la branche de **votre baby branche précédente**. Rien n'étant fusionné dans la branche de la
      phase, c'est elle qui porte votre travail. Vous pouvez aussi y fusionner une autre de vos branches de baby step.
 
    Travaillez dans le dépôt de l'atelier, pas dans un fork : depuis un fork, l'arbitre ne peut pas commenter, sauf si
    vous l'autorisez dans votre fork.
-2. **Nommez la branche** `team-<équipe>/step-<N>/ha<règle>-<quoi>`. Le premier segment est le nom de votre équipe au
+2. **Nommez la branche** `team-<équipe>/phase-<N>/ha<règle>-<quoi>`. Le premier segment est le nom de votre équipe au
    classement.
-   - phase 1 : `team-red/step-1/ha9-identifiable`
-   - phase 2 : `team-red/step-2/ha4-3-shelf-life`
+   - phase 1 : `team-red/phase-1/ha9-identifiable`
+   - phase 2 : `team-red/phase-2/ha4-3-shelf-life`
 3. **Choisissez une ligne `[FAIL]`** du harnais. Corrigez cette règle, et seulement elle. A priori, faites dans l'ordre
    de numérotation des règles.
    **Régler de la dette est permis.** Une règle plus ancienne, sautée ou cassée en route, qui est encore `[FAIL]` à un
    step ultérieur (par exemple une règle de la phase 1 pendant la phase 2) peut faire l'objet d'un baby step. La PR ne
-   traite que cette règle, nommée dans la branche et le titre (`team-red/step-2/ha9-dette-identifiable`,
+   traite que cette règle, nommée dans la branche et le titre (`team-red/phase-2/ha9-dette-identifiable`,
    `HA9 green: ...`) : l'arbitre la note comme n'importe quelle règle cible.
 4. **Lancez `./harness.sh all`** en local avant de pousser. L'arbitre utilise le même harnais.
 
 ```
-git switch team-red/step-1/ha8-no-jpa        # le baby step précédent (au premier : java-bdxio-phase1)
-git switch -c team-red/step-1/ha9-identifiable
+git switch team-red/phase-1/ha8-no-jpa        # le baby branche précédente (au premier : java-bdxio-phase1)
+git switch -c team-red/phase-1/ha9-identifiable
 # ... le refactoring ...
 ./harness.sh all
 git commit -am "HA9 green: Product and Supplier implement Identifiable"
-git push -u origin team-red/step-1/ha9-identifiable
+git push -u origin team-red/phase-1/ha9-identifiable
 ```
 
 ### 2. Créer la PR, vers la bonne base
@@ -97,10 +97,10 @@ piège : `main` n'a pas d'arbitre, la PR est alors « hors jeu ».
 **La base est toujours la branche de la phase** : `java-bdxio-phase1` pour une règle de la phase 1,
 `java-bdxio-phase2` pour une règle de la phase 2. Jamais `main`, jamais la branche d'un autre baby step.
 
-L'arbitre retrouve tout seul votre baby step précédent : la branche de votre équipe (même premier segment,
+L'arbitre retrouve tout seul votre baby branche précédente : la branche de votre équipe (même premier segment,
 `team-red/`) dont votre branche est partie. Il en tire deux mesures :
 
-- **le score du round** : ce que la PR ajoute à votre step précédent (règle cible, baby step, petit diff, tokens,
+- **le score du round** : ce que la PR ajoute à votre branche précédente (règle cible, baby step, petit diff, tokens,
   complexité, métriques). Rien n'est compté deux fois ;
 - **le chemin parcouru** depuis le départ de la phase : règles passées au vert, niveau, tokens et complexité, dans un
   bloc « 🧭 Since the start of the phase », sans points.
@@ -141,7 +141,7 @@ Une minute ou deux après l'ouverture de la PR, l'arbitre commente la PR :
 | HA9     | 🔴 FAIL (5)  | 🔴 FAIL (10) |        |
 Score: +17 · Level: Unix Apprentice (1/8)
 
-[ 🍼 BABY STEP ] [ 🧼 NO REGRESSION ]     ← les badges, en images
+[ 🍼 BABY PHASE ] [ 🧼 NO REGRESSION ]     ← les badges, en images
 ```
 
 L'arbitre écrit aussi le score du round en tête de la **description** de la PR (verdict, points, niveau, badges),
@@ -188,7 +188,7 @@ l'explique, et signale ce qui fait passer une règle sans corriger le défaut qu
 Comme la PR vise la branche de la phase, **Files changed** montre tous vos baby steps depuis le legacy, alors que le
 score du round ne porte que sur le dernier. Pour ne voir que lui, choisissez ses commits dans le menu **Commits** de
 Files changed, ou en local :
-`git diff team-red/step-1/ha8-no-jpa..team-red/step-1/ha9-identifiable`.
+`git diff team-red/phase-1/ha8-no-jpa..team-red/phase-1/ha9-identifiable`.
 
 Écrivez vos conclusions en commentaire de la PR : c'est là que se fait l'apprentissage.
 
@@ -196,12 +196,12 @@ Files changed, ou en local :
 
 Ne fusionnez pas la PR dans la branche de la phase : laissez-la en draft, ouverte. Ne la fermez pas non plus : le classement ne compte que les PR
 ouvertes. Pour le baby step suivant, créez une nouvelle branche à partir de celle que vous venez de terminer, puis une
-nouvelle PR draft vers la branche de la phase : retour à l'étape 1.
+nouvelle PR draft vers la branche de la phase : retour à la phase 1.
 
 Après chaque round, l'issue épinglée **CUPID workshop leaderboard (java-bdxio-phase1)** (ou `phase2`) classe les
 équipes : la somme des scores de leurs PR ouvertes.
 
-Chaque round est noté seul, par rapport à votre baby step précédent. Le score total de votre équipe est envoyé par
+Chaque round est noté seul, par rapport à votre baby branche précédente. Le score total de votre équipe est envoyé par
 l'arbitre sous forme d'**issue** du projet, **Score <équipe> (<branche de la phase>)** : son corps est le registre
 cumulé de vos PR ouvertes (score du round, puis cumul), et chaque PR y a un commentaire, sa carte de score, mis à jour
 à chaque push. Rien à remplir à la main.
@@ -301,11 +301,11 @@ Quelques conseils pour jouer avec un LLM :
 
 - **Pas de modèle frontière.** Choisissez un modèle économique : il suffit largement pour cet atelier, dont la
   difficulté est dans vos choix de conception, pas dans la puissance du modèle.
-- **Faites un clear du contexte entre chaque step** (`/clear` dans Claude Code, ou une nouvelle conversation). Un
+- **Faites un clear du contexte entre chaque règle** (`/clear` dans Claude Code, ou une nouvelle conversation). Un
   baby step ne dépend que du code de votre branche et de la sortie du harnais : un contexte long coûte plus cher et
   fait dériver l'agent vers les règles suivantes.
 - **Regardez toujours vous-mêmes** la PR, son diff (**Files changed**) et le score de l'arbitre, puis **discutez-en
-  dans l'équipe** avant de passer au step suivant. L'agent n'est pas là pour valider à votre place.
+  dans l'équipe** avant de passer à la règle suivante. L'agent n'est pas là pour valider à votre place.
 
 ### Règles du jeu
 

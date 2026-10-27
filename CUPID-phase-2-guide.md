@@ -1,15 +1,15 @@
-# CUPID étape 2 : parcours en autonomie
+# CUPID phase 2 : parcours en autonomie
 
-Ce guide est pour faire l'étape 2 seul. Il explique ce que le harnais vérifie, dans quel ordre travailler et comment
+Ce guide est pour faire la phase 2 seul. Il explique ce que le harnais vérifie, dans quel ordre travailler et comment
 lire sa sortie. Il ne donne pas la réponse : le choix des types, des alternatives et des fabriques vous appartient.
 
-Lisez d'abord [docs/CUPID-step1-2.md](docs/CUPID-step1-2.md) pour l'énoncé (immutabilité, `Price`, ADT, composition)
+Lisez d'abord [docs/CUPID-phase1-2.md](docs/CUPID-phase1-2.md) pour l'énoncé (immutabilité, `Price`, ADT, composition)
 et la définition des règles (HA2, HA3, HA4.1 à HA4.7). Ce guide est le mode d'emploi.
 
-`./harness.sh 2` lance aussi toutes les règles de l'étape 1 (HA5 à HA12.1) : si l'étape 1 est rouge, l'étape 2 ne
-peut pas passer. Le code de départ de la phase 2 a fait l'étape 1 (la persistance et ses tests CRUD ont été retirés,
+`./harness.sh 2` lance aussi toutes les règles de la phase 1 (HA5 à HA12.1) : si la phase 1 est rouge, la phase 2 ne
+peut pas passer. Le code de départ de la phase 2 a fait la phase 1 (la persistance et ses tests CRUD ont été retirés,
 les concepts et les identifiants sont des records), sauf HA7 : la hiérarchie `Perishable`/`NonExpiring` référence
-l'entité `Product`, et c'est l'exercice HA4.1 de l'étape 2 qui la fera disparaître.
+l'entité `Product`, et c'est l'exercice HA4.1 de la phase 2 qui la fera disparaître.
 
 ## 1. Ce que vous modifiez
 
@@ -21,7 +21,7 @@ Le code à travailler se trouve dans deux packages :
 
 Ne touchez pas à `domain/` ni à `infrastructure/` : ils sont hors exercice.
 
-L'étape 2 ne découpe plus les entités. Elle change la manière dont elles s'expriment :
+La phase 2 ne découpe plus les entités. Elle change la manière dont elles s'expriment :
 
 - les données sont immuables, sans setter : des `record` pour les valeurs, des classes à champs `final` pour les
   entités ;
@@ -38,7 +38,7 @@ L'étape 2 ne découpe plus les entités. Elle change la manière dont elles s'e
 
 Le script compile d'abord le projet. Un projet qui ne compile pas ne passe jamais. Codes de sortie :
 
-- `0` : toutes les vérifications passent (les étapes 1 et 2)
+- `0` : toutes les vérifications passent (les phases 1 et 2)
 - `1` : au moins une vérification échoue
 - `2` : le harnais n'a pas pu tourner
 
@@ -55,7 +55,7 @@ branche et la branche de base.
 ## 3. Travailler dans cet ordre
 
 Un baby step = une PR = une règle qui passe de rouge à vert (voir la section « The game » de
-[CUPID-step-1.md](CUPID-step-1.md), et « How to work » : chaque PR est un draft qui vise `java-bdxio-phase2` et n'est jamais fusionné ; chaque
+[CUPID-phase-1.md](CUPID-phase-1.md), et « How to work » : chaque PR est un draft qui vise `java-bdxio-phase2` et n'est jamais fusionné ; chaque
 branche part du baby step précédent). L'ordre ci-dessous est celui qui
 coûte le moins de réécriture : une règle en amont rend souvent la suivante plus facile.
 
@@ -66,9 +66,9 @@ coûte le moins de réécriture : une règle en amont rend souvent la suivante p
 3. **HA4.1 : pas d'héritage.** Aucune classe ni aucun record ne doit étendre une autre classe. Les interfaces et
    `implements` sont permis. Composez au lieu d'étendre.
    Le code de départ contient une hiérarchie volontaire : `Perishable` et `NonExpiring` étendent `Product`. Supprimez
-   ces deux classes et remplacez-les par une ADT (`sealed interface` + records), comme décrit à l'étape 6 (HA4.3).
+   ces deux classes et remplacez-les par une ADT (`sealed interface` + records), comme décrit à la phase 6 (HA4.3).
 4. **HA4.2 : pas d'exception dans un constructeur.** Retirez les `throw`, `assert` et gardes (`requireNonNull`,
-   `checkArgument`...) des constructeurs. La validation passe par une fabrique (étape 5).
+   `checkArgument`...) des constructeurs. La validation passe par une fabrique (phase 5).
 5. **HA4.4 : fabrique à résultat scellé.** Un value object a une méthode statique `create`, `build`, `of`, `from` ou
    `make` qui renvoie un `sealed interface` dont les alternatives sont le value object et un record d'erreur, ou une
    ADT de Vavr (`Either`, `Validation`, `Try`, `Option`) dont le succès est le value object.
@@ -83,12 +83,12 @@ coûte le moins de réécriture : une règle en amont rend souvent la suivante p
 9. **HA4.7 : `canSell` avant `withdraw` (avertissement).** Dans la méthode de vente, appelez le contrôle avant le
    retrait de stock.
 
-Lancez `./harness.sh 2` après chaque étape. Un petit changement qui fait passer une règle de FAIL à PASS vaut mieux
+Lancez `./harness.sh 2` après chaque phase. Un petit changement qui fait passer une règle de FAIL à PASS vaut mieux
 qu'un gros refactoring que vous ne pouvez pas vérifier.
 
 ## 4. Règle par règle
 
-Le texte des règles dans [docs/CUPID-step1-2.md](docs/CUPID-step1-2.md) fait autorité ; ce qui suit n'est qu'une aide
+Le texte des règles dans [docs/CUPID-phase1-2.md](docs/CUPID-phase1-2.md) fait autorité ; ce qui suit n'est qu'une aide
 à la lecture.
 
 ### HA2 - données immuables
@@ -160,14 +160,14 @@ Une ligne d'échec nomme la règle, la classe et le numéro de ligne quand le ha
 première règle en échec et corrigez cette classe avant la suivante. Plusieurs échecs ont souvent la même cause : une
 ADT bien placée dans `Product` peut corriger HA4.3 et rendre HA4.5 plus facile à satisfaire.
 
-Si un résultat vous surprend, relisez la règle dans [docs/CUPID-step1-2.md](docs/CUPID-step1-2.md) avant de modifier le
+Si un résultat vous surprend, relisez la règle dans [docs/CUPID-phase1-2.md](docs/CUPID-phase1-2.md) avant de modifier le
 code. Si le code est correct pour le domaine et que le harnais proteste quand même, notez le cas et signalez-le à
 l'animateur plutôt que de contourner la règle.
 
 ## 6. Terminé
 
-L'étape 2 est terminée quand `./harness.sh 2` sort avec le code `0`. Les avertissements sont autorisés. Avant de
-considérer l'étape comme finie :
+La phase 2 est terminée quand `./harness.sh 2` sort avec le code `0`. Les avertissements sont autorisés. Avant de
+considérer la phase comme finie :
 
 - le harnais sort avec `0` sur votre machine, après une compilation propre ;
 - vous savez expliquer pourquoi `Product` porte une ADT plutôt qu'un booléen, et ce qui se passe quand on ajoute une

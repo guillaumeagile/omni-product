@@ -20,9 +20,9 @@ import java.util.stream.Stream;
 
 // Le classement de l'atelier, recalculé après chaque round à partir des PR ouvertes de la phase (rien n'est jamais
 // fusionné : les PR restent en draft). Pour chaque PR, le dernier commentaire de l'arbitre (posté par le bot, jamais un
-// commentaire d'étudiant qui imiterait le marqueur) donne son score, qui est le delta avec le step précédent : la somme
+// commentaire d'étudiant qui imiterait le marqueur) donne son score, qui est le delta avec la branche précédente : la somme
 // par équipe est donc le cumul, sans double compte. Une équipe est le premier segment du nom de branche
-// (team-red/step-1/ha9 -> team-red). Aucun état caché : relancer donne le même tableau.
+// (team-red/phase-1/ha9 -> team-red). Aucun état caché : relancer donne le même tableau.
 //   leaderboard --prs prs.json [--out leaderboard.md]
 //   (prs.json : gh pr list --state open --base java-bdxio-phase1 --json number,headRefName,comments)
 public final class Leaderboard {
@@ -59,7 +59,7 @@ public final class Leaderboard {
         return Stream.of(
                         Stream.of("# 🏆 CUPID workshop leaderboard", "",
                                 "Recomputed by the referee after each round. Score = sum of the referee's points over the team's open pull requests, "
-                                        + "each one scoring what it adds to the previous step.", ""),
+                                        + "each one scoring what it adds to the previous branch.", ""),
                         standings.isEmpty()
                                 ? Stream.of("_No baby step yet._")
                                 : Stream.concat(Stream.of("| Rank | Team | Score | Baby steps | Level | Badges |",
@@ -89,7 +89,7 @@ public final class Leaderboard {
         return Stream.of(
                         Stream.of("# 📒 Score card of " + team, "",
                                 "Computed by the referee after each round: one row per open pull request, each scoring what it adds "
-                                        + "to the previous step. The cumulative column is the team's score on the leaderboard. "
+                                        + "to the previous branch. The cumulative column is the team's score on the leaderboard. "
                                         + "The referee's card for each pull request is in the comments below, updated at each push.", ""),
                         plays.isEmpty()
                                 ? Stream.of("_No baby step yet._")

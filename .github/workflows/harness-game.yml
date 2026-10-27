@@ -4,13 +4,13 @@
 # modifié, projet qui ne compile pas).
 #
 # Rien n'est jamais fusionné : chaque PR est un draft qui vise la branche de la phase, et les branches d'une équipe
-# s'enchaînent (team-red/step-1/ha9 part de team-red/step-1/ha8). Le score du round est le delta avec le step
-# précédent, retrouvé automatiquement ; le chemin parcouru depuis la phase est affiché sans points.
+# s'enchaînent (team-red/phase-1/ha9 part de team-red/phase-1/ha8). Le score du round est le delta avec la branche
+# précédente, retrouvée automatiquement ; le chemin parcouru depuis la phase est affiché sans points.
 #
 # Mesures du score : les tokens (coût de lecture et d'écriture pour un agent) remplacent les lignes ; la complexité
 # cyclomatique vient de PMD (règle CyclomaticComplexity). Les deux sont dans les rapports JSON du harnais.
 #
-# Les PR doivent être internes au dépôt (une équipe = un préfixe de branche, team-red/step-1/ha9-...) : depuis un
+# Les PR doivent être internes au dépôt (une équipe = un préfixe de branche, team-red/phase-1/ha9-...) : depuis un
 # fork, le jeton est en lecture seule et le commentaire est impossible. On n'utilise pas pull_request_target, qui
 # exécuterait le code des étudiants avec des droits en écriture.
 name: harness-game
@@ -57,7 +57,7 @@ jobs:
     if: needs.formule.outputs.magic != 'true'
     runs-on: ubuntu-latest
     env:
-      # La base vient du commit de fusion de la PR (GITHUB_SHA), voir l'étape « Base of the PR ».
+      # La base vient du commit de fusion de la PR (GITHUB_SHA), voir la phase « Base of the PR ».
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
       PR_TITLE: ${{ github.event.pull_request.title }}
@@ -121,10 +121,10 @@ jobs:
             echo "(\`java-bdxio-phase1\` ou \`java-bdxio-phase2\`), ou pour la branche de votre baby step précédent."
           } > "$RUNNER_TEMP/scorecard.md"
 
-      # Le step précédent : parmi les branches de la même équipe (premier segment du nom), celle dont la PR est partie
+      # La branche précédente : parmi les branches de la même équipe (premier segment du nom), celle dont la PR est partie
       # (merge-base) et qui porte le plus de commits de l'équipe, hors phase. La phase a pu être fusionnée dans la PR
-      # depuis : on ne demande pas que le step précédent la contienne. Aucune : premier step, comparé à la phase.
-      - name: Previous step of the team
+      # depuis : on ne demande pas que la branche précédente la contienne. Aucune : première branche, comparée à la phase.
+      - name: Previous branch of the team
         id: previous
         if: steps.base.outputs.playable == 'true'
         run: |
@@ -140,9 +140,9 @@ jobs:
           done < <(git for-each-ref --format='%(refname:short)' "refs/remotes/origin/$team/")
           echo "sha=$best_sha" >> "$GITHUB_OUTPUT"
           echo "ref=$best_ref" >> "$GITHUB_OUTPUT"
-          echo "Step précédent : ${best_ref:-aucun (premier step)} @ $best_sha"
+          echo "Branche précédente : ${best_ref:-aucune (première branche)} @ $best_sha"
 
-      - name: Harness on the previous step
+      - name: Harness on the previous branch
         if: steps.base.outputs.playable == 'true' && steps.previous.outputs.ref != ''
         env:
           PREV_SHA: ${{ steps.previous.outputs.sha }}

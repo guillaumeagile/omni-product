@@ -2,7 +2,7 @@
 # Lance harness.sh dans le conteneur omni-harness (voir Dockerfile) sur le dépôt courant : même code, même verdict
 # que le check harness-game, sans GitHub. Les arguments sont ceux de harness.sh, relatifs à la racine du dépôt.
 #
-# Usage : ./harness-docker.sh [--clean] [étape] [--json rapport.json]   (étape : 1 par défaut ; 1, 2, 3 ou all)
+# Usage : ./harness-docker.sh [--clean] [phase] [--json rapport.json]   (phase : 1 par défaut ; 1, 2, 3 ou all)
 #         ./harness-docker.sh --build      (reconstruit l'image après une modification du Dockerfile)
 #
 # Le cache Gradle est gardé dans le volume Docker omni-harness-gradle : la première exécution télécharge tout,

@@ -14,7 +14,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// HA4.5 (moteur AST) - Composable, étape 4 : le comportement de chaque alternative passe par un `switch` exhaustif
+// HA4.5 (moteur AST) - Composable, phase 4 : le comportement de chaque alternative passe par un `switch` exhaustif
 // sur l'ADT, jamais par des tests de type. Les résultats scellés (SaleDecision, PerishableCreation...) sont des ADT
 // comme les autres : ils se consomment par un switch. Quatre contrôles :
 //   1. pas de `instanceof` sur une ADT ni sur une de ses alternatives ;

@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 
 // Le chemin parcouru depuis le départ de la phase, quand le round est noté par rapport au baby step précédent :
 // les branches d'une équipe s'enchaînent et ne sont jamais fusionnées, chaque PR vise la branche de la phase.
-// Le score du round reste le delta avec le step précédent (rien n'est compté deux fois) ; ce bloc montre le cumul,
-// sans points. Vide sans rapport du départ de la phase (premier step : le round est déjà mesuré depuis la phase).
+// Le score du round reste le delta avec la branche précédente (rien n'est compté deux fois) ; ce bloc montre le cumul,
+// sans points. Vide sans rapport du départ de la phase (première branche : le round est déjà mesuré depuis la phase).
 final class Journey {
 
     private Journey() {
@@ -21,7 +21,7 @@ final class Journey {
     // La note en tête du commentaire : à quoi le round est comparé.
     static List<String> context(String previous) {
         return previous.isBlank() ? List.of()
-                : List.of("Round scored against your previous step " + previous + ": only what this PR adds earns points.");
+                : List.of("Round scored against your previous branch " + previous + ": only what this PR adds earns points.");
     }
 
     static List<String> lines(Optional<HarnessReport> phase, HarnessReport head) {

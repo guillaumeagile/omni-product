@@ -33,7 +33,7 @@ public final class Referee {
     static final int REGRESSION = -20;
     // Badge « Clean Coder » : les mesures de qualité (PMD ici) rapportent au moins ce nombre de points dans le round.
     static final int CLEAN_CODER_MIN_POINTS = 2;
-    // Coût agentique : tokens et branches retirés du code de l'étape (model/ et service/). La complexité cyclomatique
+    // Coût agentique : tokens et branches retirés du code de la phase (model/ et service/). La complexité cyclomatique
     // pèse plus que les tokens : retirer des branches, c'est ce qui rend le code plus simple à lire et à tester.
     static final long TOKENS_PER_POINT = 100;
     static final long TOKEN_CAP = 5;
@@ -71,7 +71,7 @@ public final class Referee {
                           List<String> notes, int score, String level, List<String> badges, List<String> measures,
                           List<Points> breakdown) {
 
-        // Le contexte du round (step précédent, chemin depuis la phase) ajouté en tête des notes et des mesures.
+        // Le contexte du round (branche précédente, chemin depuis la phase) ajouté en tête des notes et des mesures.
         Verdict withContext(List<String> moreNotes, List<String> moreMeasures) {
             return new Verdict(outcome, target, changes, problems, Stream.concat(moreNotes.stream(), notes.stream()).toList(),
                     score, level, badges, Stream.concat(moreMeasures.stream(), measures.stream()).toList(), breakdown);
@@ -101,7 +101,7 @@ public final class Referee {
         }
         if (target.isEmpty()) {
             return new Verdict(Outcome.OFF_GAME, target, List.of(), List.of(),
-                    List.of("No baby step target found: put the rule in the PR title (`HA9 green: ...`) or in the branch name (`step-1/ha9-...`)."),
+                    List.of("No baby step target found: put the rule in the PR title (`HA9 green: ...`) or in the branch name (`phase-1/ha9-...`)."),
                     0, level(head.get()), List.of(), List.of(), List.of());
         }
 
@@ -112,7 +112,7 @@ public final class Referee {
 
         List<String> problems = Stream.of(
                         targeted.isEmpty()
-                                ? Stream.of("`" + target.get() + "` is not a rule of step " + head.get().step() + ".")
+                                ? Stream.of("`" + target.get() + "` is not a rule of phase " + head.get().phase() + ".")
                                 : Stream.<String>empty(),
                         targeted.filter(rule -> !rule.turnedGreen()).stream()
                                 .map(rule -> "`" + rule.id() + "` is not green yet (" + describe(Optional.of(rule.head())) + ")."),

@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// HA4.3 (moteur AST) - Composable, étape 2 : Product porte ses différences par composition, pas par sous-classes.
+// HA4.3 (moteur AST) - Composable, phase 2 : Product porte ses différences par composition, pas par sous-classes.
 // `Product` a au moins une propriété (champ, composant de record ou accesseur sans paramètre) typée par une ADT, c'est-à-dire
 // une `sealed interface` dont les alternatives sont des value objects. Cette propriété n'a pas de setter.
 // Le nom du champ n'est pas imposé.

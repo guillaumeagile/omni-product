@@ -11,13 +11,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class HarnessReportTest {
 
-    // Les JSON des checkouts d'équipe, écrits avant le renommage, gardent la clé « step » : l'arbitre doit les relire.
+    // Le JSON reste « step » sur le fil : les checkouts d'équipe et la base lisent cette clé. Le nom Java est phase.
     @Test
-    void readsTheStepKeyOfAReportWrittenBeforeTheRename(@TempDir Path dir) throws Exception {
+    void writesTheStepKeyAndReadsItBack(@TempDir Path dir) throws Exception {
         Path file = dir.resolve("report.json");
         new HarnessReport("2", "PASS", List.<HarnessReport.RuleResult>of(), new Metrics(0, 0, 0, null, null)).write(file);
-        Files.writeString(file, Files.readString(file).replace("\"phase\"", "\"step\""));
 
+        assertThat(Files.readString(file)).contains("\"step\" : \"2\"");
         assertThat(HarnessReport.read(file).phase()).isEqualTo("2");
     }
 }

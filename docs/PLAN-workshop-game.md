@@ -29,7 +29,7 @@ legacy. Documents : `docs/harness-rules.md` (inventaire, heuristiques, limites).
 
 ```json
 {
-  "phase": "1",
+  "step": "1",
   "result": "FAIL",
   "rules": [
     { "id": "HA9", "name": "...", "severity": "ERROR", "status": "FAIL", "violations": 2 },

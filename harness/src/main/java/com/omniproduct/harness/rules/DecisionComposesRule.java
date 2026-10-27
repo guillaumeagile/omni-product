@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 // HA16 (moteur AST, erreur) - une décision du domaine se compose, elle ne se teste pas : un `if` (ou
 // un ternaire retourné) dont la condition porte une décision `can*` et dont une branche sort de la méthode par un
-// `return` ou un `throw` coupe le flux. `Option.when(canSell, ...)`, `filter`, `map` ou `fold` en font une étape.
+// `return` ou un `throw` coupe le flux. `Option.when(canSell, ...)`, `filter`, `map` ou `fold` en font une phase.
 // Heuristiques, par mots (`Words`) :
 //   - décision : appel ou référence de méthode dont les mots contiennent `can`, ou `sellable`/`saleable`/`allowed`/
 //     `permitted`/`eligible`/`decide`/`decision` ; une variable locale initialisée par une décision la porte aussi,

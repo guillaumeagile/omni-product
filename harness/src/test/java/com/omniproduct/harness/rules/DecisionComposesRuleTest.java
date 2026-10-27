@@ -44,7 +44,7 @@ class DecisionComposesRuleTest {
         });
     }
 
-    // --- Fixture bonne : la décision est une étape de la chaîne ---
+    // --- Fixture bonne : la décision est une phase de la chaîne ---
 
     @ParameterizedTest
     @ValueSource(strings = {

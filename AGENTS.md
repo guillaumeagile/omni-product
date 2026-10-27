@@ -13,7 +13,7 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
    pars toujours de la branche du baby step précédent : rien n'est fusionné dans la branche de la phase, c'est elle qui porte le travail.
    ```
    git switch <baby step précédent, ou java-bdxio-phase1 au premier>
-   git switch -c team-<équipe>/step-<N>/ha<règle>-<quoi>
+   git switch -c team-<équipe>/phase-<N>/ha<règle>-<quoi>
    ```
    Demande le nom de l'équipe à l'humain si tu ne le connais pas.
 3. **Lance le harnais** (`./harness.sh all`) et montre les lignes `[FAIL]`. Laisse l'humain choisir la règle à
@@ -21,7 +21,7 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
    **Régler de la dette est permis.** Une règle plus ancienne, sautée ou cassée en route, qui est encore `[FAIL]` à un
    step ultérieur (par exemple une règle de la phase 1 pendant la phase 2) peut faire l'objet d'un baby step. Tu peux
    le signaler à l'humain et la lui proposer parmi les choix ; c'est lui qui décide, et la PR ne traite que cette
-   règle, nommée dans la branche et le titre (`team-<équipe>/step-<N>/ha9-dette-identifiable`, `HA9 green: ...`).
+   règle, nommée dans la branche et le titre (`team-<équipe>/phase-<N>/ha9-dette-identifiable`, `HA9 green: ...`).
 4. **Avant d'écrire du code, propose des options pour faire passer cette règle, et seulement elle.** Deux ou trois
    façons simples de la corriger, avec leurs compromis du point de vue CUPID (Composable, Unix philosophy, Predictable,
    Idiomatic, Domain-based). Ne parle pas des autres règles ni des tensions possibles entre elles : au premier
@@ -47,7 +47,7 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
    les points de la CI : une autre règle passée au vert en passant (tant mieux), une règle qui a rougi, une métrique qui
    se dégrade. Une régression est acceptable si elle est temporaire : l'humain choisit de la corriger sur la même
    branche ou de la réparer dans un baby step suivant. Ne choisis pas à sa place.
-10. **Ne fusionne jamais la PR dans la branche de la phase.** Elle reste en draft, ouverte. Retour à l'étape 2 pour la règle suivante.
+10. **Ne fusionne jamais la PR dans la branche de la phase.** Elle reste en draft, ouverte. Retour à la phase 2 pour la règle suivante.
 
 ## Ce que tu ne fais pas
 
@@ -60,7 +60,7 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
   commente pas, signale-le seulement à l'animateur.
 - **N'anticipe pas le score.** Ne calcule pas les points à l'avance, n'optimise pas le code pour les métriques
   (tokens, complexité, CK, PMD). Fais de ton mieux pour un code clair et correct ; l'arbitre notera.- **Ne devance pas les règles.** Ne traite pas la règle suivante dans la même PR. Ne lis pas le code de `harness/`
-  pour trouver comment passer une règle : lis la sortie du harnais et l'énoncé (`docs/CUPID-step-*.md`).
+  pour trouver comment passer une règle : lis la sortie du harnais et l'énoncé (`docs/CUPID-phase-*.md`).
 - **Ne réfléchis pas au-delà de la règle en cours.** Tu sais qu'il y a d'autres règles et qu'elles peuvent tirer dans
   des sens opposés : n'en parle pas avant le premier refactoring, et ne cherche pas une solution qui les satisfasse
   toutes. Si un changement simple en fait passer plusieurs par chance, tant mieux, mais ce n'est pas un but.

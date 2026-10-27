@@ -69,7 +69,7 @@ public final class RecordsAreValueObjectsRule implements HarnessRule {
                 : Stream.of(new Violation(
                         model.stream().findFirst().map(SourceFile::path).orElse("<no files>"), 1,
                         "No record named '" + REQUIRED_VALUE_OBJECT + "' in a value-object package. "
-                                + "'" + REQUIRED_VALUE_OBJECT + "' must be a record value object (see CUPID-step1-2.md)."));
+                                + "'" + REQUIRED_VALUE_OBJECT + "' must be a record value object (see CUPID-phase1-2.md)."));
 
         return Stream.of(identities, classesInValueObjectPackage, missingPrice)
                 .flatMap(violations -> violations)

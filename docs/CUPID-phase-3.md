@@ -1,18 +1,18 @@
-### Step 3: Functional style, pipelines and composition
+### Phase 3: Functional style, pipelines and composition
 
-Step 2 made the model immutable and gave it types that say what can happen: records, sealed results, a `switch` the
-compiler checks. Step 3 is about the code that **moves data through that model**. It should read like a chain of small
+Phase 2 made the model immutable and gave it types that say what can happen: records, sealed results, a `switch` the
+compiler checks. Phase 3 is about the code that **moves data through that model**. It should read like a chain of small
 steps, each one a value you can name, test and recombine, instead of a recipe of branches and accumulators.
 
 This is the **Composable** and **Idiomatic** part of CUPID: a `Stream` or a Vavr `Option` is what Java and its usual
 libraries already offer for "do this, then that", and small pure steps compose where a loop with a counter does not.
 
-**Where you start.** The phase 3 starting code has done steps 1 and 2: the model is immutable, `Product` carries a
+**Where you start.** The phase 3 starting code has done phases 1 and 2: the model is immutable, `Product` carries a
 `ShelfLife` ADT, the sale checks `canSell` before it withdraws, the model never reads the clock. `./harness.sh 3` runs
-the rules of steps 1 and 2 too, and they are green. Four rules are red, and they are the exercise. A fifth rule,
+the rules of phases 1 and 2 too, and they are green. Four rules are red, and they are the exercise. A fifth rule,
 `HA21`, is green: it guards the way you use Vavr (see below) and only turns red if you open a Vavr container.
 
-The rules of this step are numbered from `HA14`: the number 13 is skipped on purpose.
+The rules of this phase are numbered from `HA14`: the number 13 is skipped on purpose.
 
 ## **Exercise**
 
@@ -125,9 +125,9 @@ Pass the harness verification:
 ./harness.sh 3
 ```
 
-It runs the rules of steps 1 and 2 and the rules of step 3, and exits `0` only when every error passes.
+It runs the rules of phases 1 and 2 and the rules of phase 3, and exits `0` only when every error passes.
 `./harness.sh 3 --json report.json` writes the same verdict as a JSON report, which the game uses (see "The game" in
-`CUPID-step-1.md`).
+`CUPID-phase-1.md`).
 
 Do not relax or rewrite the harness rules to make the exercise pass - that defeats the assessment. If a rule genuinely
 looks wrong, flag it.
@@ -143,4 +143,4 @@ hundred tokens at most:
 | Small diff (changed tokens in `src/main/java`) | 200 or less: +3 |
 | Tokens removed from `model/` and `service/` | +1 per 50 tokens, up to +5 |
 
-The other points (turning a rule green, baby step, complexity, PMD) are the ones of `CUPID-step-1.md`.
+The other points (turning a rule green, baby step, complexity, PMD) are the ones of `CUPID-phase-1.md`.

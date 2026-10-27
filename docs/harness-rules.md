@@ -26,7 +26,7 @@ sur le Java en phase 3.
 | HA12 | Identifiants riches | `Id`/`*Id`/`*Ids` générés par le système : UUID ou ULID, ou record qui en enveloppe un ; jamais `String`/`int`/`long` ; v7 minimum. Un identifiant naturel (`naturalIdentifiers` : siren, siret, tva, vat, sku, ean, gtin, isbn) en est exempté | Voir « UUID v7 » ci-dessous ; interdire `UUID.randomUUID()` (v4) et valeurs nulles/vides en contexte d'id | AST | Error |
 | HA12.1 | Identifiant nu = faible | Primitive obsession sur les ids | Tout `Id`/`*Id`/`*Ids` dont le type n'est pas déclaré dans le source (String, int, UUID…) | AST | Warning |
 | HA14 | Collections en pipeline | Une collection se transforme par un Stream, pas en remplissant un accumulateur | Boucle (`for`, for-each, `while`, `do`) ou `forEach`/`peek` qui modifie une variable déclarée hors d'elle | AST | Error |
-| HA15 | La fabrique valide par composition | La fabrique d'un value object exprime sa validation comme une chaîne d'étapes (`Option.of(...).filter(...).flatMap(...)`, `Validation.combine(...).ap(...)`), pas comme un branchement | `if`, ternaire ou `switch` dans la fabrique ou dans un helper privé qu'elle appelle ; `throw`, `assert` ou appel de garde (`requireNonNull`…) ; fabrique dont le retour promet un échec (générique, ADT scellée) sans aucune lambda ni référence de méthode ; **aucune** fabrique dont le résultat peut échouer (rouge par absence, comme HA4.4) | AST | Error |
+| HA15 | La fabrique valide par composition | La fabrique d'un value object exprime sa validation comme une chaîne d'phases (`Option.of(...).filter(...).flatMap(...)`, `Validation.combine(...).ap(...)`), pas comme un branchement | `if`, ternaire ou `switch` dans la fabrique ou dans un helper privé qu'elle appelle ; `throw`, `assert` ou appel de garde (`requireNonNull`…) ; fabrique dont le retour promet un échec (générique, ADT scellée) sans aucune lambda ni référence de méthode ; **aucune** fabrique dont le résultat peut échouer (rouge par absence, comme HA4.4) | AST | Error |
 | HA21 | Un conteneur Vavr se consomme par `fold` | Un `Either`, `Option`, `Try` ou `Validation` n'est jamais ouvert : on le replie, on le transforme (`map`, `flatMap`) ou on lui donne une valeur par défaut (`getOrElse(valeur)`) | Appel, ou référence de méthode, sur `io.vavr.control.*` ou `io.vavr.Value` dont le nom, lu en mots, est `get` sans argument, `get` + `left`/`error`/`cause` (`getLeft`, `getError`, `getCause`), contient `throw` (`getOrElseThrow`, `orElseThrow`), ou est `is` + `left`/`right`/`empty`/`defined`/`present`/`success`/`failure`/`valid`/`invalid` | BYTECODE | Error |
 
 ## Adaptations propres à Java
@@ -59,14 +59,14 @@ en phase 2). La liste exacte des checks est un livrable de la phase 3.
 
 HA5 → HA4, HA2 → HA6 → HA8 → HA7 → HA9, HA10 → HA12, HA12.1.
 
-## État d'implémentation et étapes
+## État d'implémentation et phases
 
-L'**étape 1** (`./harness.sh`, `docs/CUPID-step-1.md`) couvre **HA5 à HA12.1** uniquement. L'**étape 2** (`./harness.sh 2`) ajoute HA2, HA3 et HA4.1 à HA4.7 ; l'**étape 3** (`./harness.sh 3`, `docs/CUPID-step-3.md`) ajoute HA14, HA15 et HA21 (style fonctionnel : pipelines, fabrique par composition, conteneurs Vavr consommés par `fold`) ; `all` lance toutes les étapes, c'est-à-dire l'étape 3. La numérotation reprend à HA14 : on saute le 13. Les règles se règlent
-dans `Steps.java`.
+La **phase 1** (`./harness.sh`, `docs/CUPID-phase-1.md`) couvre **HA5 à HA12.1** uniquement. La **phase 2** (`./harness.sh 2`) ajoute HA2, HA3 et HA4.1 à HA4.7 ; l'**phase 3** (`./harness.sh 3`, `docs/CUPID-phase-3.md`) ajoute HA14, HA15 et HA21 (style fonctionnel : pipelines, fabrique par composition, conteneurs Vavr consommés par `fold`) ; `all` lance toutes les phases, c'est-à-dire la phase 3. La numérotation reprend à HA14 : on saute le 13. Les règles se règlent
+dans `Phases.java`.
 
-| Règle | Implémentée | Étape | Notes |
+| Règle | Implémentée | Phase | Notes |
 |---|---|---|---|
-| HA1 idiomes | non | hors étape 1 | à décider (Error Prone ou Checkstyle) |
+| HA1 idiomes | non | hors phase 1 | à décider (Error Prone ou Checkstyle) |
 | HA5 pas de god class | oui | 1 | seuil 4 (le document C# annonce 6 mais le code C# exécute 4) |
 | HA6 single concern | oui | 1 | `ubiquitous-language-map.json` adapté au vocabulaire Java |
 | HA7 fan-out | oui | 1 | entité = implémente `Identifiable` ou déclare un champ `id` |
@@ -101,7 +101,7 @@ Une règle verte sur le legacy (le défaut n'y est pas encore) n'est prouvée qu
 `expected.txt` une ligne `<règle> <fichier>:<ligne>` par détection attendue. `harness/mutate.sh [nom...]` applique le mutant,
 lance `./harness.sh all`, vérifie que **cette règle** signale **cette ligne** (une règle rouge ailleurs ne valide pas
 l'attente d'une autre), puis restaure `src/` même en cas d'échec ; il refuse de partir d'un `src/main/java` modifié. Le
-workflow `le-maitre-des-jeux` le joue sur chaque PR d'animateur (étape « Mutation du harnais ») et échoue si un défaut
+workflow `le-maitre-des-jeux` le joue sur chaque PR d'animateur (phase « Mutation du harnais ») et échoue si un défaut
 n'est pas vu. Mutations actuelles : `ha15-factory-branches-and-throws` (`Slug.of` avec `if` + `throw`) et `ha21-vavr-escape-hatches` (`Slug.of` qui ouvre un `Either` avec `isLeft()` et `get()` ; une règle bytecode n'affiche que le nom du fichier, `expected.txt` attend donc `Slug.java:7`).
 
 ### Propositions de règles (TODO, phase 3)

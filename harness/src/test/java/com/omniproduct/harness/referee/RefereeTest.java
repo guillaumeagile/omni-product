@@ -87,7 +87,7 @@ class RefereeTest {
 
     @Test
     void readsTheTargetFromTheBranchAndPaysDoubleForABoss() {
-        PullRequest pr = new PullRequest("Shelf life", "team-red/step-2/ha4-3-shelf-life", List.of(), 12, 50);
+        PullRequest pr = new PullRequest("Shelf life", "team-red/phase-2/ha4-3-shelf-life", List.of(), 12, 50);
 
         Verdict verdict = Referee.judge(BASE, report(
                 rule("HA7", "PASS", 0), rule("HA9", "FAIL", 2), rule("HA2", "FAIL", 47),
@@ -100,7 +100,7 @@ class RefereeTest {
 
     @Test
     void rejectsAPullRequestThatTouchesTheHarnessOrDoesNotCompile() {
-        PullRequest cheat = new PullRequest("HA9 green", "", List.of("harness/src/main/java/com/omniproduct/harness/Steps.java"), 1, 50);
+        PullRequest cheat = new PullRequest("HA9 green", "", List.of("harness/src/main/java/com/omniproduct/harness/Phases.java"), 1, 50);
 
         Verdict cheating = Referee.judge(BASE, BASE, cheat);
         Verdict broken = Referee.judge(BASE, Optional.empty(), pr("HA9 green"));
@@ -123,7 +123,7 @@ class RefereeTest {
     void anUnknownTargetIsRejected() {
         Verdict verdict = Referee.judge(BASE, BASE, pr("HA42 green"));
 
-        assertThat(verdict.problems()).anySatisfy(problem -> assertThat(problem).contains("`HA42` is not a rule of step 2"));
+        assertThat(verdict.problems()).anySatisfy(problem -> assertThat(problem).contains("`HA42` is not a rule of phase 2"));
     }
 
     @Test
@@ -272,7 +272,7 @@ class RefereeTest {
         assertThat(markdown).contains(
                 "| Score | Points |",
                 "| `HA9` turned green 🎯 | +10 |",
-                "| `HA7` regressed (was green) | -5 |",
+                "| `HA7` regressed (was green) | -20 |",
                 "| `HA12.1` warning resolved | +3 |",
                 "| Violations removed on rules still red (up to +5) | +2 |",
                 "| Tokens removed (+1 per 100, up to +5) | +2 |",

@@ -52,7 +52,7 @@ produit.
 
 Un baby step = une PR = une règle qui passe de rouge à vert (voir la section « The game » de
 [CUPID-phase-1.md](CUPID-phase-1.md) : chaque PR est un draft qui vise `java-bdxio-phase3` et n'est jamais fusionné ;
-chaque branche part du baby branche précédente).
+chaque branche part du baby step précédent).
 
 1. **HA14 : collections en pipeline.** Remplacez la boucle de `CatalogService.catalogLabels` par un `Stream`
    (`filter`, `map`, `toList`). Plus de liste déclarée hors du pipeline que l'on remplit.

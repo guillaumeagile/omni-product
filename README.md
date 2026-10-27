@@ -56,7 +56,7 @@ vert.
 
 Chaque PR passe
 devant **l'arbitre CUPID** : une GitHub Action (le check `harness-game`) qui lance le harnais sur la branche de la
-phase, sur votre baby branche précédente et sur la PR elle-même. L'arbitre compare les résultats, commente la PR avec un
+phase, sur votre baby step précédent et sur la PR elle-même. L'arbitre compare les résultats, commente la PR avec un
 tableau de score, met à jour le classement et met le check au vert ou au rouge.
 
 ### 1. Préparer la branche
@@ -64,7 +64,7 @@ tableau de score, met à jour le classement et met le check au vert ou au rouge.
 1. **Partez de la bonne branche.**
    - Premier baby step de la phase : la branche de la phase (`java-bdxio-phase1` pour les règles HA5 à HA12.1,
      `java-bdxio-phase2` pour celles de la phase 2, `java-bdxio-phase3` pour HA14 et HA15).
-   - Baby steps suivants : la branche de **votre baby branche précédente**. Rien n'étant fusionné dans la branche de la
+   - Baby steps suivants : la branche de **votre baby step précédent**. Rien n'étant fusionné dans la branche de la
      phase, c'est elle qui porte votre travail. Vous pouvez aussi y fusionner une autre de vos branches de baby step.
 
    Travaillez dans le dépôt de l'atelier, pas dans un fork : depuis un fork, l'arbitre ne peut pas commenter, sauf si
@@ -82,7 +82,7 @@ tableau de score, met à jour le classement et met le check au vert ou au rouge.
 4. **Lancez `./harness.sh all`** en local avant de pousser. L'arbitre utilise le même harnais.
 
 ```
-git switch team-red/phase-1/ha8-no-jpa        # le baby branche précédente (au premier : java-bdxio-phase1)
+git switch team-red/phase-1/ha8-no-jpa        # le baby step précédent (au premier : java-bdxio-phase1)
 git switch -c team-red/phase-1/ha9-identifiable
 # ... le refactoring ...
 ./harness.sh all
@@ -98,7 +98,7 @@ piège : `main` n'a pas d'arbitre, la PR est alors « hors jeu ».
 **La base est toujours la branche de la phase** : `java-bdxio-phase1` pour une règle de la phase 1,
 `java-bdxio-phase2` pour une règle de la phase 2, `java-bdxio-phase3` pour une règle de la phase 3. Jamais `main`, jamais la branche d'un autre baby step.
 
-L'arbitre retrouve tout seul votre baby branche précédente : la branche de votre équipe (même premier segment,
+L'arbitre retrouve tout seul votre baby step précédent : la branche de votre équipe (même premier segment,
 `team-red/`) dont votre branche est partie. Il en tire deux mesures :
 
 - **le score du round** : ce que la PR ajoute à votre branche précédente (règle cible, baby step, petit diff, tokens,
@@ -202,7 +202,7 @@ nouvelle PR draft vers la branche de la phase : retour à la phase 1.
 Après chaque round, l'issue épinglée **CUPID workshop leaderboard (java-bdxio-phase1)** (ou `phase2`, `phase3`) classe les
 équipes : la somme des scores de leurs PR ouvertes.
 
-Chaque round est noté seul, par rapport à votre baby branche précédente. Le score total de votre équipe est envoyé par
+Chaque round est noté seul, par rapport à votre baby step précédent. Le score total de votre équipe est envoyé par
 l'arbitre sous forme d'**issue** du projet, **Score <équipe> (<branche de la phase>)** : son corps est le registre
 cumulé de vos PR ouvertes (score du round, puis cumul), et chaque PR y a un commentaire, sa carte de score, mis à jour
 à chaque push. Rien à remplir à la main.

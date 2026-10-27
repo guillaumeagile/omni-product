@@ -15,7 +15,7 @@ class HarnessReportTest {
     @Test
     void readsTheStepKeyOfAReportWrittenBeforeTheRename(@TempDir Path dir) throws Exception {
         Path file = dir.resolve("report.json");
-        new HarnessReport("2", "PASS", List.<HarnessReport.RuleResult>of(), new Metrics(0, 0, 0, null, null)).write(file);
+        new HarnessReport("2", "PASS", List.<HarnessReport.RuleResult>of(), new Metrics(0, 0, 0, null)).write(file);
         Files.writeString(file, Files.readString(file).replace("\"phase\"", "\"step\""));
 
         assertThat(HarnessReport.read(file).phase()).isEqualTo("2");

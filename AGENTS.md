@@ -9,9 +9,9 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
 1. **Repère la phase.** Phase 1 : règles HA5 à HA12.1, branche `java-bdxio-phase1`. Phase 2 : règles HA2, HA3,
    HA4.x, branche `java-bdxio-phase2`. En cas de doute, demande.
 2. **Crée la branche du baby step.** Au premier baby step de la phase, pars de la branche de la phase. Ensuite,
-   pars toujours de la branche du baby branche précédente : rien n'est fusionné dans la branche de la phase, c'est elle qui porte le travail.
+   pars toujours de la branche du baby step précédent : rien n'est fusionné dans la branche de la phase, c'est elle qui porte le travail.
    ```
-   git switch <baby branche précédente, ou java-bdxio-phase1 au premier>
+   git switch <baby step précédent, ou java-bdxio-phase1 au premier>
    git switch -c team-<équipe>/phase-<N>/ha<règle>-<quoi>
    ```
    Demande le nom de l'équipe à l'humain si tu ne le connais pas.

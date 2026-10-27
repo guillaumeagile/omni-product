@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
-// Le chemin parcouru depuis le départ de la phase, quand le round est noté par rapport au baby branche précédente :
+// Le chemin parcouru depuis le départ de la phase, quand le round est noté par rapport au baby step précédent :
 // les branches d'une équipe s'enchaînent et ne sont jamais fusionnées, chaque PR vise la branche de la phase.
 // Le score du round reste le delta avec la branche précédente (rien n'est compté deux fois) ; ce bloc montre le cumul,
 // sans points. Vide sans rapport du départ de la phase (première branche : le round est déjà mesuré depuis la phase).

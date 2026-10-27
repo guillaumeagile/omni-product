@@ -60,7 +60,7 @@ HA5 → HA4, HA2 → HA6 → HA8 → HA7 → HA9, HA10 → HA12, HA12.1.
 
 ## État d'implémentation et phases
 
-L'**phase 1** (`./harness.sh`, `docs/CUPID-phase-1.md`) couvre **HA5 à HA12.1** uniquement. L'**phase 2** (`./harness.sh 2`) ajoute HA2, HA3 et HA4.1 à HA4.9 ; `all` lance les deux phases. Les règles se règlent
+La **phase 1** (`./harness.sh`, `docs/CUPID-phase-1.md`) couvre **HA5 à HA12.1** uniquement. La **phase 2** (`./harness.sh 2`) ajoute HA2, HA3 et HA4.1 à HA4.9 ; `all` lance les deux phases. Les règles se règlent
 dans `Phases.java`.
 
 | Règle | Implémentée | Phase | Notes |
@@ -195,7 +195,7 @@ Restent des faux négatifs, assumés (par conception ou faute de moyen sûr de l
 - HA4.6 : une horloge lue par une bibliothèque tierce, ou par réflexion, n'est pas vue.
 - HA4.7 : la décision n'est suivie que dans une même méthode (variables locales) ; un retrait délégué à une autre classe n'est vu que par les mots de son nom.
 - HA4.9 : un branchement déplacé dans **un autre type** (`Dates.ordered(a, b)` statique ailleurs dans `model`) n'est pas suivi ; une
-  fabrique qui compose une seule phase triviale (`Option.of(x).map(Slug::new)`, sans `filter`) passe : la règle voit la forme,
+  fabrique qui compose une seule étape triviale (`Option.of(x).map(Slug::new)`, sans `filter`) passe : la règle voit la forme,
   pas la force de la validation. Les `&&`/`||` dans une lambda de `filter` ne sont pas des branchements pour elle.
 
 ## Ce que « heuristique » promet

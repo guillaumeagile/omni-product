@@ -43,4 +43,5 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+/package-lock.json
 /.idea/gradle.xml

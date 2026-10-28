@@ -1,7 +1,11 @@
 package com.omniproduct.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.omniproduct.model.Catalog;
+import com.omniproduct.model.Parcel;
 import com.omniproduct.model.Product;
+import com.omniproduct.model.Storage;
+import com.omniproduct.model.Supply;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,10 +35,11 @@ public class ProductControllerTest {
         Product.Warehouse warehouse = new Product.Warehouse("Main Warehouse");
         Product.Supplier supplier1 = new Product.Supplier("Supplier1", "SIREN123", "TVA456");
         Product product = new Product(
-                "p1", "Test Product", "test-product",
-                price, List.of("Image 1"), Map.of("main", "image-url"),
-                Map.of("Europe", supplier1),
-                23.0, "10x10x10", 100, 50, warehouse
+                "p1",
+                new Catalog("Test Product", "test-product", List.of("Image 1"), Map.of("main", "image-url")),
+                price,
+                new Storage(100, 50, warehouse, new Parcel(23.0, "10x10x10")),
+                new Supply(null, Map.of("Europe", supplier1))
         );
 
         // Create
@@ -51,7 +56,7 @@ public class ProductControllerTest {
 
         // Test the  validation rule
         Product invalidProduct = new Product();
-        invalidProduct.setName(""); // Trigger the exception
+        invalidProduct.getCatalog().setName(""); // Trigger the exception
 
         mockMvc.perform(post("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -71,10 +76,11 @@ public class ProductControllerTest {
         // Update
         Product.Supplier supplier2 = new Product.Supplier("Supplier2", "SIREN789", "TVA012");
         Product updatedProduct = new Product(
-                "p1", "Updated Product", "updated-product",
-                price, List.of("D1"), Map.of("main", "image-url"),
-                Map.of("Asia", supplier2),
-                3.0, "10x10x10", 100, 50, warehouse
+                "p1",
+                new Catalog("Updated Product", "updated-product", List.of("D1"), Map.of("main", "image-url")),
+                price,
+                new Storage(100, 50, warehouse, new Parcel(3.0, "10x10x10")),
+                new Supply(null, Map.of("Asia", supplier2))
         );
         mockMvc.perform(put("/api/products/p1")
                 .contentType(MediaType.APPLICATION_JSON)

@@ -9,9 +9,9 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String> {
     
-    Optional<Product> findByCatalogSlug(String slug);
-
-    boolean existsByCatalogSlug(String slug);
-
-    void deleteByCatalogSlug(String slug);
+    Optional<Product> findBySlug(String slug);
+    
+    boolean existsBySlug(String slug);
+    
+    void deleteBySlug(String slug);
 }

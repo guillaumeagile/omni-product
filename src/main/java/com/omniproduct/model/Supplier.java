@@ -81,4 +81,62 @@ public class Supplier {
     public void setProducts(List<Product> products) {
         this.products = products;
     }
+
+    @Embeddable
+    public static class Contact {
+        private String contactEmail;
+        private String contactPhone;
+
+        public Contact() {}
+
+        public Contact(String contactEmail, String contactPhone) {
+            this.contactEmail = contactEmail;
+            this.contactPhone = contactPhone;
+        }
+
+        public String getContactEmail() {
+            return contactEmail;
+        }
+
+        public void setContactEmail(String contactEmail) {
+            this.contactEmail = contactEmail;
+        }
+
+        public String getContactPhone() {
+            return contactPhone;
+        }
+
+        public void setContactPhone(String contactPhone) {
+            this.contactPhone = contactPhone;
+        }
+    }
+
+    @Embeddable
+    public static class Location {
+        private String country;
+        private String region;
+
+        public Location() {}
+
+        public Location(String country, String region) {
+            this.country = country;
+            this.region = region;
+        }
+
+        public String getCountry() {
+            return country;
+        }
+
+        public void setCountry(String country) {
+            this.country = country;
+        }
+
+        public String getRegion() {
+            return region;
+        }
+
+        public void setRegion(String region) {
+            this.region = region;
+        }
+    }
 }

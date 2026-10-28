@@ -1,7 +1,5 @@
 package com.omniproduct.service;
 
-import com.omniproduct.model.Contact;
-import com.omniproduct.model.Location;
 import com.omniproduct.model.Supplier;
 import com.omniproduct.model.Product;
 import com.omniproduct.repository.SupplierRepository;
@@ -60,8 +58,8 @@ public class SupplierService {
             .orElseThrow(() -> new IllegalArgumentException("Supplier not found: " + id));
         
         supplier.setName(name);
-        supplier.setContact(new Contact(contactEmail, contactPhone));
-        supplier.setLocation(new Location(country, region));
+        supplier.setContact(new Supplier.Contact(contactEmail, contactPhone));
+        supplier.setLocation(new Supplier.Location(country, region));
         
         return supplierRepository.save(supplier);
     }

@@ -1,10 +1,7 @@
 package com.omniproduct.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omniproduct.model.Price;
 import com.omniproduct.model.Product;
-import com.omniproduct.model.SupplierIdentity;
-import com.omniproduct.model.Warehouse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,9 +27,9 @@ public class ProductControllerTest {
 
     @Test
     public void testCrudOperations() throws Exception {
-        Price price = new Price(100.0, 20.0, 0.2);
-        Warehouse warehouse = new Warehouse("Main Warehouse");
-        SupplierIdentity supplier1 = new SupplierIdentity("Supplier1", "SIREN123", "TVA456");
+        Product.Price price = new Product.Price(100.0, 20.0, 0.2);
+        Product.Warehouse warehouse = new Product.Warehouse("Main Warehouse");
+        Product.Supplier supplier1 = new Product.Supplier("Supplier1", "SIREN123", "TVA456");
         Product product = new Product(
                 "p1", "Test Product", "test-product",
                 price, List.of("Image 1"), Map.of("main", "image-url"),
@@ -72,7 +69,7 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.name").value("Test Product"));
 
         // Update
-        SupplierIdentity supplier2 = new SupplierIdentity("Supplier2", "SIREN789", "TVA012");
+        Product.Supplier supplier2 = new Product.Supplier("Supplier2", "SIREN789", "TVA012");
         Product updatedProduct = new Product(
                 "p1", "Updated Product", "updated-product",
                 price, List.of("D1"), Map.of("main", "image-url"),

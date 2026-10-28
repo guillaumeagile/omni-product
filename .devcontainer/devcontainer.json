@@ -1,0 +1,18 @@
+{
+	"image": "mcr.microsoft.com/devcontainers/java",
+	"postCreateCommand": "sudo apt-get update -qq && sudo apt-get install -y openjdk-21-jdk-headless",
+	"postStartCommand": "rm -rf /home/vscode/.openvscode-server/extensions/redhat.java-1.56.0-* /home/vscode/.openvscode-server/extensions/vscjava.vscode-java-debug-0.58.*",
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"java.import.gradle.java.home": "/usr/lib/jvm/msopenjdk-current",
+				"java.jdt.ls.java.home": "/usr/lib/jvm/x"
+			},
+			"extensions": [
+				"vscjava.vscode-java-pack",
+				"redhat.java@1.35.0",
+				"vscjava.vscode-java-debug@0.55.0"
+			]
+		}
+	}
+}

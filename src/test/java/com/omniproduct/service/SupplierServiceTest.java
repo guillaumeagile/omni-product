@@ -1,6 +1,7 @@
 package com.omniproduct.service;
 
 import com.omniproduct.model.Supplier;
+import com.omniproduct.model.SupplierId;
 import com.omniproduct.model.Product;
 import com.omniproduct.repository.SupplierRepository;
 import com.omniproduct.repository.ProductRepository;
@@ -160,7 +161,7 @@ class SupplierServiceTest {
         product.setId("prod1");
         product.getCatalog().setName("Test Product");
         product.getCatalog().setSlug("test-product");
-        product.getSupply().setSupplier(supplier);
+        product.getSupply().setSupplierId(new SupplierId(supplier.getId()));
         productRepository.save(product);
         
         assertThat(productRepository.findById("prod1")).isPresent();
@@ -183,7 +184,7 @@ class SupplierServiceTest {
         product.setId("prod1");
         product.getCatalog().setName("Test Product");
         product.getCatalog().setSlug("test-product");
-        product.getSupply().setSupplier(supplier);
+        product.getSupply().setSupplierId(new SupplierId(supplier.getId()));
         productRepository.save(product);
         
         List<Supplier> suppliers = supplierService.getSuppliersByProduct("prod1");

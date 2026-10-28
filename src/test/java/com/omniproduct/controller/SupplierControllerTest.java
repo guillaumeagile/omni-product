@@ -1,6 +1,7 @@
 package com.omniproduct.controller;
 
 import com.omniproduct.model.Supplier;
+import com.omniproduct.model.SupplierId;
 import com.omniproduct.model.Product;
 import com.omniproduct.repository.SupplierRepository;
 import com.omniproduct.repository.ProductRepository;
@@ -174,7 +175,7 @@ class SupplierControllerTest {
         product.setId("prod1");
         product.getCatalog().setName("Test Product");
         product.getCatalog().setSlug("test-product");
-        product.getSupply().setSupplier(supplier);
+        product.getSupply().setSupplierId(new SupplierId(supplier.getId()));
         productRepository.save(product);
         
         mockMvc.perform(delete("/api/suppliers/sup1"))

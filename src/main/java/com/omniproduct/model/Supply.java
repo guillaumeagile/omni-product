@@ -6,9 +6,9 @@ import java.util.Map;
 @Embeddable
 public class Supply {
 
-    @ManyToOne
-    @JoinColumn(name = "supplier_id")
-    private Supplier supplier;
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "supplier_id"))
+    private SupplierId supplierId;
 
     @ElementCollection
     @CollectionTable(name = "product_suppliers", joinColumns = @JoinColumn(name = "product_id"))
@@ -17,13 +17,13 @@ public class Supply {
 
     public Supply() {}
 
-    public Supply(Supplier supplier, Map<String, Product.Supplier> suppliersRegions) {
-        this.supplier = supplier;
+    public Supply(SupplierId supplierId, Map<String, Product.Supplier> suppliersRegions) {
+        this.supplierId = supplierId;
         this.suppliersRegions = suppliersRegions;
     }
 
-    public Supplier getSupplier() { return supplier; }
-    public void setSupplier(Supplier supplier) { this.supplier = supplier; }
+    public SupplierId getSupplierId() { return supplierId; }
+    public void setSupplierId(SupplierId supplierId) { this.supplierId = supplierId; }
 
     public Map<String, Product.Supplier> getSuppliersRegions() { return suppliersRegions; }
     public void setSuppliersRegions(Map<String, Product.Supplier> suppliersRegions) { this.suppliersRegions = suppliersRegions; }

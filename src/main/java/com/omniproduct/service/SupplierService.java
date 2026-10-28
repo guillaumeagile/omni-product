@@ -4,6 +4,7 @@ import com.omniproduct.model.Contact;
 import com.omniproduct.model.Location;
 import com.omniproduct.model.Supplier;
 import com.omniproduct.model.Product;
+import com.omniproduct.model.SupplierId;
 import com.omniproduct.repository.SupplierRepository;
 import com.omniproduct.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -38,11 +39,11 @@ public class SupplierService {
     
     @Transactional(readOnly = true)
     public List<Supplier> getSuppliersByProduct(String productId) {
-        productRepository.findById(productId)
+        Product product = productRepository.findById(productId)
             .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
-        return supplierRepository.findAll().stream()
-            .filter(s -> s.getProducts() != null && s.getProducts().stream()
-                .anyMatch(p -> p.getId().equals(productId)))
+        return Optional.ofNullable(product.getSupply().getSupplierId())
+            .flatMap(supplierId -> supplierRepository.findById(supplierId.value()))
+            .stream()
             .toList();
     }
     
@@ -66,9 +67,11 @@ public class SupplierService {
         return supplierRepository.save(supplier);
     }
     
+    @Transactional
     public void deleteSupplier(String id) {
         Supplier supplier = supplierRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Supplier not found: " + id));
+        productRepository.deleteBySupplySupplierId(new SupplierId(id));
         supplierRepository.delete(supplier);
     }
 }

@@ -299,3 +299,14 @@ Quelques conseils pour jouer avec un LLM :
   signalez-le à l'animateur.
 - Un échec que vous provoquez en corrigeant autre chose se dit dans la PR : ne le cachez pas.
 - Le diff de chaque PR est la leçon : regardez ce que chaque règle coûte en code.
+
+## Environnement DevPod / devcontainer
+
+Le dépôt fournit un `.devcontainer/devcontainer.json` (image `mcr.microsoft.com/devcontainers/java`, JDK 21, extensions Java pinnées pour rester compatibles avec le langage server). Avant votre premier `devpod up` sur ce projet, exécutez une fois sur votre machine :
+
+```sh
+./scripts/setup-devpod.sh        # macOS / Linux
+.\scripts\setup-devpod.ps1       # Windows (PowerShell)
+```
+
+Le script ne touche que la config locale de DevPod (`~/.devpod/config.yaml`), jamais le conteneur.

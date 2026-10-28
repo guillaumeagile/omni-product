@@ -79,7 +79,7 @@ in the scorecard but never penalized: splitting a class sometimes moves a branch
 
 [CK](https://github.com/mauricioaniche/ck) metrics (CBO total and max, WMC max, LCOM* max, mutable fields,
 assignments, loops, lambdas, max nesting) are detailed in a collapsible block of the scorecard, with the points of
-each one. An improvement earns points, a worse metric costs nothing. The number of classes is shown but not scored.
+each one. An improvement earns points, a worse metric costs nothing, except CBO total (coupling), which costs -1 point per 5 added, with no limit. The number of classes is shown but not scored.
 
 Badges: 🍼 Baby step, 🧼 No regression, 🤏 Small diff. Run `./harness.sh` locally before pushing: the referee uses
 the same harness.

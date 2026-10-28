@@ -51,7 +51,7 @@ public class ProductControllerTest {
 
         // Test the  validation rule
         Product invalidProduct = new Product();
-        invalidProduct.setName(""); // Trigger the exception
+        invalidProduct.getCatalog().setName(""); // Trigger the exception
 
         mockMvc.perform(post("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)

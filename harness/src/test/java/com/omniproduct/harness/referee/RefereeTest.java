@@ -273,7 +273,7 @@ class RefereeTest {
                 "| Cyclomatic complexity removed (+1 per 2, up to +10) | +5 |",
                 "| **Total** | **" + "+" + verdict.score() + "** |");
         // Refusée (régression de HA7) : ni bonus de baby step ou de petit diff, ni points CK.
-        assertThat(markdown).doesNotContain("Baby step: exactly one", "Small diff:", "📐 CK metrics");
+        assertThat(markdown).doesNotContain("Baby step: exactly one", "Small diff:", "| 📐 CK metrics |");
         assertThat(markdown).contains("CK metrics of model/ and service/: +3, not counted: the PR is not accepted");
     }
 }

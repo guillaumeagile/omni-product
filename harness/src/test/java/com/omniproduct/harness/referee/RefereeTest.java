@@ -211,7 +211,7 @@ class RefereeTest {
     }
 
     @Test
-    void ckPointsAreCappedPerMetricOnlyAndAWorseMetricCostsNothing() {
+    void ckPointsAreCappedPerMetricOnlyAndOnlyAWorseCboTotalCostsPoints() {
         Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, ck(1, 500, 50, 100, 1.0, 100, 500, 50, 0, 9)),
                 rule("HA9", "FAIL", 2));
         Verdict best = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(99, 0, 0, 0, 0, 0, 0, 0, 50, 0)),
@@ -221,7 +221,23 @@ class RefereeTest {
 
         // Pas de plafond total : la somme des plafonds par mesure (5+4+5+4+5+4+4+10+4).
         assertThat(best.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + 45);
-        assertThat(worse.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS);
+        // CBO total +400 : -80, sans plafond ; les autres mesures qui se dégradent ne coûtent rien.
+        assertThat(worse.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS - 80);
+    }
+
+    @Test
+    void cboTotalCostsOnePointPerFiveAdded() {
+        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, ck(8, 37, 14, 28, 0.90, 27, 64, 0, 5, 0)),
+                rule("HA9", "FAIL", 2));
+        Verdict fourAdded = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(8, 41, 14, 28, 0.90, 27, 64, 0, 5, 0)),
+                rule("HA9", "PASS", 0)), pr("HA9 green"));
+        Verdict fiveAdded = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(8, 42, 14, 28, 0.90, 27, 64, 0, 5, 0)),
+                rule("HA9", "PASS", 0)), pr("HA9 green"));
+
+        assertThat(fourAdded.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS);
+        assertThat(fiveAdded.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS - 1);
+        assertThat(Scorecard.markdown(fiveAdded)).contains("CK metrics of model/ and service/: -1",
+                "| CBO total (coupling) | 37 | 42 | +5 | -1 |");
     }
 
     @Test

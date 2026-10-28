@@ -228,8 +228,22 @@ class RefereeTest {
                 rule("HA9", "PASS", 0)), pr("HA9 green"));
 
         assertThat(verdict.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS);
-        assertThat(Scorecard.markdown(verdict)).contains("CK metrics of model/ and service/: shown for comparison, no points",
+        assertThat(Scorecard.markdown(verdict)).contains("CK metrics of model/ and service/: shown for comparison, only a worse CBO total costs points (-1 per 5 added): 0",
                 "| CBO total (coupling) | 37 | 0 | -37 |");
+    }
+
+    @Test
+    void ckCboTotalCostsOnePointPerFiveAddedEvenThoughCkEarnsNothing() {
+        Optional<HarnessReport> base = reportWith(new Metrics(3000, 40, 6, SOME_CK), rule("HA9", "FAIL", 2));
+        Verdict fourAdded = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(8, 41, 14, 28, 0.90, 27, 64, 0, 5, 0)),
+                rule("HA9", "PASS", 0)), pr("HA9 green"));
+        Verdict fiveAdded = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(8, 42, 14, 28, 0.90, 27, 64, 0, 5, 0)),
+                rule("HA9", "PASS", 0)), pr("HA9 green"));
+
+        assertThat(fourAdded.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS);
+        assertThat(fiveAdded.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS - 1);
+        assertThat(Scorecard.markdown(fiveAdded)).contains("only a worse CBO total costs points (-1 per 5 added): -1",
+                "| CBO total (coupling) | 37 | 42 | +5 | -1 |");
     }
 
     @Test
@@ -280,7 +294,7 @@ class RefereeTest {
                 "| **Total** | **" + "+" + verdict.score() + "** |");
         // Refusée (régression de HA7) : ni bonus de baby step ou de petit diff, ni points de mesures.
         assertThat(markdown).doesNotContain("Baby step: exactly one", "Small diff:", "quality metrics improved");
-        assertThat(markdown).contains("CK metrics of model/ and service/: shown for comparison, no points");
+        assertThat(markdown).contains("CK metrics of model/ and service/: shown for comparison, only a worse CBO total costs points");
     }
 
     @Test

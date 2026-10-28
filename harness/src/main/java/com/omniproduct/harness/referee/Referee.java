@@ -144,6 +144,8 @@ public final class Referee {
                 .toList();
 
         int qualityPoints = accepted ? MetricTables.PMD.points(base, head.get()) : 0;
+        // CK n'est pas noté, sauf le CBO total : -1 par 5 ajoutés, sans plafond.
+        int couplingPenalty = accepted ? MetricTables.CK.points(base, head.get()) : 0;
 
         List<Points> breakdown = Stream.of(
                         changes.stream().filter(rule -> rule.points() != 0).map(rule -> new Points(reason(rule), rule.points())),
@@ -155,7 +157,8 @@ public final class Referee {
                                         tokensRemoved.map(removed -> Math.min(TOKEN_CAP, Math.max(0, removed) / pr.tokensPerPoint())).orElse(0L).intValue()),
                                 new Points("Cyclomatic complexity removed (+1 per " + COMPLEXITY_PER_POINT + ", up to +" + COMPLEXITY_CAP + ")",
                                         branchesRemoved.map(removed -> Math.min(COMPLEXITY_CAP, Math.max(0, removed) / COMPLEXITY_PER_POINT)).orElse(0L).intValue()),
-                                new Points("📐 PMD quality metrics improved", qualityPoints)))
+                                new Points("📐 PMD quality metrics improved", qualityPoints),
+                                new Points("📐 CBO total (CK) added: -1 per 5", couplingPenalty)))
                 .flatMap(lines -> lines)
                 .filter(line -> line.points() != 0)
                 .toList();

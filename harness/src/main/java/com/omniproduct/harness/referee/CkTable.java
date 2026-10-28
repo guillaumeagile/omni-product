@@ -11,28 +11,37 @@ import java.util.function.ToDoubleFunction;
 import java.util.stream.Stream;
 
 // Les mesures CK dans le score et dans le commentaire de l'arbitre. Chaque mesure rapporte des points quand elle
-// s'améliore (plafond par mesure, pas de plafond total : c'est du bonus), jamais de pénalité quand elle se dégrade :
-// c'est affiché.
+// s'améliore (plafond par mesure, pas de plafond total : c'est du bonus). Une mesure qui se dégrade ne coûte rien,
+// c'est affiché, sauf le couplage total (CBO total) : -1 point par 5 ajoutés, sans plafond.
 // Le nombre de classes est affiché sans points : découper ne vaut rien en soi, c'est le couplage et la cohésion qui
 // disent si le découpage est bon. Vide si l'un des deux rapports n'a pas de mesures CK.
 final class CkTable {
 
     // step : amélioration qui vaut 1 point ; cap : points maximum ; lowerIsBetter : sens de l'amélioration.
-    // step = 0 : affiché sans points.
-    record Row(String label, String meaning, ToDoubleFunction<CkMetrics> measure, double step, int cap, boolean lowerIsBetter) {
+    // step = 0 : affiché sans points. penaltyStep : dégradation qui coûte 1 point, sans plafond ; 0 : la dégradation ne
+    // coûte rien.
+    record Row(String label, String meaning, ToDoubleFunction<CkMetrics> measure, double step, int cap, boolean lowerIsBetter,
+               double penaltyStep) {
+
+        Row(String label, String meaning, ToDoubleFunction<CkMetrics> measure, double step, int cap, boolean lowerIsBetter) {
+            this(label, meaning, measure, step, cap, lowerIsBetter, 0);
+        }
 
         int points(CkMetrics before, CkMetrics after) {
             double gain = lowerIsBetter
                     ? measure.applyAsDouble(before) - measure.applyAsDouble(after)
                     : measure.applyAsDouble(after) - measure.applyAsDouble(before);
             // Arrondi avant la division : 0.90 - 0.75 doit valoir 0.15, pas 0.1499999.
-            return step == 0 ? 0 : (int) Math.min(cap, Math.max(0, Math.floor(Math.round(gain * 1000) / 1000.0 / step)));
+            double rounded = Math.round(gain * 1000) / 1000.0;
+            int reward = (int) Math.min(cap, Math.max(0, Math.floor(rounded / step)));
+            int penalty = penaltyStep == 0 ? 0 : (int) Math.max(0, Math.floor(-rounded / penaltyStep));
+            return step == 0 ? 0 : reward - penalty;
         }
     }
 
     static final List<Row> ROWS = List.of(
             new Row("Classes", "not scored: splitting is not a goal in itself", CkMetrics::classes, 0, 0, true),
-            new Row("CBO total (coupling)", "+1 per 2 removed, up to +5", CkMetrics::coupling, 2, 5, true),
+            new Row("CBO total (coupling)", "+1 per 2 removed, up to +5; -1 per 5 added, no limit", CkMetrics::coupling, 2, 5, true, 5),
             new Row("CBO max", "+1 per 2 removed, up to +4", CkMetrics::maxCoupling, 2, 4, true),
             new Row("WMC max (class complexity)", "+1 per 2 removed, up to +5", CkMetrics::maxWmc, 2, 5, true),
             new Row("LCOM* max (lack of cohesion, 0..1)", "+1 per 0.1 removed, up to +4", CkMetrics::maxLcom, 0.1, 4, true),
@@ -74,7 +83,7 @@ final class CkTable {
                                 "| Metric | Base | This PR | Δ | Points | Rule |", "|---|---|---|---|---|---|"),
                         ROWS.stream().map(row -> row(row, before, after)),
                         Stream.of("", "Measured by [CK](https://github.com/mauricioaniche/ck) 0.7.0. "
-                                + "A metric that gets worse costs no points, but read why in Files changed.", "</details>"))
+                                + "A metric that gets worse costs no points, except CBO total (-1 per 5 added); read why in Files changed.", "</details>"))
                 .flatMap(lines -> lines)
                 .toList();
     }

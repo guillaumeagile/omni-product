@@ -185,9 +185,10 @@ class RefereeTest {
         Verdict verdict = Referee.judge(base, reportWith(new Metrics(3000, 40, 6, ck(13, 59, 11, 13, 0.75, 32, 75, 0, 5, 0)),
                 rule("HA9", "PASS", 0)), pr("HA9 green"));
 
-        // CBO max -3 : +1 ; WMC max -15 : +5 (plafond) ; LCOM* -0.15 : +1 ; +5 classes : 0.
-        assertThat(verdict.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + 7);
-        assertThat(Scorecard.markdown(verdict)).contains("CK metrics of model/ and service/: +7",
+        // CBO max -3 : +1 ; WMC max -15 : +5 (plafond) ; LCOM* -0.15 : +1 ; +5 classes : 0 ;
+        // CBO total +22 : -4 (-1 par 5 ajoutés).
+        assertThat(verdict.score()).isEqualTo(Referee.GREEN + Referee.SINGLE_GREEN_BONUS + 3);
+        assertThat(Scorecard.markdown(verdict)).contains("CK metrics of model/ and service/: +3",
                 "| Classes | 8 | 13 | +5 |  | not scored", "| WMC max (class complexity) | 28 | 13 | -15 | +5 |");
     }
 
@@ -272,7 +273,7 @@ class RefereeTest {
                 "| Cyclomatic complexity removed (+1 per 2, up to +10) | +5 |",
                 "| **Total** | **" + "+" + verdict.score() + "** |");
         // Refusée (régression de HA7) : ni bonus de baby step ou de petit diff, ni points CK.
-        assertThat(markdown).doesNotContain("Baby step: exactly one", "Small diff:", "CK metrics improved");
-        assertThat(markdown).contains("CK metrics of model/ and service/: +7, not counted: the PR is not accepted");
+        assertThat(markdown).doesNotContain("Baby step: exactly one", "Small diff:", "📐 CK metrics");
+        assertThat(markdown).contains("CK metrics of model/ and service/: +3, not counted: the PR is not accepted");
     }
 }

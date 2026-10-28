@@ -149,7 +149,7 @@ public final class Referee {
                                         tokensRemoved.map(removed -> Math.min(TOKEN_CAP, Math.max(0, removed) / TOKENS_PER_POINT)).orElse(0L).intValue()),
                                 new Points("Cyclomatic complexity removed (+1 per " + COMPLEXITY_PER_POINT + ", up to +" + COMPLEXITY_CAP + ")",
                                         branchesRemoved.map(removed -> Math.min(COMPLEXITY_CAP, Math.max(0, removed) / COMPLEXITY_PER_POINT)).orElse(0L).intValue()),
-                                new Points("📐 CK metrics improved", qualityPoints)))
+                                new Points("📐 CK metrics", qualityPoints)))
                 .flatMap(lines -> lines)
                 .filter(line -> line.points() != 0)
                 .toList();

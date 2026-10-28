@@ -8,8 +8,8 @@ import com.omniproduct.harness.referee.MetricTable.Row;
 import java.util.List;
 
 // Les blocs de mesures de l'arbitre en phase 2 (essai testPMD). PMD est noté : il lit Java 21, records compris.
-// CK est affiché pour comparaison, sans points : CK 0.7.0 ne voit pas les records, qu'il ferait disparaître des
-// mesures (points gagnés sans rien améliorer). Le nombre de types est affiché sans points : découper n'est pas un but.
+// CK est affiché pour comparaison, sans points gagnés : CK 0.7.0 ne voit pas les records, qu'il ferait disparaître des
+// mesures (points gagnés sans rien améliorer). Seul le CBO total y coûte des points : -1 par 5 ajoutés, sans plafond. Le nombre de types est affiché sans points : découper n'est pas un but.
 final class MetricTables {
 
     static final MetricTable<PmdQuality> PMD = new MetricTable<>("PMD quality metrics",
@@ -30,7 +30,7 @@ final class MetricTables {
     static final MetricTable<CkMetrics> CK = new MetricTable<>("CK metrics",
             "[CK](https://github.com/mauricioaniche/ck) 0.7.0, which does not see records", Metrics::ck, List.of(
             new Row<>("Classes", "", CkMetrics::classes, 0, 0, true),
-            new Row<>("CBO total (coupling)", "", CkMetrics::coupling, 0, 0, true),
+            new Row<>("CBO total (coupling)", "-1 per 5 added, no limit", CkMetrics::coupling, 0, 0, true, 5),
             new Row<>("CBO max", "", CkMetrics::maxCoupling, 0, 0, true),
             new Row<>("WMC max (class complexity)", "", CkMetrics::maxWmc, 0, 0, true),
             new Row<>("LCOM* max (lack of cohesion, 0..1)", "", CkMetrics::maxLcom, 0, 0, true),

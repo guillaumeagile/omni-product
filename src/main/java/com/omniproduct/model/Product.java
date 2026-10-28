@@ -59,5 +59,5 @@ public class Product {
 
     @JsonUnwrapped
     public Supply getSupply() { return supply; }
-    public void setSupply(Supply supply) { this.supply = supply; }
+
 }

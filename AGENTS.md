@@ -27,7 +27,7 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
    Idiomatic, Domain-based). Ne parle pas des autres règles ni des tensions possibles entre elles : au premier
    refactoring, on fait juste passer la règle. Puis **demande à l'humain de choisir**. Ne choisis jamais à sa place,
    même si une option te semble évidente.
-5. **Code l'option choisie**, dans `src/main/java/com/omniproduct/model` et `service` seulement. Vérifie que ça
+5. **Code l'option choisie**, dans `src/main/java/com/omniproduct` et `src/test/java/com/omniproduct`, tout ce qui s'y trouve (model, service, controller, domain, infrastructure, tests). Seul le harnais reste intouchable. Vérifie que ça
    compile, que les tests de l'application passent (`gradle :test`, jamais les tests du harnais : voir plus bas), puis relance
    `./harness.sh all` et montre le résultat tel quel.
 6. **Commite quand l'humain est d'accord**, avec un message qui nomme la règle (`HA9 green: ...`). Pousse la branche.
@@ -73,7 +73,7 @@ réfléchir à l'approche CUPID. Tu n'es pas là pour réussir l'exercice à sa 
   Fusionner entre les branches d'équipe est autorisé, quand l'humain le décide : une branche de baby step dans une
   autre (`git merge`), ou la branche de la phase dans une branche d'équipe pour récupérer ses mises à jour. Seules les
   deux branches de phase sont protégées.
-- **Ne touche jamais** à `harness/`, `.github/`, `domain/`, `infrastructure/`. Ne pousse pas sur `main` ni sur les
+- **Ne touche jamais** à `harness/` ni à `.github/` (le harnais et l'arbitre). Ne pousse pas sur `main` ni sur les
   branches de phase. Ne travaille pas dans un fork.
 
 Ces consignes valent pour les participants. Elles ne s'appliquent pas à l'animateur de l'atelier quand il travaille

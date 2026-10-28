@@ -80,7 +80,7 @@ in the scorecard but never penalized: an exhaustive `switch` (HA4.5) adds one br
 
 [CK](https://github.com/mauricioaniche/ck) metrics (CBO total and max, WMC max, LCOM* max, mutable fields,
 assignments, loops, lambdas, max nesting) are detailed in a collapsible block of the scorecard, with the points of
-each one. An improvement earns points, a worse metric costs nothing. The number of classes is shown but not scored.
+each one. An improvement earns points, a worse metric costs nothing, except CBO total (coupling), which costs -1 point per 5 added, with no limit. The number of classes is shown but not scored.
 CK 0.7.0 does not see records: in phase 2, a record is not measured.
 
 Badges: 🍼 Baby step, 🧼 No regression, 🤏 Small diff, 👑 Boss defeated, 🧠 Compiler-checked. Run `./harness.sh` locally

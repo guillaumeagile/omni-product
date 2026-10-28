@@ -229,6 +229,7 @@ Une PR est acceptée quand :
 | retirez des tokens de `model/` et `service/` | +1 par 100 tokens, jusqu'à +5 |
 | retirez de la complexité cyclomatique de `model/` et `service/` | +1 par 2 points, jusqu'à +10 |
 | améliorez les mesures CK de `model/` et `service/` (couplage, cohésion, mutabilité, style) | bonus sans plafond total, détail ci-dessous |
+| ajoutez du couplage (CBO total, CK) | -1 par 5 ajoutés, sans limite |
 | cassez une règle qui était verte | -5 par règle |
 
 Le code se mesure en **tokens**, pas en lignes : un agent lit et écrit des tokens. Ils sont comptés par
@@ -237,12 +238,12 @@ Le code se mesure en **tokens**, pas en lignes : un agent lit et écrit des toke
 affichée mais jamais pénalisée : un `switch` exhaustif ajoute une branche par cas.
 
 Les mesures [CK](https://github.com/mauricioaniche/ck) sont détaillées dans un bloc repliable du commentaire de
-l'arbitre. Une mesure qui s'améliore rapporte des points ; une mesure qui se dégrade ne coûte rien, mais regardez
+l'arbitre. Une mesure qui s'améliore rapporte des points ; une mesure qui se dégrade ne coûte rien (sauf le CBO total, voir le tableau), mais regardez
 pourquoi dans **Files changed**. Le nombre de classes est affiché sans points : découper n'est pas un but en soi.
 
 | Mesure CK | Points |
 |---|---|
-| CBO total (couplage entre classes) | +1 par 2 retirés, jusqu'à +5 |
+| CBO total (couplage entre classes) | +1 par 2 retirés, jusqu'à +5 ; **-1 par 5 ajoutés, sans limite** |
 | CBO max (la classe la plus couplée) | +1 par 2 retirés, jusqu'à +4 |
 | WMC max (la classe la plus complexe) | +1 par 2 retirés, jusqu'à +5 |
 | LCOM* max (manque de cohésion, de 0 à 1) | +1 par 0,1 retiré, jusqu'à +4 |

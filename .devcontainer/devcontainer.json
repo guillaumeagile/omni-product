@@ -1,24 +1,18 @@
 {
-  "name": "CUPID workshop (Java 21 / Gradle 9.5) - phase 1",
-  "image": "mcr.microsoft.com/devcontainers/java:21",
-  "features": {
-    "ghcr.io/devcontainers/features/java:1": {
-      "version": "21",
-      "installGradle": true,
-      "gradleVersion": "9.5.0"
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {}
-  },
-  "postCreateCommand": "java -version && gradle --version && gradle compileJava",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "vscjava.vscode-java-pack",
-        "vscjava.vscode-gradle"
-      ],
-      "settings": {
-        "java.configuration.updateBuildConfiguration": "automatic"
-      }
-    }
-  }
+	"image": "mcr.microsoft.com/devcontainers/java",
+	"postCreateCommand": "sudo apt-get update -qq && sudo apt-get install -y openjdk-21-jdk-headless",
+	"postStartCommand": "rm -rf /home/vscode/.openvscode-server/extensions/redhat.java-1.56.0-* /home/vscode/.openvscode-server/extensions/vscjava.vscode-java-debug-0.58.*",
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"java.import.gradle.java.home": "/usr/lib/jvm/msopenjdk-current",
+				"java.jdt.ls.java.home": "/usr/lib/jvm/x"
+			},
+			"extensions": [
+				"vscjava.vscode-java-pack",
+				"redhat.java@1.35.0",
+				"vscjava.vscode-java-debug@0.55.0"
+			]
+		}
+	}
 }

@@ -123,14 +123,21 @@ public class Product {
     }
 
     @JsonUnwrapped
-    public Sourcing getSourcing() { return new Sourcing(supplier, suppliersRegions, kilos, volume); }
+    public Sourcing getSourcing() { return new Sourcing(supplier, suppliersRegions); }
 
     @JsonUnwrapped
     public void setSourcing(Sourcing sourcing) {
         this.supplier = sourcing.supplier();
         this.suppliersRegions = sourcing.suppliersRegions();
-        this.kilos = sourcing.kilos();
-        this.volume = sourcing.volume();
+    }
+
+    @JsonUnwrapped
+    public Packing getPacking() { return new Packing(kilos, volume); }
+
+    @JsonUnwrapped
+    public void setPacking(Packing packing) {
+        this.kilos = packing.kilos();
+        this.volume = packing.volume();
     }
 
     @Embeddable

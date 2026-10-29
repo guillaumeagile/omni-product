@@ -55,18 +55,16 @@ faites : cet ordre marche mieux que de corriger les échecs dans l'ordre où ils
    contexte borné il appartient. Utilisez le vocabulaire de
    `harness/src/main/resources/ubiquitous-language-map.json`. Les mots de ce fichier sont ceux que le harnais
    recherche, c'est donc un bon guide pour les noms que vous rencontrerez.
-2. **Retirer les identifiants qui ne sont pas des valeurs métier.** Décidez ce qui est un identifiant et ce qui est
-   une propriété. Repérez les identifiants (voir HA11 et HA12, section 4) pour savoir lesquels seront à corriger aux étapes 8 et 9.
-3. **Découper les entités.** Extrayez une classe par préoccupation (HA5, HA6). Gardez chaque classe extraite petite.
-4. **Couper les références entre entités** (HA7). Une entité ne se relie à une autre que par son identifiant.
-5. **Retirer la persistance du modèle** (HA8). Le modèle n'importe pas JPA. Si le mapping reste nécessaire, il vit
+2. **Découper les entités.** Extrayez une classe par préoccupation (HA5, HA6). Gardez chaque classe extraite petite.
+3. **Couper les références entre entités** (HA7). Une entité ne se relie à une autre que par son identifiant.
+4. **Retirer la persistance du modèle** (HA8). Le modèle n'importe pas JPA. Si le mapping reste nécessaire, il vit
    dans une classe séparée, hors de `model`.
-6. **Faire déclarer à chaque classe du modèle ce qu'elle est** (HA9). Soit elle implémente `Identifiable`, soit
+5. **Faire déclarer à chaque classe du modèle ce qu'elle est** (HA9). Soit elle implémente `Identifiable`, soit
    c'est un record.
-7. **Retirer les services des constructeurs d'entités** (HA10). Déplacez l'orchestration dans un service.
-8. **Donner un type aux concepts du domaine** (HA11). Une valeur brute qui porte un concept (`String slug`,
+6. **Retirer les services des constructeurs d'entités** (HA10). Déplacez l'orchestration dans un service.
+7. **Donner un type aux concepts du domaine** (HA11). Une valeur brute qui porte un concept (`String slug`,
    `long price`, `int quantity`) devient un record du domaine (`record Price(BigDecimal amount)`).
-9. **Rendre les identifiants riches** (HA12). Chaque identifiant restant devient un `UUID` v7 ou un `Ulid`, ou un
+8. **Rendre les identifiants riches** (HA12). Chaque identifiant restant devient un `UUID` v7 ou un `Ulid`, ou un
    record qui en enveloppe un. Traitez-le en dernier, une fois les classes stabilisées, puisque c'est le point qui
    touche le plus de code.
 

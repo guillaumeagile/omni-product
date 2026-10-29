@@ -2,6 +2,19 @@ package com.omniproduct.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omniproduct.model.Product;
+import com.omniproduct.model.BasePrice;
+import com.omniproduct.model.TaxAmount;
+import com.omniproduct.model.TaxRate;
+import com.omniproduct.model.Discount;
+import com.omniproduct.model.ImageDetail;
+import com.omniproduct.model.ImageKey;
+import com.omniproduct.model.Kilos;
+import com.omniproduct.model.Location;
+import com.omniproduct.model.Quantity;
+import com.omniproduct.model.Region;
+import com.omniproduct.model.Slug;
+import com.omniproduct.model.Stock;
+import com.omniproduct.model.Volume;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -27,14 +40,14 @@ public class ProductControllerTest {
 
     @Test
     public void testCrudOperations() throws Exception {
-        Product.Price price = new Product.Price(100.0, 20.0, 0.2);
-        Product.Warehouse warehouse = new Product.Warehouse("Main Warehouse");
+        Product.Price price = new Product.Price(new BasePrice(100.0), new TaxAmount(20.0), new TaxRate(0.2));
+        Product.Warehouse warehouse = new Product.Warehouse(new Location("Main Warehouse"));
         Product.Supplier supplier1 = new Product.Supplier("Supplier1", "SIREN123", "TVA456");
         Product product = new Product(
-                "p1", "Test Product", "test-product",
-                price, List.of("Image 1"), Map.of("main", "image-url"),
-                Map.of("Europe", supplier1),
-                23.0, "10x10x10", 100, 50, warehouse
+                "p1", "Test Product", new Slug("test-product"),
+                price, List.of(new Discount("Image 1")), Map.of(new ImageKey("main"), new ImageDetail("image-url")),
+                Map.of(new Region("Europe"), supplier1),
+                new Kilos(23.0), new Volume("10x10x10"), new Quantity(100), new Stock(50), warehouse
         );
 
         // Create
@@ -71,10 +84,10 @@ public class ProductControllerTest {
         // Update
         Product.Supplier supplier2 = new Product.Supplier("Supplier2", "SIREN789", "TVA012");
         Product updatedProduct = new Product(
-                "p1", "Updated Product", "updated-product",
-                price, List.of("D1"), Map.of("main", "image-url"),
-                Map.of("Asia", supplier2),
-                3.0, "10x10x10", 100, 50, warehouse
+                "p1", "Updated Product", new Slug("updated-product"),
+                price, List.of(new Discount("D1")), Map.of(new ImageKey("main"), new ImageDetail("image-url")),
+                Map.of(new Region("Asia"), supplier2),
+                new Kilos(3.0), new Volume("10x10x10"), new Quantity(100), new Stock(50), warehouse
         );
         mockMvc.perform(put("/api/products/p1")
                 .contentType(MediaType.APPLICATION_JSON)

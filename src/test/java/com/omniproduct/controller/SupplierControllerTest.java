@@ -2,6 +2,11 @@ package com.omniproduct.controller;
 
 import com.omniproduct.model.Supplier;
 import com.omniproduct.model.Product;
+import com.omniproduct.model.ContactEmail;
+import com.omniproduct.model.ContactPhone;
+import com.omniproduct.model.Country;
+import com.omniproduct.model.Region;
+import com.omniproduct.model.Slug;
 import com.omniproduct.repository.SupplierRepository;
 import com.omniproduct.repository.ProductRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,8 +70,7 @@ class SupplierControllerTest {
     
     @Test
     void shouldGetSupplierById() throws Exception {
-        Supplier supplier = new Supplier("sup1", "Supplier A", "contact@suppliera.com", 
-                                        "+33123456789", "France", "Île-de-France");
+        Supplier supplier = new Supplier("sup1", "Supplier A", new ContactEmail("contact@suppliera.com"), new ContactPhone("+33123456789"), new Country("France"), new Region("Île-de-France"));
         supplierRepository.save(supplier);
         
         mockMvc.perform(get("/api/suppliers/sup1"))
@@ -83,10 +87,8 @@ class SupplierControllerTest {
     
     @Test
     void shouldGetAllSuppliers() throws Exception {
-        Supplier supplier1 = new Supplier("sup1", "Supplier A", "contact@suppliera.com", 
-                                         "+33123456789", "France", "Île-de-France");
-        Supplier supplier2 = new Supplier("sup2", "Supplier B", "contact@supplierb.com", 
-                                         "+33987654321", "Spain", "Madrid");
+        Supplier supplier1 = new Supplier("sup1", "Supplier A", new ContactEmail("contact@suppliera.com"), new ContactPhone("+33123456789"), new Country("France"), new Region("Île-de-France"));
+        Supplier supplier2 = new Supplier("sup2", "Supplier B", new ContactEmail("contact@supplierb.com"), new ContactPhone("+33987654321"), new Country("Spain"), new Region("Madrid"));
         supplierRepository.save(supplier1);
         supplierRepository.save(supplier2);
         
@@ -99,10 +101,8 @@ class SupplierControllerTest {
     
     @Test
     void shouldGetSuppliersByCountry() throws Exception {
-        Supplier supplier1 = new Supplier("sup1", "Supplier A", "contact@suppliera.com", 
-                                         "+33123456789", "France", "Île-de-France");
-        Supplier supplier2 = new Supplier("sup2", "Supplier B", "contact@supplierb.com", 
-                                         "+33987654321", "Spain", "Madrid");
+        Supplier supplier1 = new Supplier("sup1", "Supplier A", new ContactEmail("contact@suppliera.com"), new ContactPhone("+33123456789"), new Country("France"), new Region("Île-de-France"));
+        Supplier supplier2 = new Supplier("sup2", "Supplier B", new ContactEmail("contact@supplierb.com"), new ContactPhone("+33987654321"), new Country("Spain"), new Region("Madrid"));
         supplierRepository.save(supplier1);
         supplierRepository.save(supplier2);
         
@@ -114,10 +114,8 @@ class SupplierControllerTest {
     
     @Test
     void shouldGetSuppliersByRegion() throws Exception {
-        Supplier supplier1 = new Supplier("sup1", "Supplier A", "contact@suppliera.com", 
-                                         "+33123456789", "France", "Île-de-France");
-        Supplier supplier2 = new Supplier("sup2", "Supplier B", "contact@supplierb.com", 
-                                         "+33987654321", "France", "Provence");
+        Supplier supplier1 = new Supplier("sup1", "Supplier A", new ContactEmail("contact@suppliera.com"), new ContactPhone("+33123456789"), new Country("France"), new Region("Île-de-France"));
+        Supplier supplier2 = new Supplier("sup2", "Supplier B", new ContactEmail("contact@supplierb.com"), new ContactPhone("+33987654321"), new Country("France"), new Region("Provence"));
         supplierRepository.save(supplier1);
         supplierRepository.save(supplier2);
         
@@ -129,8 +127,7 @@ class SupplierControllerTest {
     
     @Test
     void shouldUpdateSupplier() throws Exception {
-        Supplier supplier = new Supplier("sup1", "Supplier A", "contact@suppliera.com", 
-                                        "+33123456789", "France", "Île-de-France");
+        Supplier supplier = new Supplier("sup1", "Supplier A", new ContactEmail("contact@suppliera.com"), new ContactPhone("+33123456789"), new Country("France"), new Region("Île-de-France"));
         supplierRepository.save(supplier);
         
         String updateJson = """
@@ -153,8 +150,7 @@ class SupplierControllerTest {
     
     @Test
     void shouldDeleteSupplier() throws Exception {
-        Supplier supplier = new Supplier("sup1", "Supplier A", "contact@suppliera.com", 
-                                        "+33123456789", "France", "Île-de-France");
+        Supplier supplier = new Supplier("sup1", "Supplier A", new ContactEmail("contact@suppliera.com"), new ContactPhone("+33123456789"), new Country("France"), new Region("Île-de-France"));
         supplierRepository.save(supplier);
         
         mockMvc.perform(delete("/api/suppliers/sup1"))
@@ -166,14 +162,13 @@ class SupplierControllerTest {
     
     @Test
     void shouldCascadeDeleteProductsWhenSupplierDeleted() throws Exception {
-        Supplier supplier = new Supplier("sup1", "Supplier A", "contact@suppliera.com", 
-                                        "+33123456789", "France", "Île-de-France");
+        Supplier supplier = new Supplier("sup1", "Supplier A", new ContactEmail("contact@suppliera.com"), new ContactPhone("+33123456789"), new Country("France"), new Region("Île-de-France"));
         supplierRepository.save(supplier);
         
         Product product = new Product();
         product.setId("prod1");
         product.setName("Test Product");
-        product.setSlug("test-product");
+        product.setSlug(new Slug("test-product"));
         product.setSupplierId(new com.omniproduct.model.SupplierId(supplier.getId()));
         productRepository.save(product);
 

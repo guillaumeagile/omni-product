@@ -2,6 +2,9 @@ package com.omniproduct.service;
 
 import com.omniproduct.model.Supplier;
 import com.omniproduct.model.Product;
+import com.omniproduct.model.Slug;
+import com.omniproduct.model.Country;
+import com.omniproduct.model.Region;
 import com.omniproduct.repository.SupplierRepository;
 import com.omniproduct.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +47,7 @@ class SupplierServiceTest {
         assertThat(supplier).isNotNull();
         assertThat(supplier.getId()).isEqualTo("sup1");
         assertThat(supplier.getName()).isEqualTo("Supplier A");
-        assertThat(supplier.getCountry()).isEqualTo("France");
+        assertThat(supplier.getCountry()).isEqualTo(new Country("France"));
     }
     
     @Test
@@ -118,8 +121,8 @@ class SupplierServiceTest {
         );
         
         assertThat(updated.getName()).isEqualTo("Updated Supplier A");
-        assertThat(updated.getCountry()).isEqualTo("Germany");
-        assertThat(updated.getRegion()).isEqualTo("Berlin");
+        assertThat(updated.getCountry()).isEqualTo(new Country("Germany"));
+        assertThat(updated.getRegion()).isEqualTo(new Region("Berlin"));
     }
     
     @Test
@@ -159,7 +162,7 @@ class SupplierServiceTest {
         Product product = new Product();
         product.setId("prod1");
         product.setName("Test Product");
-        product.setSlug("test-product");
+        product.setSlug(new Slug("test-product"));
         product.setSupplierId(new com.omniproduct.model.SupplierId(supplier.getId()));
         productRepository.save(product);
 
@@ -181,7 +184,7 @@ class SupplierServiceTest {
         Product product = new Product();
         product.setId("prod1");
         product.setName("Test Product");
-        product.setSlug("test-product");
+        product.setSlug(new Slug("test-product"));
         product.setSupplierId(new com.omniproduct.model.SupplierId(supplier.getId()));
         productRepository.save(product);
 

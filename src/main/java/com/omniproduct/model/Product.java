@@ -7,61 +7,73 @@ import java.util.Map;
 @Entity
 @Table(name = "products")
 public class Product {
-    
+
     @Id
     private String id;
-    
+
     @Column(nullable = false)
     private String name;
-    
-    @Column(unique = true, nullable = false)
-    private String slug;
-    
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "slug", unique = true, nullable = false))
+    private Slug slug;
+
     @Embedded
     private Price price;
-    
+
     @ElementCollection
     @CollectionTable(name = "product_discounts", joinColumns = @JoinColumn(name = "product_id"))
-    @Column(name = "discount")
-    private List<String> discounts;
-    
+    @AttributeOverride(name = "value", column = @Column(name = "discount"))
+    private List<Discount> discounts;
+
     @ElementCollection
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
-    @MapKeyColumn(name = "image_key")
-    @Column(name = "image_detail")
-    private Map<String, String> images; // Simplified to Map<String, String> for JPA
-    
+    @AttributeOverride(name = "key.value", column = @Column(name = "image_key"))
+    @AttributeOverride(name = "value.value", column = @Column(name = "image_detail"))
+    private Map<ImageKey, ImageDetail> images; // Simplified to Map<ImageKey, ImageDetail> for JPA
+
     @ElementCollection
     @CollectionTable(name = "product_suppliers", joinColumns = @JoinColumn(name = "product_id"))
-    @MapKeyColumn(name = "region")
-    private Map<String, Supplier> suppliersRegions;
-    
+    @AttributeOverride(name = "key.value", column = @Column(name = "region"))
+    private Map<Region, Supplier> suppliersRegions;
+
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "supplier_id"))
     private SupplierId supplierId;
-    
-    private Double kilos;
-    private String volume;
-    private Integer quantity;
-    private Integer stock;
-    
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "kilos"))
+    private Kilos kilos;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "volume"))
+    private Volume volume;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "quantity"))
+    private Quantity quantity;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "stock"))
+    private Stock stock;
+
     @Embedded
     private Warehouse warehouse;
-    
+
     @Embeddable
     public static class Supplier {
         private String name;
         private String siren;
         private String tvaId;
-        
+
         public Supplier() {}
-        
+
         public Supplier(String name, String siren, String tvaId) {
             this.name = name;
             this.siren = siren;
             this.tvaId = tvaId;
         }
-        
+
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
 
@@ -71,14 +83,14 @@ public class Product {
         public String getTvaId() { return tvaId; }
         public void setTvaId(String tvaId) { this.tvaId = tvaId; }
     }
-    
+
     // Default constructor for JPA
     public Product() {}
-    
+
     // Constructor for testing
-    public Product(String id, String name, String slug, Price price, List<String> discounts, 
-                   Map<String, String> images, Map<String, Supplier> suppliersRegions, Double weight, String dimensions, 
-                   Integer quantity, Integer stock, Warehouse warehouse) {
+    public Product(String id, String name, Slug slug, Price price, List<Discount> discounts,
+                   Map<ImageKey, ImageDetail> images, Map<Region, Supplier> suppliersRegions, Kilos kilos, Volume volume,
+                   Quantity quantity, Stock stock, Warehouse warehouse) {
         this.id = id;
         this.name = name;
         this.slug = slug;
@@ -86,88 +98,98 @@ public class Product {
         this.discounts = discounts;
         this.images = images;
         this.suppliersRegions = suppliersRegions;
-        this.kilos = weight;
-        this.volume = dimensions;
+        this.kilos = kilos;
+        this.volume = volume;
         this.quantity = quantity;
         this.stock = stock;
         this.warehouse = warehouse;
     }
-    
+
     // Getters and setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
-    
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-    
-    public String getSlug() { return slug; }
-    public void setSlug(String slug) { this.slug = slug; }
-    
+
+    public Slug getSlug() { return slug; }
+    public void setSlug(Slug slug) { this.slug = slug; }
+
     public Price getPrice() { return price; }
     public void setPrice(Price price) { this.price = price; }
-    
-    public List<String> getDiscounts() { return discounts; }
-    public void setDiscounts(List<String> discounts) { this.discounts = discounts; }
-    
-    public Map<String, String> getImages() { return images; }
-    public void setImages(Map<String, String> images) { this.images = images; }
-    
-    public Map<String, Supplier> getSuppliersRegions() { return suppliersRegions; }
-    public void setSuppliersRegions(Map<String, Supplier> suppliersRegions) { this.suppliersRegions = suppliersRegions; }
-    
-    public Double getKilos() { return kilos; }
-    public void setKilos(Double weight) { this.kilos = weight; }
-    
-    public String getVolume() { return volume; }
-    public void setVolume(String dimensions) { this.volume = dimensions; }
-    
-    public Integer getQuantity() { return quantity; }
-    public void setQuantity(Integer quantity) { this.quantity = quantity; }
-    
-    public Integer getStock() { return stock; }
-    public void setStock(Integer stock) { this.stock = stock; }
-    
+
+    public List<Discount> getDiscounts() { return discounts; }
+    public void setDiscounts(List<Discount> discounts) { this.discounts = discounts; }
+
+    public Map<ImageKey, ImageDetail> getImages() { return images; }
+    public void setImages(Map<ImageKey, ImageDetail> images) { this.images = images; }
+
+    public Map<Region, Supplier> getSuppliersRegions() { return suppliersRegions; }
+    public void setSuppliersRegions(Map<Region, Supplier> suppliersRegions) { this.suppliersRegions = suppliersRegions; }
+
+    public Kilos getKilos() { return kilos; }
+    public void setKilos(Kilos kilos) { this.kilos = kilos; }
+
+    public Volume getVolume() { return volume; }
+    public void setVolume(Volume volume) { this.volume = volume; }
+
+    public Quantity getQuantity() { return quantity; }
+    public void setQuantity(Quantity quantity) { this.quantity = quantity; }
+
+    public Stock getStock() { return stock; }
+    public void setStock(Stock stock) { this.stock = stock; }
+
     public Warehouse getWarehouse() { return warehouse; }
     public void setWarehouse(Warehouse warehouse) { this.warehouse = warehouse; }
-    
+
     public SupplierId getSupplierId() { return supplierId; }
     public void setSupplierId(SupplierId supplierId) { this.supplierId = supplierId; }
-    
+
     @Embeddable
     public static class Price {
-        private Double base;
-        private Double tax;
-        private Double taxRate;
-        
+        @Embedded
+        @AttributeOverride(name = "value", column = @Column(name = "base"))
+        private BasePrice base;
+
+        @Embedded
+        @AttributeOverride(name = "value", column = @Column(name = "tax"))
+        private TaxAmount tax;
+
+        @Embedded
+        @AttributeOverride(name = "value", column = @Column(name = "tax_rate"))
+        private TaxRate taxRate;
+
         public Price() {}
-        
-        public Price(Double base, Double tax, Double taxRate) {
+
+        public Price(BasePrice base, TaxAmount tax, TaxRate taxRate) {
             this.base = base;
             this.tax = tax;
             this.taxRate = taxRate;
         }
-        
-        public Double getBase() { return base; }
-        public void setBase(Double base) { this.base = base; }
-        
-        public Double getTax() { return tax; }
-        public void setTax(Double tax) { this.tax = tax; }
-        
-        public Double getTaxRate() { return taxRate; }
-        public void setTaxRate(Double taxRate) { this.taxRate = taxRate; }
+
+        public BasePrice getBase() { return base; }
+        public void setBase(BasePrice base) { this.base = base; }
+
+        public TaxAmount getTax() { return tax; }
+        public void setTax(TaxAmount tax) { this.tax = tax; }
+
+        public TaxRate getTaxRate() { return taxRate; }
+        public void setTaxRate(TaxRate taxRate) { this.taxRate = taxRate; }
     }
-    
+
     @Embeddable
     public static class Warehouse {
-        private String location;
-        
+        @Embedded
+        @AttributeOverride(name = "value", column = @Column(name = "location"))
+        private Location location;
+
         public Warehouse() {}
-        
-        public Warehouse(String location) {
+
+        public Warehouse(Location location) {
             this.location = location;
         }
-        
-        public String getLocation() { return location; }
-        public void setLocation(String location) { this.location = location; }
+
+        public Location getLocation() { return location; }
+        public void setLocation(Location location) { this.location = location; }
     }
 }

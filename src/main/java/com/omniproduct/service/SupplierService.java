@@ -2,6 +2,10 @@ package com.omniproduct.service;
 
 import com.omniproduct.model.Supplier;
 import com.omniproduct.model.Product;
+import com.omniproduct.model.ContactEmail;
+import com.omniproduct.model.ContactPhone;
+import com.omniproduct.model.Country;
+import com.omniproduct.model.Region;
 import com.omniproduct.repository.SupplierRepository;
 import com.omniproduct.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -22,7 +26,8 @@ public class SupplierService {
     
     public Supplier createSupplier(String id, String name, String contactEmail, String contactPhone,
                                    String country, String region) {
-        Supplier supplier = new Supplier(id, name, contactEmail, contactPhone, country, region);
+        Supplier supplier = new Supplier(id, name, new ContactEmail(contactEmail), new ContactPhone(contactPhone),
+                new Country(country), new Region(region));
         return supplierRepository.save(supplier);
     }
     
@@ -47,24 +52,24 @@ public class SupplierService {
     }
     
     public List<Supplier> getSuppliersByCountry(String country) {
-        return supplierRepository.findByCountry(country);
+        return supplierRepository.findByCountry(new Country(country));
     }
-    
+
     public List<Supplier> getSuppliersByRegion(String region) {
-        return supplierRepository.findByRegion(region);
+        return supplierRepository.findByRegion(new Region(region));
     }
-    
+
     public Supplier updateSupplier(String id, String name, String contactEmail, String contactPhone,
                                    String country, String region) {
         Supplier supplier = supplierRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Supplier not found: " + id));
-        
+
         supplier.setName(name);
-        supplier.setContactEmail(contactEmail);
-        supplier.setContactPhone(contactPhone);
-        supplier.setCountry(country);
-        supplier.setRegion(region);
-        
+        supplier.setContactEmail(new ContactEmail(contactEmail));
+        supplier.setContactPhone(new ContactPhone(contactPhone));
+        supplier.setCountry(new Country(country));
+        supplier.setRegion(new Region(region));
+
         return supplierRepository.save(supplier);
     }
     

@@ -150,44 +150,43 @@ class SupplierServiceTest {
     }
     
     @Test
-    void shouldCascadeDeleteProductsWhenSupplierDeleted() {
+    void shouldNotDeleteProductsWhenSupplierDeleted() {
         Supplier supplier = supplierService.createSupplier(
-            "sup1", "Supplier A", "contact@suppliera.com", 
+            "sup1", "Supplier A", "contact@suppliera.com",
             "+33123456789", "France", "Île-de-France"
         );
-        
+
         Product product = new Product();
         product.setId("prod1");
         product.setName("Test Product");
         product.setSlug("test-product");
-        product.setSupplier(supplier);
+        product.setSupplierId(new com.omniproduct.model.SupplierId(supplier.getId()));
         productRepository.save(product);
-        
+
         assertThat(productRepository.findById("prod1")).isPresent();
-        
+
         supplierService.deleteSupplier("sup1");
-        
-        assertThat(productRepository.findById("prod1")).isEmpty();
+
+        assertThat(productRepository.findById("prod1")).isPresent();
     }
-    
+
     @Test
-    @Disabled // see LAZY_LOADING_ISSUE.md
     @Transactional
     void shouldGetSuppliersByProduct() {
         Supplier supplier = supplierService.createSupplier(
-            "sup1", "Supplier A", "contact@suppliera.com", 
+            "sup1", "Supplier A", "contact@suppliera.com",
             "+33123456789", "France", "Île-de-France"
         );
-        
+
         Product product = new Product();
         product.setId("prod1");
         product.setName("Test Product");
         product.setSlug("test-product");
-        product.setSupplier(supplier);
+        product.setSupplierId(new com.omniproduct.model.SupplierId(supplier.getId()));
         productRepository.save(product);
-        
+
         List<Supplier> suppliers = supplierService.getSuppliersByProduct("prod1");
-        
+
         assertThat(suppliers).hasSize(1);
         assertThat(suppliers.get(0).getId()).isEqualTo("sup1");
     }

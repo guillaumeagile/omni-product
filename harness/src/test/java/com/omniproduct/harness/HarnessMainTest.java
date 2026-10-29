@@ -49,7 +49,7 @@ class HarnessMainTest {
 
         assertThat(result.exitCode()).isEqualTo(1);
         assertThat(result.out().lines().filter(line -> line.startsWith("[FAIL]")).map(line -> line.split(" ")[1]).toList())
-                .containsExactly("HA14", "HA15", "HA16", "HA17");
+                .containsExactly("HA14", "HA15", "HA16", "HA17", "HA21");
         assertThat(result.out()).contains("CatalogService.java:", "Perishable.java:", "ProductService.java:");
         assertThat(result.out()).contains("HARNESS RESULT: FAIL");
     }
@@ -74,7 +74,7 @@ class HarnessMainTest {
                 .isEqualTo(Phases.rules("3").stream().map(HarnessRule::id).toList());
         assertThat(Phases.rules("3").stream().map(HarnessRule::id)).doesNotContain("HA13");
         assertThat(report.rules().stream().filter(rule -> rule.status().equals("FAIL")).map(HarnessReport.RuleResult::id).toList())
-                .isEqualTo(List.of("HA14", "HA15", "HA16", "HA17"));
+                .isEqualTo(List.of("HA14", "HA15", "HA16", "HA17", "HA21"));
         // Exercice volontaire (CatalogService.catalogLabels remplit une liste dans une boucle) : HA14 est rouge.
         assertThat(report.rule("HA14")).hasValueSatisfying(rule -> {
             assertThat(rule.status()).isEqualTo("FAIL");
@@ -94,6 +94,12 @@ class HarnessMainTest {
         });
         // Exercice volontaire (ProductService.withdrawStock reconstruit un ProductStock champ par champ) : HA17 est rouge.
         assertThat(report.rule("HA17")).hasValueSatisfying(rule -> {
+            assertThat(rule.status()).isEqualTo("FAIL");
+            assertThat(rule.severity()).isEqualTo("ERROR");
+            assertThat(rule.violations()).isEqualTo(1);
+        });
+        // Rouge par absence (Perishable.of et ProductService.sellOne rendent un Option que rien ne replie) : HA21 est rouge.
+        assertThat(report.rule("HA21")).hasValueSatisfying(rule -> {
             assertThat(rule.status()).isEqualTo("FAIL");
             assertThat(rule.severity()).isEqualTo("ERROR");
             assertThat(rule.violations()).isEqualTo(1);

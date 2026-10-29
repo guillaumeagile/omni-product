@@ -9,8 +9,7 @@ libraries already offer for "do this, then that", and small pure steps compose w
 
 **Where you start.** The phase 3 starting code has done phases 1 and 2: the model is immutable, `Product` carries a
 `ShelfLife` ADT, the sale checks `canSell` before it withdraws, the model never reads the clock. `./harness.sh 3` runs
-the rules of phases 1 and 2 too, and they are green. Four rules are red, and they are the exercise. A fifth rule,
-`HA21`, is green: it guards the way you use Vavr (see below) and only turns red if you open a Vavr container.
+the rules of phases 1 and 2 too, and they are green. Five rules are red, and they are the exercise.
 
 The rules of this phase are numbered from `HA14`: the number 13 is skipped on purpose.
 
@@ -86,11 +85,12 @@ new ProductStock(new Quantity(stock.stock().value() - 1), stock.quantity(), stoc
 The service knows how a stock is made, and what "withdraw one" means is not written anywhere in the model. Tell the
 object what you want (`stock.withdrawOne()`) and let it decide how to change itself.
 
-### HA21 - A Vavr container is consumed by `fold`, never opened
+### HA21 - A Vavr container is consumed by `fold`, and by nothing else
 
 `Either`, `Option`, `Try` and `Validation` say "this may have failed" in the type. Opening them throws the information
-away: `get()`, `getLeft()` and `getOrElseThrow()` throw when you guessed the wrong side, and `isLeft()`, `isRight()`,
-`isEmpty()` only replay the `if` that the container exists to avoid.
+away: `get()`, `getLeft()` and `getOrElseThrow()` throw when you guessed the wrong side, `isLeft()`, `isRight()`,
+`isEmpty()` only replay the `if` that the container exists to avoid, and `getOrElse(value)` or `getOrNull()` quietly
+pick one side for you. `fold` is the only way out that makes you handle both cases.
 
 ```java
 // refused: the caller must remember to test first
@@ -101,8 +101,11 @@ return use(result.get());
 return result.fold(this::report, this::use);
 ```
 
-`map`, `flatMap`, `filter`, `peek` and `getOrElse(value)` are fine. This rule is green when you start: it is a guard rail
-for the code you write to fix HA15, not an exercise.
+Staying inside the container is fine: `map`, `flatMap`, `filter`, `peek`, `toEither`, and returning the container to
+your caller. Taking the value out by any other door is refused, whatever its name: `getOrElse(value)`, `getOrNull()`,
+`toJavaOptional()`, `toList()`, `contains(x)`, `forEach(...)`. This rule is red when you start: `Perishable.of` and
+`ProductService.sellOne` return an `Option` that nothing folds. It turns green when at least one container in `model/`
+or `service/` is consumed by `fold`, and no other way out remains.
 
 #### What the harness checks
 
@@ -115,7 +118,7 @@ to choose yours. A *value object* here is a `record` that does not implement `Id
 | HA15 | A value object factory (static, named `create`/`build`/`of`/`from`/`make` or returning the record) validates by composing `Option`/`Validation`/`Either` steps (`filter`, `flatMap`, `map`, `combine`): no `if`, `?:`, `switch`, `throw`, `assert` or guard call in it nor in a private helper it calls; a factory whose return type can fail must hold at least one lambda or method reference. At least one such factory must exist (a generic or sealed result): without one the rule is red, like HA4.4. | error |
 | HA16 | In `service`, no `if` whose condition carries a domain decision (a name with the word `can`, or `sellable`, `allowed`, `permitted`, `eligible`, `decide`, `decision`, directly or through a local variable) and whose branch ends in `return` or `throw`, and no such decision in a returned `?:`. Compose it with `Option.when`, `filter`, `map` or `fold`. | error |
 | HA17 | In `service`, a method does not build an object of the type of one of its parameters (`new T(...)` or `T.of(...)`, any factory name) from 2 or more distinct accessors of that parameter (`x()`, `getX()`, a field, a chain such as `p.x().y()`, or a local variable that holds the read). The type must be declared in the analysed sources. | error |
-| HA21 | No call, and no method reference, that opens a Vavr container of `io.vavr.control` (`Either`, `Option`, `Try`, `Validation`) in `model/` and `service/`: `get()`, `getLeft()`, `getError()`, `getCause()`, anything with `throw` in its name (`getOrElseThrow`), and the tests `isLeft()`, `isRight()`, `isEmpty()`, `isDefined()`, `isSuccess()`, `isFailure()`, `isValid()`, `isInvalid()`. The check is on the compiled code and reads the method name in words, so a static import or a variable typed by a supertype does not hide the call. | error |
+| HA21 | In `model/` and `service/`, a value leaves a Vavr container of `io.vavr.control` (`Either`, `Option`, `Try`, `Validation`, or `io.vavr.Value` that they extend) only through `fold`. Any call or method reference on such a container whose result is no longer an `io.vavr.control` container is a way out, whatever its name (`get()`, `getOrElse(value)`, `getOrNull()`, `isEmpty()`, `contains(x)`, `toJavaOptional()`, `toList()`, `forEach(...)`), and is refused unless it is `fold`; a way out inside the lambda of a `fold` counts too. `equals`, `hashCode` and `toString` are not ways out. The rule is red while no container is consumed by `fold` at all. The check is on the compiled code, so a static import, a method reference or a variable typed by a supertype does not hide the call. | error |
 
 ## Assessment
 

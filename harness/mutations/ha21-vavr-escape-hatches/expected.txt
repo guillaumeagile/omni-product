@@ -1,3 +1,3 @@
 # Une ligne par détection attendue : <règle> <fichier>:<ligne>. La règle doit être [FAIL] et la ligne signalée.
-# HA21 est une règle bytecode : le harnais n'affiche que le nom du fichier, et la ligne de la méthode qui ouvre le conteneur.
-HA21 Slug.java:7
+# HA21 est une règle bytecode : le harnais n'affiche que le nom du fichier, et la ligne de l'appel qui sort du conteneur.
+HA21 Slug.java:9

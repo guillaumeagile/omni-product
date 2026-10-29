@@ -30,8 +30,8 @@ class SupplierServiceTest {
     
     @BeforeEach
     void setUp() {
-        supplierRepository.deleteAll();
         productRepository.deleteAll();
+        supplierRepository.deleteAll();
     }
     
     @Test
@@ -44,7 +44,7 @@ class SupplierServiceTest {
         assertThat(supplier).isNotNull();
         assertThat(supplier.getId()).isEqualTo("sup1");
         assertThat(supplier.getName()).isEqualTo("Supplier A");
-        assertThat(supplier.getCountry()).isEqualTo("France");
+        assertThat(supplier.getSupplierRegion().getCountry()).isEqualTo("France");
     }
     
     @Test
@@ -118,8 +118,8 @@ class SupplierServiceTest {
         );
         
         assertThat(updated.getName()).isEqualTo("Updated Supplier A");
-        assertThat(updated.getCountry()).isEqualTo("Germany");
-        assertThat(updated.getRegion()).isEqualTo("Berlin");
+        assertThat(updated.getSupplierRegion().getCountry()).isEqualTo("Germany");
+        assertThat(updated.getSupplierRegion().getRegion()).isEqualTo("Berlin");
     }
     
     @Test
@@ -156,11 +156,8 @@ class SupplierServiceTest {
             "+33123456789", "France", "Île-de-France"
         );
         
-        Product product = new Product();
-        product.setId("prod1");
-        product.setName("Test Product");
-        product.setSlug("test-product");
-        product.setSupplier(supplier);
+        Product product = new Product("prod1", "Test Product", "test-product", null, null, null, null, null, null, null, null, null);
+        product.getSupply().setSupplier(supplier);
         productRepository.save(product);
         
         assertThat(productRepository.findById("prod1")).isPresent();
@@ -171,7 +168,6 @@ class SupplierServiceTest {
     }
     
     @Test
-    @Disabled // see LAZY_LOADING_ISSUE.md
     @Transactional
     void shouldGetSuppliersByProduct() {
         Supplier supplier = supplierService.createSupplier(
@@ -179,11 +175,8 @@ class SupplierServiceTest {
             "+33123456789", "France", "Île-de-France"
         );
         
-        Product product = new Product();
-        product.setId("prod1");
-        product.setName("Test Product");
-        product.setSlug("test-product");
-        product.setSupplier(supplier);
+        Product product = new Product("prod1", "Test Product", "test-product", null, null, null, null, null, null, null, null, null);
+        product.getSupply().setSupplier(supplier);
         productRepository.save(product);
         
         List<Supplier> suppliers = supplierService.getSuppliersByProduct("prod1");

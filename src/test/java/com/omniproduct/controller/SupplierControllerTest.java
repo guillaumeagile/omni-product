@@ -37,8 +37,8 @@ class SupplierControllerTest {
     
     @BeforeEach
     void setUp() {
-        supplierRepository.deleteAll();
         productRepository.deleteAll();
+        supplierRepository.deleteAll();
     }
     
     @Test
@@ -170,11 +170,8 @@ class SupplierControllerTest {
                                         "+33123456789", "France", "Île-de-France");
         supplierRepository.save(supplier);
         
-        Product product = new Product();
-        product.setId("prod1");
-        product.setName("Test Product");
-        product.setSlug("test-product");
-        product.setSupplier(supplier);
+        Product product = new Product("prod1", "Test Product", "test-product", null, null, null, null, null, null, null, null, null);
+        product.getSupply().setSupplier(supplier);
         productRepository.save(product);
         
         mockMvc.perform(delete("/api/suppliers/sup1"))

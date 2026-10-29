@@ -1,8 +1,6 @@
 package com.omniproduct.model;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.omniproduct.service.ProductService;
-import com.omniproduct.service.SupplierService;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -31,13 +29,6 @@ public class Supplier {
         this.contactPhone = contactPhone;
         this.country = country;
         this.region = region;
-    }
-
-    public Supplier(String id, String name, ProductService productService, SupplierService supplierService) {
-        this.id = id;
-        this.name = name;
-        this.products = productService.findAll();
-        this.region = supplierService.getSupplier(id).map(Supplier::getLocation).map(Location::region).orElse(null);
     }
 
     public String getId() {

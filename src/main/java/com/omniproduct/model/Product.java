@@ -47,7 +47,11 @@ public class Product {
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
 
-        public boolean hasName() { return name != null && !name.trim().isEmpty(); }
+        public void requireName() {
+            if (name == null || name.trim().isEmpty()) {
+                throw new com.omniproduct.exception.ProductNameException("Product name is missing, you fucking idiot!");
+            }
+        }
 
         public String getSlug() { return slug; }
         public void setSlug(String slug) { this.slug = slug; }

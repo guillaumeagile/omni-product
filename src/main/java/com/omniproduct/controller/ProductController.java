@@ -39,9 +39,7 @@ public class ProductController {
     @PostMapping
     public Product createProduct(@RequestBody Product product) {
         // Validation rule: Name must not be null or empty
-        if (!product.getCatalog().hasName()) {
-            throw new ProductNameException("Product name is missing, you fucking idiot!");
-        }
+        product.getCatalog().requireName();
         return productService.save(product);
     }
 

@@ -39,14 +39,14 @@ public class ProductController {
     @PostMapping
     public Product createProduct(@RequestBody Product product) {
         // Validation rule: Name must not be null or empty
-        if (product.getName() == null || product.getName().trim().isEmpty()) {
+        if (product.getCatalogue().name() == null || product.getCatalogue().name().trim().isEmpty()) {
             throw new ProductNameException("Product name is missing, you fucking idiot!");
         }
 
         
         // Useless nested null checks
         if (product != null) {
-            if (product.getName() != null) {
+            if (product.getCatalogue().name() != null) {
                 return productService.save(product);
             }
         }
@@ -63,17 +63,17 @@ public class ProductController {
         // In this simple implementation, we just use the id from the path
         Product updatedProduct = new Product(
                 id,
-                product.getName(),
-                product.getSlug(),
+                product.getCatalogue().name(),
+                product.getCatalogue().slug(),
                 product.getPrice(),
-                product.getDiscounts(),
-                product.getImages(),
-                product.getSuppliersRegions(),
-                product.getKilos(),
-                product.getVolume(),
-                product.getQuantity(),
-                product.getStock(),
-                product.getWarehouse()
+                product.getCatalogue().discounts(),
+                product.getCatalogue().images(),
+                product.getSourcing().suppliersRegions(),
+                product.getSourcing().kilos(),
+                product.getSourcing().volume(),
+                product.getStorage().quantity(),
+                product.getStorage().stock(),
+                product.getStorage().warehouse()
         );
 
         return ResponseEntity.ok(productService.save(updatedProduct));

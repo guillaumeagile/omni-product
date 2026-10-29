@@ -58,10 +58,8 @@ public class SupplierService {
             .orElseThrow(() -> new IllegalArgumentException("Supplier not found: " + id));
         
         supplier.setName(name);
-        supplier.setContactEmail(contactEmail);
-        supplier.setContactPhone(contactPhone);
-        supplier.setCountry(country);
-        supplier.setRegion(region);
+        supplier.setContact(new Supplier.Contact(contactEmail, contactPhone));
+        supplier.setLocation(new Supplier.Location(country, region));
         
         return supplierRepository.save(supplier);
     }

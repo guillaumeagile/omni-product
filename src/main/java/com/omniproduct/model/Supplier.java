@@ -1,5 +1,6 @@
 package com.omniproduct.model;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.omniproduct.service.ProductService;
 import com.omniproduct.service.SupplierService;
 import jakarta.persistence.*;
@@ -12,12 +13,13 @@ public class Supplier {
     private String id;
     
     private String name;
-    private String contactEmail;
-    private String contactPhone;
-    private String country;
-    private String region;
+    @Embedded
+    private Contact contact = new Contact();
+
+    @Embedded
+    private Location location = new Location();
     
-    @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "supply.supplier", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products;
     
     public Supplier() {}
@@ -26,17 +28,18 @@ public class Supplier {
                    String country, String region) {
         this.id = id;
         this.name = name;
-        this.contactEmail = contactEmail;
-        this.contactPhone = contactPhone;
-        this.country = country;
-        this.region = region;
+        this.contact = new Contact(contactEmail, contactPhone);
+        this.location = new Location(country, region);
     }
 
     public Supplier(String id, String name, ProductService productService, SupplierService supplierService) {
         this.id = id;
         this.name = name;
         this.products = productService.findAll();
-        this.region = supplierService.getSupplier(id).map(Supplier::getRegion).orElse(null);
+        this.location = new Location(null,
+            supplierService.getSupplier(id)
+                .map(supplier -> supplier.getLocation().getRegion())
+                .orElse(null));
     }
     
     public String getId() {
@@ -55,36 +58,22 @@ public class Supplier {
         this.name = name;
     }
     
-    public String getContactEmail() {
-        return contactEmail;
+    @JsonUnwrapped
+    public Contact getContact() {
+        return contact;
     }
     
-    public void setContactEmail(String contactEmail) {
-        this.contactEmail = contactEmail;
+    public void setContact(Contact contact) {
+        this.contact = contact;
     }
     
-    public String getContactPhone() {
-        return contactPhone;
+    @JsonUnwrapped
+    public Location getLocation() {
+        return location;
     }
     
-    public void setContactPhone(String contactPhone) {
-        this.contactPhone = contactPhone;
-    }
-    
-    public String getCountry() {
-        return country;
-    }
-    
-    public void setCountry(String country) {
-        this.country = country;
-    }
-    
-    public String getRegion() {
-        return region;
-    }
-    
-    public void setRegion(String region) {
-        this.region = region;
+    public void setLocation(Location location) {
+        this.location = location;
     }
     
     public List<Product> getProducts() {

@@ -172,9 +172,8 @@ class SupplierControllerTest {
         
         Product product = new Product();
         product.setId("prod1");
-        product.setName("Test Product");
-        product.setSlug("test-product");
-        product.setSupplier(supplier);
+        product.setCatalog(new com.omniproduct.model.Catalog("Test Product", "test-product", java.util.List.of(), java.util.Map.of()));
+        product.setSupply(new com.omniproduct.model.Supply(supplier, java.util.Map.of(), 1.0, "1x1x1"));
         productRepository.save(product);
         
         mockMvc.perform(delete("/api/suppliers/sup1"))

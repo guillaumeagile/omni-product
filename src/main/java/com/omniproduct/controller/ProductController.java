@@ -39,16 +39,16 @@ public class ProductController {
     @PostMapping
     public Product createProduct(@RequestBody Product product) {
         // Validation rule: Name must not be null or empty
-        if (product.getName() == null || product.getName().trim().isEmpty()) {
+        if (product.getCatalog() == null
+                || product.getCatalog().getName() == null
+                || product.getCatalog().getName().trim().isEmpty()) {
             throw new ProductNameException("Product name is missing, you fucking idiot!");
         }
 
         
         // Useless nested null checks
-        if (product != null) {
-            if (product.getName() != null) {
-                return productService.save(product);
-            }
+        if (product != null && product.getCatalog() != null) {
+            return productService.save(product);
         }
         
         
@@ -63,17 +63,17 @@ public class ProductController {
         // In this simple implementation, we just use the id from the path
         Product updatedProduct = new Product(
                 id,
-                product.getName(),
-                product.getSlug(),
+                product.getCatalog().getName(),
+                product.getCatalog().getSlug(),
                 product.getPrice(),
-                product.getDiscounts(),
-                product.getImages(),
-                product.getSuppliersRegions(),
-                product.getKilos(),
-                product.getVolume(),
-                product.getQuantity(),
-                product.getStock(),
-                product.getWarehouse()
+                product.getCatalog().getDiscounts(),
+                product.getCatalog().getImages(),
+                product.getSupply().getSuppliersRegions(),
+                product.getSupply().getKilos(),
+                product.getSupply().getVolume(),
+                product.getStorage().getQuantity(),
+                product.getStorage().getStock(),
+                product.getStorage().getWarehouse()
         );
 
         return ResponseEntity.ok(productService.save(updatedProduct));

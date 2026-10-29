@@ -39,20 +39,8 @@ public class ProductController {
     @PostMapping
     public Product createProduct(@RequestBody Product product) {
         // Validation rule: Name must not be null or empty
-        if (product.getName() == null || product.getName().trim().isEmpty()) {
-            throw new ProductNameException("Product name is missing, you fucking idiot!");
-        }
-
-        
-        // Useless nested null checks
-        if (product != null) {
-            if (product.getName() != null) {
-                return productService.save(product);
-            }
-        }
-        
-        
-        throw new ProductNameException("Something went wrong in the void");
+        product.getCatalog().requireName();
+        return productService.save(product);
     }
 
     @PutMapping("/{id}")
@@ -63,17 +51,10 @@ public class ProductController {
         // In this simple implementation, we just use the id from the path
         Product updatedProduct = new Product(
                 id,
-                product.getName(),
-                product.getSlug(),
+                product.getCatalog(),
                 product.getPrice(),
-                product.getDiscounts(),
-                product.getImages(),
-                product.getSuppliersRegions(),
-                product.getKilos(),
-                product.getVolume(),
-                product.getQuantity(),
-                product.getStock(),
-                product.getWarehouse()
+                product.getInventory(),
+                product.getSourcing()
         );
 
         return ResponseEntity.ok(productService.save(updatedProduct));

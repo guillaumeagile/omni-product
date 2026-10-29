@@ -121,8 +121,8 @@ Deux ou trois PR de test sur une branche d'équipe jetable (une PR verte, une PR
 ## Phase 3 : Vavr
 
 - Chaînage des résultats avec `Either`/`Option` de Vavr (`map`, `flatMap`) sur des alternatives scellées.
-- Règles propres : un `Either` se consomme par `fold` ; `get()`, `getLeft()`, `isLeft()`, `isRight()`,
-  `getOrElseThrow()` interdits dans le modèle.
+- Règles propres : un conteneur Vavr (`Either`, `Option`, `Try`, `Validation`) se consomme par `fold`, et par rien
+  d'autre (HA21) : `get()`, `getOrElse(v)`, `isLeft()`, `getOrElseThrow()`… interdits dans `model` et `service`.
 - HA4.4 accepte déjà les ADT de Vavr (`Either<Erreur, Self>`, `Validation`, `Try`, `Option`) depuis la phase 2.
 
 ## Points ouverts (à trancher par l'animateur)

@@ -16,12 +16,22 @@ public class Folder {
         return result.map(value -> value + 1).toOption();
     }
 
-    public String withDefault(Option<String> option) {
-        return option.getOrElse("none");
+    // Rendre le conteneur à l'appelant n'est pas le consommer.
+    public static Option<String> parse(String text) {
+        return Option.of(text).filter(value -> !value.isBlank());
     }
 
-    public String computedDefault(Try<String> attempt) {
-        return attempt.getOrElseGet(error -> "failed");
+    public Try<Integer> attempt(String text) {
+        return Try.of(() -> Integer.parseInt(text)).map(value -> value * 2);
+    }
+
+    public String foldTry(Try<Integer> attempt) {
+        return attempt.fold(error -> "failed", String::valueOf);
+    }
+
+    // Les méthodes d'Object n'ouvrent rien.
+    public boolean same(Option<String> left, Option<String> right) {
+        return left.equals(right);
     }
 
     // Une liste Java garde son get(int) : seul un conteneur Vavr est visé.

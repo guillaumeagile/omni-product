@@ -53,6 +53,40 @@ public class Opener {
         return Either::get;
     }
 
+    // Les sorties qu'une liste de mots ratait : seul fold sort d'un conteneur.
+    public String orNull(Option<String> option) {
+        return option.getOrNull();
+    }
+
+    public String withDefault(Option<String> option) {
+        return option.getOrElse("none");
+    }
+
+    public String computedDefault(Try<String> attempt) {
+        return attempt.getOrElseGet(error -> "failed");
+    }
+
+    public java.util.Optional<String> toJdk(Option<String> option) {
+        return option.toJavaOptional();
+    }
+
+    public io.vavr.collection.List<String> toList(Option<String> option) {
+        return option.toList();
+    }
+
+    public boolean contains(Option<String> option) {
+        return option.contains("x");
+    }
+
+    public void forEach(Option<String> option, java.util.List<String> sink) {
+        option.forEach(sink::add);
+    }
+
+    // Une sortie cachée dans le lambda d'un fold reste une sortie.
+    public String insideFold(Either<String, Option<String>> result) {
+        return result.fold(error -> error, value -> value.get());
+    }
+
     // Import statique et chaîne : l'appel est le même.
     public String chained() {
         return right("x").swap().getLeft();

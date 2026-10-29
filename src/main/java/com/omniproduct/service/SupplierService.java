@@ -36,12 +36,14 @@ public class SupplierService {
     
     @Transactional(readOnly = true)
     public List<Supplier> getSuppliersByProduct(String productId) {
-        productRepository.findById(productId)
+        Product product = productRepository.findById(productId)
             .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
-        return supplierRepository.findAll().stream()
-            .filter(s -> s.getProducts() != null && s.getProducts().stream()
-                .anyMatch(p -> p.getId().equals(productId)))
-            .toList();
+        if (product.getSupplierId() == null) {
+            return List.of();
+        }
+        return supplierRepository.findById(product.getSupplierId().value())
+            .map(List::of)
+            .orElse(List.of());
     }
     
     public List<Supplier> getSuppliersByCountry(String country) {

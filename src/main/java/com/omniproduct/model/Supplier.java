@@ -1,9 +1,6 @@
 package com.omniproduct.model;
 
-import com.omniproduct.service.ProductService;
-import com.omniproduct.service.SupplierService;
 import jakarta.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "suppliers")
@@ -16,13 +13,10 @@ public class Supplier {
     private String contactPhone;
     private String country;
     private String region;
-    
-    @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Product> products;
-    
+
     public Supplier() {}
-    
-    public Supplier(String id, String name, String contactEmail, String contactPhone, 
+
+    public Supplier(String id, String name, String contactEmail, String contactPhone,
                    String country, String region) {
         this.id = id;
         this.name = name;
@@ -30,13 +24,6 @@ public class Supplier {
         this.contactPhone = contactPhone;
         this.country = country;
         this.region = region;
-    }
-
-    public Supplier(String id, String name, ProductService productService, SupplierService supplierService) {
-        this.id = id;
-        this.name = name;
-        this.products = productService.findAll();
-        this.region = supplierService.getSupplier(id).map(Supplier::getRegion).orElse(null);
     }
     
     public String getId() {
@@ -85,13 +72,5 @@ public class Supplier {
     
     public void setRegion(String region) {
         this.region = region;
-    }
-    
-    public List<Product> getProducts() {
-        return products;
-    }
-    
-    public void setProducts(List<Product> products) {
-        this.products = products;
     }
 }

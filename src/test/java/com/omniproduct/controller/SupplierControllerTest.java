@@ -174,13 +174,13 @@ class SupplierControllerTest {
         product.setId("prod1");
         product.setName("Test Product");
         product.setSlug("test-product");
-        product.setSupplier(supplier);
+        product.setSupplierId(new com.omniproduct.model.SupplierId(supplier.getId()));
         productRepository.save(product);
-        
+
         mockMvc.perform(delete("/api/suppliers/sup1"))
                 .andExpect(status().isNoContent());
-        
+
         mockMvc.perform(get("/api/products/prod1"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isOk());
     }
 }

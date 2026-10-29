@@ -1,10 +1,7 @@
 package com.omniproduct.model;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.omniproduct.service.ProductService;
-import com.omniproduct.service.SupplierService;
 import jakarta.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "suppliers")
@@ -18,10 +15,7 @@ public class Supplier {
     private Contact contact;
 
     @Embedded
-    private Location location;
-
-    @OneToMany(mappedBy = "supply.supplier", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Product> products;
+    private SupplierRegion supplierRegion;
 
     public Supplier() {}
 
@@ -30,14 +24,7 @@ public class Supplier {
         this.id = id;
         this.name = name;
         this.contact = new Contact(contactEmail, contactPhone);
-        this.location = new Location(country, region);
-    }
-
-    public Supplier(String id, String name, ProductService productService, SupplierService supplierService) {
-        this.id = id;
-        this.name = name;
-        this.products = productService.findAll();
-        this.location = new Location(null, supplierService.getSupplier(id).map(Supplier::getLocation).map(Location::getRegion).orElse(null));
+        this.supplierRegion = new SupplierRegion(country, region);
     }
 
     public String getId() {
@@ -66,19 +53,11 @@ public class Supplier {
     }
 
     @JsonUnwrapped
-    public Location getLocation() {
-        return location;
+    public SupplierRegion getSupplierRegion() {
+        return supplierRegion;
     }
 
-    public void setLocation(Location location) {
-        this.location = location;
-    }
-
-    public List<Product> getProducts() {
-        return products;
-    }
-
-    public void setProducts(List<Product> products) {
-        this.products = products;
+    public void setSupplierRegion(SupplierRegion supplierRegion) {
+        this.supplierRegion = supplierRegion;
     }
 }

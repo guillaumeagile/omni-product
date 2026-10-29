@@ -38,15 +38,15 @@ public class ProductController {
 
     @PostMapping
     public Product createProduct(@RequestBody Product product) {
-        // Validation rule: Name must not be null or empty
-        if (product.getCatalog().getName() == null || product.getCatalog().getName().trim().isEmpty()) {
+        String name = product.getCatalogue() != null ? product.getCatalogue().getName() : null;
+        if (name == null || name.trim().isEmpty()) {
             throw new ProductNameException("Product name is missing, you fucking idiot!");
         }
 
         
         // Useless nested null checks
         if (product != null) {
-            if (product.getCatalog().getName() != null) {
+            if (name != null) {
                 return productService.save(product);
             }
         }

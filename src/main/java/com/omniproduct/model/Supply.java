@@ -14,16 +14,11 @@ public class Supply {
     @MapKeyColumn(name = "region")
     private Map<String, SupplierIdentity> suppliersRegions;
     
-    private Double kilos;
-    private String volume;
-    
     public Supply() {}
     
-    public Supply(Supplier supplier, Map<String, SupplierIdentity> suppliersRegions, Double kilos, String volume) {
+    public Supply(Supplier supplier, Map<String, SupplierIdentity> suppliersRegions) {
         this.supplier = supplier;
         this.suppliersRegions = suppliersRegions;
-        this.kilos = kilos;
-        this.volume = volume;
     }
     
     public Supplier getSupplier() { return supplier; }
@@ -31,10 +26,4 @@ public class Supply {
     
     public Map<String, SupplierIdentity> getSuppliersRegions() { return suppliersRegions; }
     public void setSuppliersRegions(Map<String, SupplierIdentity> suppliersRegions) { this.suppliersRegions = suppliersRegions; }
-    
-    public Double getKilos() { return kilos; }
-    public void setKilos(Double kilos) { this.kilos = kilos; }
-    
-    public String getVolume() { return volume; }
-    public void setVolume(String volume) { this.volume = volume; }
 }

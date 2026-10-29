@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 @Embeddable
-public class Catalog {
+public class Catalogue {
     @Column(nullable = false)
     private String name;
     
@@ -23,9 +23,9 @@ public class Catalog {
     @Column(name = "image_detail")
     private Map<String, String> images; // Simplified to Map<String, String> for JPA
     
-    public Catalog() {}
+    public Catalogue() {}
     
-    public Catalog(String name, String slug, List<String> discounts, Map<String, String> images) {
+    public Catalogue(String name, String slug, List<String> discounts, Map<String, String> images) {
         this.name = name;
         this.slug = slug;
         this.discounts = discounts;

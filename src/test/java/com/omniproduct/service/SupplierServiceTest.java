@@ -1,5 +1,7 @@
 package com.omniproduct.service;
 
+import com.omniproduct.model.Catalogue;
+import com.omniproduct.model.Sourcing;
 import com.omniproduct.model.Supplier;
 import com.omniproduct.model.Product;
 import com.omniproduct.repository.SupplierRepository;
@@ -44,7 +46,7 @@ class SupplierServiceTest {
         assertThat(supplier).isNotNull();
         assertThat(supplier.getId()).isEqualTo("sup1");
         assertThat(supplier.getName()).isEqualTo("Supplier A");
-        assertThat(supplier.getCountry()).isEqualTo("France");
+        assertThat(supplier.getLocation().country()).isEqualTo("France");
     }
     
     @Test
@@ -118,8 +120,8 @@ class SupplierServiceTest {
         );
         
         assertThat(updated.getName()).isEqualTo("Updated Supplier A");
-        assertThat(updated.getCountry()).isEqualTo("Germany");
-        assertThat(updated.getRegion()).isEqualTo("Berlin");
+        assertThat(updated.getLocation().country()).isEqualTo("Germany");
+        assertThat(updated.getLocation().region()).isEqualTo("Berlin");
     }
     
     @Test
@@ -158,9 +160,8 @@ class SupplierServiceTest {
         
         Product product = new Product();
         product.setId("prod1");
-        product.setName("Test Product");
-        product.setSlug("test-product");
-        product.setSupplier(supplier);
+        product.setCatalogue(new Catalogue("Test Product", "test-product", null, null));
+        product.setSourcing(new Sourcing(supplier, null, null, null));
         productRepository.save(product);
         
         assertThat(productRepository.findById("prod1")).isPresent();
@@ -181,9 +182,8 @@ class SupplierServiceTest {
         
         Product product = new Product();
         product.setId("prod1");
-        product.setName("Test Product");
-        product.setSlug("test-product");
-        product.setSupplier(supplier);
+        product.setCatalogue(new Catalogue("Test Product", "test-product", null, null));
+        product.setSourcing(new Sourcing(supplier, null, null, null));
         productRepository.save(product);
         
         List<Supplier> suppliers = supplierService.getSuppliersByProduct("prod1");

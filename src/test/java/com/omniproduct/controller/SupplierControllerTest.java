@@ -60,7 +60,7 @@ class SupplierControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value("sup1"))
                 .andExpect(jsonPath("$.name").value("Supplier A"))
-                .andExpect(jsonPath("$.country").value("France"));
+                .andExpect(jsonPath("$.location.country").value("France"));
     }
     
     @Test
@@ -148,7 +148,7 @@ class SupplierControllerTest {
                 .content(updateJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Updated Supplier A"))
-                .andExpect(jsonPath("$.country").value("Germany"));
+                .andExpect(jsonPath("$.location.country").value("Germany"));
     }
     
     @Test
@@ -172,9 +172,9 @@ class SupplierControllerTest {
         
         Product product = new Product();
         product.setId("prod1");
-        product.setName("Test Product");
-        product.setSlug("test-product");
-        product.setSupplier(supplier);
+        product.getCatalog().setName("Test Product");
+        product.getCatalog().setSlug("test-product");
+        product.getSourcing().setSupplier(supplier);
         productRepository.save(product);
         
         mockMvc.perform(delete("/api/suppliers/sup1"))

@@ -3,6 +3,7 @@ package com.omniproduct.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omniproduct.model.Price;
 import com.omniproduct.model.Product;
+import com.omniproduct.model.Catalog;
 import com.omniproduct.model.SupplierIdentity;
 import com.omniproduct.model.Warehouse;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ public class ProductControllerTest {
 
         // Test the  validation rule
         Product invalidProduct = new Product();
-        invalidProduct.setName(""); // Trigger the exception
+        invalidProduct.setCatalog(new Catalog("", "invalid", List.of(), Map.of())); // Trigger the exception
 
         mockMvc.perform(post("/api/products")
                 .contentType(MediaType.APPLICATION_JSON)

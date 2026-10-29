@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface SupplierRepository extends JpaRepository<Supplier, String> {
-    List<Supplier> findByCountry(String country);
-    List<Supplier> findByRegion(String region);
+    List<Supplier> findByLocationCountry(String country);
+    List<Supplier> findByLocationRegion(String region);
     Optional<Supplier> findByName(String name);
 }

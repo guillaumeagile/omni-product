@@ -1,9 +1,9 @@
 package com.omniproduct.service;
 
-import com.omniproduct.model.Contact;
-import com.omniproduct.model.Location;
 import com.omniproduct.model.Supplier;
 import com.omniproduct.model.Product;
+import com.omniproduct.model.Contact;
+import com.omniproduct.model.Location;
 import com.omniproduct.repository.SupplierRepository;
 import com.omniproduct.repository.ProductRepository;
 import org.springframework.stereotype.Service;

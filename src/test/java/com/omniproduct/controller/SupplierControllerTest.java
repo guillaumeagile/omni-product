@@ -1,5 +1,7 @@
 package com.omniproduct.controller;
 
+import com.omniproduct.model.Catalogue;
+import com.omniproduct.model.Sourcing;
 import com.omniproduct.model.Supplier;
 import com.omniproduct.model.Product;
 import com.omniproduct.repository.SupplierRepository;
@@ -172,8 +174,8 @@ class SupplierControllerTest {
         
         Product product = new Product();
         product.setId("prod1");
-        product.setCatalogue(new Product.Catalogue("Test Product", "test-product", null, null));
-        product.setSourcing(new Product.Sourcing(supplier, null, null, null));
+        product.setCatalogue(new Catalogue("Test Product", "test-product", null, null));
+        product.setSourcing(new Sourcing(supplier, null, null, null));
         productRepository.save(product);
         
         mockMvc.perform(delete("/api/suppliers/sup1"))

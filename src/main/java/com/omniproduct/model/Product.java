@@ -133,13 +133,6 @@ public class Product {
         this.volume = sourcing.volume();
     }
 
-    public record Catalogue(String name, String slug, List<String> discounts, Map<String, String> images) {}
-
-    public record Storage(Integer quantity, Integer stock, Warehouse warehouse) {}
-
-    public record Sourcing(com.omniproduct.model.Supplier supplier, Map<String, Supplier> suppliersRegions,
-                           Double kilos, String volume) {}
-
     @Embeddable
     public static class Price {
         private Double base;

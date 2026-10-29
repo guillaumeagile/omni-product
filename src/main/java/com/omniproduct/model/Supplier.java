@@ -85,8 +85,4 @@ public class Supplier {
     public void setProducts(List<Product> products) {
         this.products = products;
     }
-
-    public record Contact(String contactEmail, String contactPhone) {}
-
-    public record Location(String country, String region) {}
 }
